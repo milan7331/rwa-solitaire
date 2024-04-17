@@ -11,10 +11,14 @@ import { ButtonModule } from 'primeng/button';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { InputTextModule } from 'primeng/inputtext';
+import { SidebarModule } from 'primeng/sidebar';
+import { DragDropModule } from 'primeng/dragdrop';
 
 import { AppComponent } from './app.component';
 import { TopBarComponent } from './core/components/top-bar/top-bar.component';
 import { DockComponent } from './core/components/dock/dock.component';
+import { TestComponentComponent } from './core/components/test-component/test-component.component';
+import { MainMenuComponent } from './core/components/main-menu/main-menu.component';
 
 
 @NgModule({
@@ -22,6 +26,8 @@ import { DockComponent } from './core/components/dock/dock.component';
     AppComponent,
     TopBarComponent,
     DockComponent,
+    TestComponentComponent,
+    MainMenuComponent,
   ],
   imports: [
     BrowserModule,
@@ -34,7 +40,9 @@ import { DockComponent } from './core/components/dock/dock.component';
     ButtonModule,
     RadioButtonModule,
     SplitButtonModule,
-    InputTextModule
+    InputTextModule,
+    SidebarModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent]

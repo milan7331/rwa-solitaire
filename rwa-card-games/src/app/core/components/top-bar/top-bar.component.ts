@@ -10,6 +10,9 @@ import { PrimeNGConfig, MenuItem } from 'primeng/api';
 export class TopBarComponent implements OnInit {
 
   items: MenuItem[] | undefined;
+
+  showSidebar: boolean = false;
+
   constructor() {
 
   }
@@ -25,6 +28,10 @@ export class TopBarComponent implements OnInit {
         icon: 'pi pi-times'
       },
     ]
+  }
+
+  toggleSidebar() {
+    this.showSidebar = !this.showSidebar;
   }
 
 }

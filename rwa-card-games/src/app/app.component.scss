@@ -1,0 +1,11 @@
+.main-container {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
+}
+
+.main-container > * {
+    width: 100%;
+}
