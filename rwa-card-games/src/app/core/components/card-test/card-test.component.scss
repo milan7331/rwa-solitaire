@@ -1,0 +1,70 @@
+:host ::ng-deep {
+    [pDraggable] {
+        cursor: move;
+    }
+}
+
+.card-main-container {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+
+
+    height: 80vh;
+    padding: 1rem;
+    margin: 1rem;
+    background-color: limegreen;
+}
+
+.card-left-container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 50%;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    height: 100%;
+    padding: 1rem;
+    background-color: blue;
+}
+
+.card-right-container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 50%;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    height: 100%;
+    padding: 1rem;
+    background-color: green;
+}
+
+.card-left-content {
+    flex-grow: 2;
+    flex-shrink: 1;
+    flex-basis: auto;
+
+    height: 100%;
+    padding: 1rem;
+    background-color: green;
+}
+
+.card-right-content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+
+    height: 100%;
+    padding: 1rem;
+    background-color: greenyellow;
+    color: black;
+}
+

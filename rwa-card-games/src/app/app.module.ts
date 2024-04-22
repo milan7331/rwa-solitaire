@@ -19,6 +19,8 @@ import { TopBarComponent } from './core/components/top-bar/top-bar.component';
 import { DockComponent } from './core/components/dock/dock.component';
 import { TestComponentComponent } from './core/components/test-component/test-component.component';
 import { MainMenuComponent } from './core/components/main-menu/main-menu.component';
+import { TestComponent2Component } from './core/components/test-component-2/test-component-2.component';
+import { CardTestComponent } from './core/components/card-test/card-test.component';
 
 
 @NgModule({
@@ -28,6 +30,8 @@ import { MainMenuComponent } from './core/components/main-menu/main-menu.compone
     DockComponent,
     TestComponentComponent,
     MainMenuComponent,
+    TestComponent2Component,
+    CardTestComponent,
   ],
   imports: [
     BrowserModule,

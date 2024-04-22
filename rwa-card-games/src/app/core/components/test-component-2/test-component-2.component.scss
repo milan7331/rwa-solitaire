@@ -1,0 +1,15 @@
+:host ::ng-deep {
+    [pDraggable] {
+        cursor: move;
+    }
+}
+
+.redbox {
+    background-color: red;
+    border-color: black;
+}
+
+.bluebox {
+    background-color: blue;
+    border-color: black;
+}
