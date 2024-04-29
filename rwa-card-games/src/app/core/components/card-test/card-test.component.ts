@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DragAndDropList, Element } from '../../models/test-element';
 
+import { Card, CardFace, CardNumber, CardSuit } from '../../models/card';
+
 @Component({
   selector: 'app-card-test',
   templateUrl: './card-test.component.html',
