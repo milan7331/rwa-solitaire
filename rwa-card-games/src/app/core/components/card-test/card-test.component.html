@@ -15,6 +15,10 @@
     <div class="card-right-container" pDroppable (onDrop)="drop(containerArray[1])" dropEffect="move">
         <p>Right container</p>
         <div class="card-right-content">
+            <p-button>Initialize deck</p-button>
+            <p-button>Swap elements</p-button>
+            <p-button>Shuffle again</p-button>
+            <p-button>Print to console</p-button>
             <p *ngFor="let el of containerArray[1].elements"
             pDraggable
             (onDragStart)="dragStart(el)"

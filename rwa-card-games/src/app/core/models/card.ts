@@ -33,11 +33,11 @@ export class Card {
     face: CardFace;
     picture: string;
 
-    constructor(suit: CardSuit, number: CardNumber, face: CardFace)
+    constructor(suit: CardSuit, number: CardNumber)
     {
         this.suit = suit;
         this.number = number;
-        this.face = face;
+        this.face = CardFace.Hidden;
         this.picture = "assets/cards/" + suit + "_" + number + ".png";
     }
 

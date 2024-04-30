@@ -3,6 +3,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { AppRoutingModule } from './app-routing.module';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+
+import { StoreModule } from '@ngrx/store';
 
 import { DockModule } from 'primeng/dock'
 import { CardModule } from 'primeng/card'
@@ -21,6 +24,8 @@ import { TestComponentComponent } from './core/components/test-component/test-co
 import { MainMenuComponent } from './core/components/main-menu/main-menu.component';
 import { TestComponent2Component } from './core/components/test-component-2/test-component-2.component';
 import { CardTestComponent } from './core/components/card-test/card-test.component';
+import { AppState } from './state/app.state';
+import { solitaireReducer } from './solitaire/store/solitaire.reducer';
 
 
 @NgModule({
@@ -38,6 +43,10 @@ import { CardTestComponent } from './core/components/card-test/card-test.compone
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
+    
+    StoreModule.forRoot({ solitaireState: solitaireReducer }),
+    
     DockModule,
     CardModule,
     ToolbarModule,
