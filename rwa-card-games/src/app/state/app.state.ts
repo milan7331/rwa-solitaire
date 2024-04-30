@@ -3,6 +3,6 @@ import { SolitaireState } from "../solitaire/state/solitaire.state";
 
 
 export interface AppState {
-    coreState: CoreState;
+    //coreState: CoreState;
     solitaireState: SolitaireState;
 }

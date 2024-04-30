@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DragAndDropList, Element } from '../../models/test-element';
 
+import * as Actions from '../../../solitaire/store/solitaire.action';
 import { Card, CardFace, CardNumber, CardSuit } from '../../models/card';
+import { AppState } from '../../../state/app.state';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-card-test',
@@ -13,7 +16,7 @@ export class CardTestComponent implements OnInit {
   containerArray: DragAndDropList[] = [];
   draggedElement: Element | null | undefined;
 
-  constructor() {
+  constructor(private store: Store<AppState>) {
     this.containerArray = [
       {id : "left", elements : []} as DragAndDropList,
       {id : "right", elements : []} as DragAndDropList
@@ -26,6 +29,13 @@ export class CardTestComponent implements OnInit {
       this.containerArray[0].elements.push({listId: this.containerArray[0].id, value: "Element3"});
       this.containerArray[0].elements.push({listId: this.containerArray[0].id, value: "Element4"});
       this.containerArray[0].elements.push({listId: this.containerArray[0].id, value: "Element5"});
+
+    this.store.subscribe((state) => {
+      if (state) {
+        console.log(state.solitaireState.deck);
+      }
+    })
+      
   }
 
   dragStart(el: Element) {
@@ -65,5 +75,17 @@ export class CardTestComponent implements OnInit {
       }
     }
     return index;
+  }
+
+  clickedInit() {
+    this.store.dispatch(Actions.initializeDeck());
+  }
+
+  clickedSwap() {
+    this.store.dispatch(Actions.swapDeckElements({index1: 2, index2: 4}))
+  }
+
+  clickedShuffle() {
+    this.store.dispatch(Actions.shuffleDeck());
   }
 }

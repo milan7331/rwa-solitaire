@@ -45,7 +45,7 @@ import { solitaireReducer } from './solitaire/store/solitaire.reducer';
     FormsModule,
     HttpClientModule,
     
-    StoreModule.forRoot({ solitaireState: solitaireReducer }),
+    StoreModule.forRoot<AppState>({ solitaireState: solitaireReducer }),
     
     DockModule,
     CardModule,
