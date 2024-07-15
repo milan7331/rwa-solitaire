@@ -18,25 +18,15 @@ import { SidebarModule } from 'primeng/sidebar';
 import { DragDropModule } from 'primeng/dragdrop';
 
 import { AppComponent } from './app.component';
-import { TopBarComponent } from './core/components/top-bar/top-bar.component';
-import { DockComponent } from './core/components/dock/dock.component';
-import { TestComponentComponent } from './core/components/test-component/test-component.component';
-import { MainMenuComponent } from './core/components/main-menu/main-menu.component';
-import { TestComponent2Component } from './core/components/test-component-2/test-component-2.component';
-import { CardTestComponent } from './core/components/card-test/card-test.component';
-import { AppState } from './state/app.state';
-import { solitaireReducer } from './solitaire/store/solitaire.reducer';
+import { SettingsMenuComponent } from './components/settings-menu/settings-menu.component';
+import { ControlDockComponent } from './components/control-dock/control-dock.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    TopBarComponent,
-    DockComponent,
-    TestComponentComponent,
-    MainMenuComponent,
-    TestComponent2Component,
-    CardTestComponent,
+    SettingsMenuComponent,
+    ControlDockComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,7 +35,7 @@ import { solitaireReducer } from './solitaire/store/solitaire.reducer';
     FormsModule,
     HttpClientModule,
     
-    StoreModule.forRoot<AppState>({ solitaireState: solitaireReducer }),
+    //StoreModule.forRoot<AppState>({ solitaireState: solitaireReducer }),
     
     DockModule,
     CardModule,
