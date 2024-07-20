@@ -1,7 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeng/resources/themes/aura-dark-noir/theme.css";
 @import "primeng/resources/primeng.css";
+@import "../node_modules/primeflex/primeflex.scss";
 @import "primeicons/primeicons.css";
+
+// html, body {
+//  //overflow: hidden;
+// }
 
 body {
     background-image: url(../src/assets/backgrounds/bg5.jpg);
@@ -9,4 +14,9 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+
+    // height: 100vh;
+    // margin: 0;
+    // padding: 0;
+    // box-sizing: border-box;
 }
