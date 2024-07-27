@@ -2,21 +2,18 @@
 @import "primeng/resources/themes/aura-dark-noir/theme.css";
 @import "primeng/resources/primeng.css";
 @import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeflex/primeflex.css";
 @import "primeicons/primeicons.css";
 
-// html, body {
-//  //overflow: hidden;
-// }
-
 body {
-    background-image: url(../src/assets/backgrounds/bg5.jpg);
+    background-image: url(../src/assets/backgrounds/bg2.jpg);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
 
-    // height: 100vh;
-    // margin: 0;
-    // padding: 0;
-    // box-sizing: border-box;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }

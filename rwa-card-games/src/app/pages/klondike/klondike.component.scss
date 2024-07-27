@@ -1,91 +1,58 @@
-// .klondike-container {
-//     height: 99vh;
 
-//     display: flex;
-//     flex-direction: column;
-//     flex-wrap: nowrap;
-//     justify-content: flex-start;
-//     //align-items: center;
-//     //align-content: center;
-//     row-gap: 0rem;
-//     column-gap: 0rem;
+.klondike-container {
+    height: 100vh;
+    //overflow: hidden;
 
-//     .klondike-top-container {
-//         flex-grow: 1;
-//         width: 100%;
-//         height: 20%;
-//         background-color: blue;
+    .klondike-top-container {
 
-//         display: flex;
-//         flex-direction: row;
-//         flex-wrap: nowrap;
-//         justify-content: space-between;
+        height: fit-content;
+        max-height: 25%;
+        overflow: hidden;
 
+        .klondike-deck-container {
+            width: fit-content;
+            max-width: 40%;
+            overflow: hidden;
+            .klondike-deck-stock {
+                *:not(:last-child) {
+                    margin-right: -3rem;
+                }
+            }
+        }
+    }
 
-//         .klondike-foundation-container {
+    // .klondike-tableau-container {
 
-//             width: 90%;
+    // }
 
-//             display: flex;
-//             flex-direction: row;
-//             flex-wrap: nowrap;
-//             justify-content: flex-start;
-//         }
+    .red {
+        background-color: red;
+    }
 
-//         .klondike-deck-container {
+    .klondike-card {
+        // 1.45 ratio
+        //width: 10vw;
 
-//             background-color: blueviolet;
-//             width: 10%;
+        color: black;
 
+        height: 20vh;
+        aspect-ratio: 0.714285;
 
-//             display: flex;
-//             flex-direction: row;
-//             flex-wrap: nowrap;
-//             justify-content: space-around;
+        background-image: url("../../../assets/cards/back_1.svg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
 
-//             .klondike-deck-stock {
-//                 display: flex;
-//                 flex-direction: row;
-//                 flex-wrap: nowrap;
-//             }
-    
-//             .klondike-deck-waste {
-//                 display: flex;
-//                 flex-direction: row;
-//                 flex-wrap: nowrap;
-//             }
-//         }
+    }
 
+    .custom-card {
+        height: 20vh;
+        aspect-ratio: 0.714285;
 
-//     }
+        // background-image: url("../../../assets/cards/back_1.svg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
 
-//     .klondike-tableau-container {
-//         flex-grow: 8;
-//         width: 100%;
-//         background-color: red;
-
-//         display: flex;
-//         flex-direction: row;
-//         flex-wrap: nowrap;
-//         justify-content: space-evenly;
-
-//     }
-
-
-
-//     .klondike-card {
-//         // 1.45 ratio
-        
-//         width: 120px;
-//         aspect-ratio: 0.6875;
-
-//         background-color: red;
-//         background-image: url("../../../assets/cards/back6.png");
-//         background-size: cover;
-//         background-repeat: no-repeat;
-//         background-position: center;
-
-        
-
-//     }
-// }
+}
