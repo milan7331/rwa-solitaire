@@ -1,13 +1,24 @@
 
 .klondike-container {
     height: 100vh;
-    //overflow: hidden;
+    overflow: hidden;
 
     .klondike-top-container {
 
         height: fit-content;
-        max-height: 25%;
+        max-height: 20%;
         overflow: hidden;
+
+        .klondike-foundation-stack {
+            display: grid;
+
+            > * {
+                grid-row: 1;
+                grid-column: 1;
+            }
+        }
+
+
 
         .klondike-deck-container {
             width: fit-content;
@@ -21,6 +32,10 @@
         }
     }
 
+    .card-stack-margin {
+        margin-top: -13.5vh;
+    }
+
     // .klondike-tableau-container {
 
     // }
@@ -31,25 +46,22 @@
 
     .klondike-card {
         // 1.45 ratio
-        //width: 10vw;
-
-        color: black;
-
-        height: 20vh;
+        height: 18vh;
         aspect-ratio: 0.714285;
 
-        background-image: url("../../../assets/cards/back_1.svg");
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
 
+
+
     }
 
-    .custom-card {
-        height: 20vh;
+    .klondike-card-default {
+        height: 18vh;
         aspect-ratio: 0.714285;
 
-        // background-image: url("../../../assets/cards/back_1.svg");
+        background-image: url("../../../assets/cards/back_1.svg");
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;

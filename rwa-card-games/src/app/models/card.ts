@@ -38,7 +38,7 @@ export class Card {
         this.suit = suit;
         this.number = number;
         this.face = CardFace.Hidden;
-        this.picture = "assets/cards/" + suit + "_" + number + ".png";
+        this.picture = suit + "_" + number;
     }
 
     flip() {

@@ -25,6 +25,14 @@ export class KlondikeComponent {
   tableau6: Card[];
   tableau7: Card[];
 
+  tableau1_movable: number = 1;
+  tableau2_movable: number = 1;
+  tableau3_movable: number = 1;
+  tableau4_movable: number = 1;
+  tableau5_movable: number = 1;
+  tableau6_movable: number = 1;
+  tableau7_movable: number = 1;
+
   draggedCard: Card | null;
   draggedStartLocation: Card[] | null;
 
