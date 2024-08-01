@@ -5,6 +5,7 @@
 
     .klondike-top-container {
 
+        min-height: 18vh;
         height: fit-content;
         max-height: 20%;
         overflow: hidden;
@@ -18,53 +19,66 @@
             }
         }
 
-
-
         .klondike-deck-container {
             width: fit-content;
             max-width: 40%;
             overflow: hidden;
-            .klondike-deck-stock {
+
+            .klondike-deck-waste {
                 *:not(:last-child) {
-                    margin-right: -3rem;
+                    margin-right: -10vh;
                 }
             }
         }
     }
 
-    .card-stack-margin {
+    .tableau-card-stack {
         margin-top: -13.5vh;
     }
 
-    // .klondike-tableau-container {
-
-    // }
-
-    .red {
-        background-color: red;
-    }
-
     .klondike-card {
-        // 1.45 ratio
         height: 18vh;
-        aspect-ratio: 0.714285;
+        aspect-ratio: 0.714285; // 2.5 x 3.5
 
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
-
-
-
     }
 
-    .klondike-card-default {
-        height: 18vh;
-        aspect-ratio: 0.714285;
-
+    .bg-card-back {
         background-image: url("../../../assets/cards/back_1.svg");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
+    }
+
+    .bg-card-back-alternative {
+        background-image: url("../../../assets/cards/back_2.svg");
+    }
+
+    .bg-card-back-2 {
+        background-image: url("../../../assets/cards/back_3.svg");
+    }
+
+    .bg-card-back-2-alternative {
+        background-image: url("../../../assets/cards/back_4.svg");
+    }
+
+    .bg-card-placeholder {
+        background-image: url("../../../assets/cards/placeholder_default.svg");
+    }
+
+    .bg-card-clubs {
+        background-image: url("../../../assets/cards/placeholder_clubs.svg");
+    }
+
+    .bg-card-diamonds {
+        background-image: url("../../../assets/cards/placeholder_diamonds.svg");
+    }
+
+    .bg-card-hearts {
+        background-image: url("../../../assets/cards/placeholder_hearts.svg");
+    }
+
+    .bg-card-spades {
+        background-image: url("../../../assets/cards/placeholder_spades.svg");
     }
 
 }

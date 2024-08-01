@@ -56,6 +56,31 @@ export class KlondikeComponent {
     this.draggedCard = null;
     this.draggedStartLocation = null;
 
+    this.loadCardsDemo();
+    
+  }
+
+  dragStart(card: Card, startArray: Card[]) {
+    this.draggedCard = card;
+    this.draggedStartLocation = startArray;
+  }
+
+  dragEnd() {
+    this.draggedCard = null;
+    this.draggedStartLocation = null;
+  }
+
+  drop(dropArray: Card[]) {
+    if (this.draggedCard, this.draggedStartLocation) {
+      dropArray.push(this.draggedCard!);
+      let elementId = this.draggedStartLocation.indexOf(this.draggedCard!);
+      if (elementId > -1) {
+        this.draggedStartLocation.splice(elementId, 1);
+      }
+    }
+  }
+
+  loadCardsDemo() {
     this.tableau2.push(new Card(CardSuit.SPADES, CardNumber.Ace));
 
     this.tableau3.push(new Card(CardSuit.SPADES, CardNumber.Two));
@@ -82,27 +107,7 @@ export class KlondikeComponent {
     this.tableau7.push(new Card(CardSuit.DIAMONDS, CardNumber.Seven));
     this.tableau7.push(new Card(CardSuit.HEARTS, CardNumber.Seven));
     this.tableau7.push(new Card(CardSuit.SPADES, CardNumber.Seven));
-  }
 
-  dragStart(card: Card, startArray: Card[]) {
-    this.draggedCard = card;
-    this.draggedStartLocation = startArray;
-  }
-
-  dragEnd() {
-    this.draggedCard = null;
-    this.draggedStartLocation = null;
-  }
-
-  drop(dropArray: Card[]) {
-    if (this.draggedCard, this.draggedStartLocation) {
-      dropArray.push(this.draggedCard!);
-      let elementId = this.draggedStartLocation.indexOf(this.draggedCard!);
-      if (elementId > -1) {
-        this.draggedStartLocation.splice(elementId, 1);
-      }
-    }
   }
   
-
 }
