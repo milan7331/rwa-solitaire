@@ -5,12 +5,12 @@
 
     .klondike-top-container {
 
-        min-height: 18vh;
+        min-height: 17vh;
         height: fit-content;
         max-height: 20%;
         overflow: hidden;
 
-        .klondike-foundation-stack {
+        .klondike-card-stack {
             display: grid;
 
             > * {
@@ -24,20 +24,39 @@
             max-width: 40%;
             overflow: hidden;
 
-            .klondike-deck-waste {
-                *:not(:last-child) {
-                    margin-right: -10vh;
+            .deck-waste-spread-2 {
+                :nth-last-child(1) {
+                    margin-left: 4vh;
                 }
             }
+
+            .deck-waste-spread-3 {
+                :nth-last-child(2) {
+                    margin-left: 3vh;
+                }
+                :nth-last-child(1) {
+                    margin-left: 6vh;
+                }
+
+            }
+
         }
     }
 
-    .tableau-card-stack {
-        margin-top: -13.5vh;
+    .tableau-stack-element {
+        margin-top: -13vh;
+    }
+
+    .tableau-stack-element-compact {
+        margin-top: -13.75vh;
+    }
+
+    .tableau-stack-element-ultra-compact {
+        margin-top: -14vh;
     }
 
     .klondike-card {
-        height: 18vh;
+        height: 17vh;
         aspect-ratio: 0.714285; // 2.5 x 3.5
 
         background-size: cover;
