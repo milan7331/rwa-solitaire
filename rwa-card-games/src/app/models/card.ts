@@ -27,6 +27,11 @@ export enum CardFace {
     Shown = 1
 }
 
+export enum KlondikeDifficulty {
+    Easy = 0,
+    Hard = 1
+  }
+
 export class Card {
     suit: CardSuit;
     number : CardNumber;

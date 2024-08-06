@@ -16,6 +16,7 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { InputTextModule } from 'primeng/inputtext';
 import { SidebarModule } from 'primeng/sidebar';
 import { DragDropModule } from 'primeng/dragdrop';
+import { SpeedDialModule } from 'primeng/speeddial';
 
 import { AppComponent } from './app.component';
 import { SettingsMenuComponent } from './components/settings-menu/settings-menu.component';
@@ -69,7 +70,8 @@ import { UserDataComponent } from './pages/user-data/user-data.component';
     SplitButtonModule,
     InputTextModule,
     SidebarModule,
-    DragDropModule
+    DragDropModule,
+    SpeedDialModule
   ],
   providers: [],
   bootstrap: [AppComponent]

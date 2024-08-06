@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
-import { Card, CardFace, CardNumber, CardSuit } from '../../models/card';
+import { Card, CardFace, CardNumber, CardSuit, KlondikeDifficulty } from '../../models/card';
 import { Router } from '@angular/router';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-klondike',
   templateUrl: './klondike.component.html',
   styleUrl: './klondike.component.scss'
 })
+
 export class KlondikeComponent {
   
   foundationClubs: Card[] = [];
@@ -36,17 +38,35 @@ export class KlondikeComponent {
   draggedCard: Card | null = null;
   draggedStartLocation: Card[] | null = null;
 
+  difficulty: KlondikeDifficulty = 1;
+
   constructor() {
     this.startNewGameDemo();
   }
 
   startNewGameDemo() {
+    this.clearBoardDemo();
+    this.fillDeckDemo();
+    this.fisherYatesShuffleDemo(this.deckStock);
+    this.placeTableauCardsDemo();
+  }
+
+  clearBoardDemo(): void {
     this.deckStock = [];
     this.deckWaste = [];
 
-    this.fillDeckDemo();
-    this.fisherYatesShuffleDemo(this.deckStock);
-    this.PlaceTableauCardsDemo();
+    this.tableau1 = [];
+    this.tableau2 = [];
+    this.tableau3 = [];
+    this.tableau4 = [];
+    this.tableau5 = [];
+    this.tableau6 = [];
+    this.tableau7 = [];
+
+    this.foundationClubs = [];
+    this.foundationDiamonds = [];
+    this.foundationHearts = [];
+    this.foundationSpades = [];
   }
 
   fillDeckDemo(): void {
@@ -107,14 +127,9 @@ export class KlondikeComponent {
     this.deckStock.push(new Card(CardSuit.SPADES, CardNumber.King));
   }
 
-  fisherYatesShuffleDemo(deck: Card[]): void {
-    for (let i = deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-  }
 
-  PlaceTableauCardsDemo(): void {
+
+  placeTableauCardsDemo(): void {
     this.tableau1.push(this.deckStock.pop()!);
     
     this.tableau2.push(this.deckStock.pop()!);
@@ -151,10 +166,26 @@ export class KlondikeComponent {
     this.tableau7.push(this.deckStock.pop()!);
   }
 
-  draw3(): void {
-    if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
-    if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
-    if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+  fisherYatesShuffleDemo(deck: Card[]): void {
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+  }
+
+  draw(): void {
+    if (this.difficulty === KlondikeDifficulty.Hard) {
+      if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+      if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+      if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+    } else {
+      if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+    }
+  }
+
+  changeDifficulty(): void {
+    (this.difficulty === KlondikeDifficulty.Easy)? this.difficulty = KlondikeDifficulty.Hard : this.difficulty = KlondikeDifficulty.Easy;
+    this.startNewGameDemo();
   }
 
   dragStart(card: Card, startArray: Card[]) {

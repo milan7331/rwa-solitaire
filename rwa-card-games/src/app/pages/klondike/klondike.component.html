@@ -59,8 +59,8 @@
                         (onDragStart)="dragStart(card, deckWaste)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
-                    <div class="klondike-card" (click)="draw3()"
-                    [ngClass]="{'bg-card-back': deckStock.length != 0, 'bg-card-placeholder': deckStock.length == 0}"></div>                      
+                    <div class="klondike-card" (click)="draw()"
+                    [ngClass]="{'bg-card-back': deckStock.length != 0, 'bg-card-placeholder': deckStock.length == 0}"></div>
                 </div>
             </div>
             <div class="klondike-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">
