@@ -44,11 +44,13 @@
                     </div>
                 </div>
                 <div class="klondike-deck-container flex-auto flex flex-row flex-nowrap justify-content-end gap-4">
-                    <div class="klondike-card"
-                    [ngClass]="{'bg-card-back': deckStock.length != 0, 'bg-card-placeholder': deckStock.length == 0}"
-                    onclick="draw3()"></div>
                     <div class="klondike-card-stack"
-                    [ngClass]="{'deck-waste-spread-2': deckWaste.length === 2, 'deck-waste-spread-3': deckWaste.length >= 3}">
+                        [ngClass]="{
+                            'deck-waste-spread-1': deckWaste.length < 2,
+                            'deck-waste-spread-2': deckWaste.length == 2,
+                            'deck-waste-spread-3': deckWaste.length > 2,
+                            
+                        }">
                         <div *ngIf="deckWaste.length == 0" class="klondike-card bg-card-placeholder" ></div>
                         <div class="klondike-card"
                         *ngFor="let card of deckWaste"
@@ -56,7 +58,9 @@
                         pDraggable
                         (onDragStart)="dragStart(card, deckWaste)"
                         (onDragEnd)="dragEnd()"></div>
-                    </div>   
+                    </div>
+                    <div class="klondike-card" (click)="draw3()"
+                    [ngClass]="{'bg-card-back': deckStock.length != 0, 'bg-card-placeholder': deckStock.length == 0}"></div>                      
                 </div>
             </div>
             <div class="klondike-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">

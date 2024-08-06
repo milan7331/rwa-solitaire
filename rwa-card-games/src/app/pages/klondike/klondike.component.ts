@@ -149,15 +149,12 @@ export class KlondikeComponent {
     this.tableau7.push(this.deckStock.pop()!);
     this.tableau7.push(this.deckStock.pop()!);
     this.tableau7.push(this.deckStock.pop()!);
-
-    this.deckWaste.push(this.deckStock.pop()!);
-    this.deckWaste.push(this.deckStock.pop()!);
-    this.deckWaste.push(this.deckStock.pop()!);
-    this.deckWaste.push(this.deckStock.pop()!);
   }
 
   draw3(): void {
-    
+    if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+    if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+    if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
   }
 
   dragStart(card: Card, startArray: Card[]) {

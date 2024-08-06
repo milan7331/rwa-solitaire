@@ -24,9 +24,15 @@
             max-width: 40%;
             overflow: hidden;
 
+            .deck-waste-spread-1 {
+                margin-right: 6vh;
+            }
+
             .deck-waste-spread-2 {
+                margin-right: 3vh;
+
                 :nth-last-child(1) {
-                    margin-left: 4vh;
+                    margin-left: 3vh;
                 }
             }
 
@@ -41,6 +47,13 @@
             }
 
         }
+
+        // .test123 {
+        //     display: flex;
+        //     justify-content: flex-end;
+        //     width: 40vh;
+        //     background-color: red;
+        // }
     }
 
     .tableau-stack-element {
