@@ -1,4 +1,3 @@
-
 .klondike-container {
     height: 100vh;
     overflow: hidden;
@@ -43,17 +42,8 @@
                 :nth-last-child(1) {
                     margin-left: 6vh;
                 }
-
             }
-
         }
-
-        // .test123 {
-        //     display: flex;
-        //     justify-content: flex-end;
-        //     width: 40vh;
-        //     background-color: red;
-        // }
     }
 
     .tableau-stack-element {
@@ -76,6 +66,27 @@
         background-repeat: no-repeat;
         background-position: center;
     }
+
+    #card-stack-dragged {
+        position: absolute;
+        top: 110vh;
+        opacity: 1;
+        pointer-events: none;
+        
+        
+    }
+
+    #ghost-image {
+        opacity: 0;
+        display: none;
+
+        position: absolute;
+        top: 110vh;
+        width: 100px;
+        height: 100px;
+    }
+
+
 
     .bg-card-back {
         background-image: url("../../../assets/cards/back_1.svg");
@@ -112,5 +123,4 @@
     .bg-card-spades {
         background-image: url("../../../assets/cards/placeholder_spades.svg");
     }
-
 }

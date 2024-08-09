@@ -1,7 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { Card, CardFace, CardNumber, CardSuit, KlondikeDifficulty } from '../../models/card';
-import { Router } from '@angular/router';
-import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-klondike',
@@ -9,8 +7,8 @@ import { MenuItem } from 'primeng/api';
   styleUrl: './klondike.component.scss'
 })
 
-export class KlondikeComponent {
-  
+export class KlondikeComponent implements AfterViewInit, OnDestroy {
+
   foundationClubs: Card[] = [];
   foundationDiamonds: Card[] = [];
   foundationHearts: Card[] = [];
@@ -27,6 +25,10 @@ export class KlondikeComponent {
   tableau6: Card[] = [];
   tableau7: Card[] = [];
 
+  draggedCards: Card[] = [];
+  draggedCardsOrigin: Card[] | null = null;
+  dropped: boolean = false;
+
   tableau1_movable: number = 1;
   tableau2_movable: number = 1;
   tableau3_movable: number = 1;
@@ -35,13 +37,27 @@ export class KlondikeComponent {
   tableau6_movable: number = 1;
   tableau7_movable: number = 1;
 
-  draggedCard: Card | null = null;
-  draggedStartLocation: Card[] | null = null;
-
   difficulty: KlondikeDifficulty = 1;
+
+  cardStackDragged: HTMLElement | null = null;
+  ghostImage: HTMLElement | null = null;
+
+  clickedElementOffsetX: number = 0;
+  clickedElementOffsetY: number = 0;
 
   constructor() {
     this.startNewGameDemo();
+  }
+
+  ngAfterViewInit(): void {
+    this.cardStackDragged = document.getElementById("card-stack-dragged");
+    this.ghostImage = document.getElementById("ghost-image");
+
+    document.addEventListener("mousedown", this.clickOffset);
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener("mousedown", this.clickOffset);
   }
 
   startNewGameDemo() {
@@ -67,6 +83,23 @@ export class KlondikeComponent {
     this.foundationDiamonds = [];
     this.foundationHearts = [];
     this.foundationSpades = [];
+
+    this.tableau1_movable = 0;
+    this.tableau2_movable = 0;
+    this.tableau3_movable = 0;
+    this.tableau4_movable = 0;
+    this.tableau5_movable = 0;
+    this.tableau6_movable = 0;
+    this.tableau7_movable = 0;
+
+    this.draggedCards = [];
+    this.draggedCardsOrigin = null;
+
+    this.cardStackDragged = null;
+    this.ghostImage = null;
+
+    this.clickedElementOffsetX = 0;
+    this.clickedElementOffsetY = 0;
   }
 
   fillDeckDemo(): void {
@@ -127,8 +160,6 @@ export class KlondikeComponent {
     this.deckStock.push(new Card(CardSuit.SPADES, CardNumber.King));
   }
 
-
-
   placeTableauCardsDemo(): void {
     this.tableau1.push(this.deckStock.pop()!);
     
@@ -188,23 +219,53 @@ export class KlondikeComponent {
     this.startNewGameDemo();
   }
 
-  dragStart(card: Card, startArray: Card[]) {
-    this.draggedCard = card;
-    this.draggedStartLocation = startArray;
+  followCursor = (event: DragEvent) => {
+    this.cardStackDragged!.style.left = (event.clientX - this.clickedElementOffsetX) + "px";
+    this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
+  }
+
+  clickOffset = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      this.clickedElementOffsetX = event.clientX - rect.left;
+      this.clickedElementOffsetY = event.clientY - rect.top;
+    }
+  }
+
+  dragStart(ev: DragEvent, startArray: Card[], index: number) {
+    this.draggedCards = startArray.slice(index);
+    this.draggedCardsOrigin = startArray;
+
+    if(this.ghostImage != null) {
+      ev.dataTransfer?.setDragImage(this.ghostImage, 0, 0);
+    }
+
+    document.addEventListener('drag', this.followCursor);
   }
 
   dragEnd() {
-    this.draggedCard = null;
-    this.draggedStartLocation = null;
+    document.removeEventListener('drag', this.followCursor);
+    this.cardStackDragged!.style.top = "110vh";
+    
+    this.draggedCards = [];
+    this.draggedCardsOrigin = null;
+
+
   }
 
   drop(dropArray: Card[]) {
-    if (this.draggedCard, this.draggedStartLocation) {
-      dropArray.push(this.draggedCard!);
-      let elementId = this.draggedStartLocation.indexOf(this.draggedCard!);
-      if (elementId > -1) {
-        this.draggedStartLocation.splice(elementId, 1);
+    if (this.draggedCards.length > 0 && this.draggedCardsOrigin != null) {
+      for(let card of this.draggedCards) {
+        dropArray.push(card);
       }
+      let origin_count = this.draggedCardsOrigin.length;
+      let draged_count = this.draggedCards.length;
+
+      this.draggedCardsOrigin.splice(origin_count - draged_count, draged_count);
     }
+
+    this.dragEnd();
   }
 }
