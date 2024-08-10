@@ -27,10 +27,7 @@ export enum CardFace {
     Shown = 1
 }
 
-export enum KlondikeDifficulty {
-    Easy = 0,
-    Hard = 1
-  }
+
 
 export class Card {
     suit: CardSuit;
@@ -49,8 +46,5 @@ export class Card {
     flip() {
         (this.face === CardFace.Hidden) ? this.face = CardFace.Shown : this.face = CardFace.Hidden;
     }
-
-
-
 
 }
