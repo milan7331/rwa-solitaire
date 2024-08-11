@@ -23,7 +23,7 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     this.board = new KlondikeBoard();
-    this.startNewGameDemo();
+    this.startNewGame();
   }
 
   ngAfterViewInit(): void {
@@ -37,11 +37,12 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
     document.removeEventListener("mousedown", this.clickOffset);
   }
 
-  startNewGameDemo() {
+  startNewGame() {
     this.resetBoard();
     this.board.generateDeck();
     this.board.fisherYatesShuffle();
     this.board.placeInitialCards();
+    this.board.setUpInitialCardOrientations();
   }
 
   resetBoard(): void {
@@ -53,7 +54,7 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
 
   changeDifficulty(): void {
     this.board.toggleDifficulty();
-    this.startNewGameDemo();
+    this.startNewGame();
   }
 
   followCursor = (event: DragEvent) => {

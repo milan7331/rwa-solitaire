@@ -150,6 +150,29 @@ export class KlondikeBoard {
         this.tableau7.push(this.deckStock.pop()!);
     }
 
+    setUpInitialCardOrientations() {
+        this.tableau1.at(-1)!.flip();
+        this.tableau2.at(-1)!.flip();
+        this.tableau3.at(-1)!.flip();
+        this.tableau4.at(-1)!.flip();
+        this.tableau5.at(-1)!.flip();
+        this.tableau6.at(-1)!.flip();
+        this.tableau7.at(-1)!.flip();
+
+        this.tableau1.at(-1)!.unlock();
+        this.tableau2.at(-1)!.unlock();
+        this.tableau3.at(-1)!.unlock();
+        this.tableau4.at(-1)!.unlock();
+        this.tableau5.at(-1)!.unlock();
+        this.tableau6.at(-1)!.unlock();
+        this.tableau7.at(-1)!.unlock();
+
+        for (let i = 0; i < this.deckStock.length; i++) {
+            this.deckStock[i].unlock();
+            this.deckStock[i].flip();
+        }
+    }
+
     toggleDifficulty(): void {
         (this.difficulty === KlondikeDifficulty.Easy)? this.difficulty = KlondikeDifficulty.Hard : this.difficulty = KlondikeDifficulty.Easy;
     }

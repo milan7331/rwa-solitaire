@@ -71,9 +71,10 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau1.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau1.length >= 15 && board.tableau1.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau1.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau1.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau1, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -85,9 +86,10 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau2.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau2.length >= 15 && board.tableau2.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau2.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau2.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau2, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -99,9 +101,10 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau3.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau3.length >= 15 && board.tableau3.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau3.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau3.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau3, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -113,9 +116,10 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau4.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau4.length >= 15 && board.tableau4.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau4.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau4.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau4, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -127,9 +131,10 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau5.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau5.length >= 15 && board.tableau5.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau5.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau5.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau5, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -141,9 +146,10 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau6.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau6.length >= 15 && board.tableau6.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau6.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau6.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau6, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -155,15 +161,20 @@
                     [ngClass]="{
                         'tableau-stack-element': i !== 0 && board.tableau7.length < 15,
                         'tableau-stack-element-compact': i !== 0 && board.tableau7.length >= 15 && board.tableau7.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau7.length >= 18
+                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau7.length >= 18,
+                        'non-interactable': !(card.movable)
                     }"
-                    [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
+                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, board.tableau7, i)"
                     (onDragEnd)="dragEnd()"></div>
                 </div>
             </div>
         </div>
+    </div>
+    <div id="demo-buttons">
+        <p-button (onClick)="startNewGame()">Restart game</p-button>
+        <p-button (onClick)="changeDifficulty()">Change difficulty</p-button>
     </div>
     <div id="card-stack-dragged">
         <div class="klondike-card"

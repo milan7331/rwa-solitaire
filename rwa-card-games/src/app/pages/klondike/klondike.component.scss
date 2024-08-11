@@ -86,6 +86,18 @@
         height: 100px;
     }
 
+    .non-interactable {
+        pointer-events: none;
+    }
+
+    #demo-buttons {
+        position: absolute;
+
+        display: flex;
+        bottom: 1vh;
+        left: 1vh;
+    }
+
 
 
     .bg-card-back {

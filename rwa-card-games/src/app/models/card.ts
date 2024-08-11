@@ -1,4 +1,3 @@
-
 export enum CardSuit {
     CLUBS = 'clubs',
     DIAMONDS = 'diamonds',
@@ -27,24 +26,31 @@ export enum CardFace {
     Shown = 1
 }
 
-
-
 export class Card {
     suit: CardSuit;
     number : CardNumber;
-    face: CardFace;
+    faceShown: boolean;
+    movable: boolean;
     picture: string;
 
     constructor(suit: CardSuit, number: CardNumber)
     {
         this.suit = suit;
         this.number = number;
-        this.face = CardFace.Hidden;
+        this.faceShown = false;
+        this.movable = false;
         this.picture = suit + "_" + number;
     }
 
     flip() {
-        (this.face === CardFace.Hidden) ? this.face = CardFace.Shown : this.face = CardFace.Hidden;
+        (this.faceShown === false) ? this.faceShown = true : this.faceShown = false;
     }
 
+    lock() {
+        this.movable = false;
+    }
+
+    unlock() {
+        this.movable = true;
+    }
 }
