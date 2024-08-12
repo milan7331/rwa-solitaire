@@ -1,8 +1,13 @@
 export enum CardSuit {
-    CLUBS = 'clubs',
-    DIAMONDS = 'diamonds',
-    HEARTS = 'hearts',
-    SPADES = 'spades'
+    Clubs = 'clubs',
+    Diamonds = 'diamonds',
+    Hearts = 'hearts',
+    Spades = 'spades'
+}
+
+export enum CardColor {
+    Red = 1,
+    Black = 2
 }
 
 export enum CardNumber {
@@ -16,20 +21,17 @@ export enum CardNumber {
     Eight = 8,
     Nine = 9,
     Ten = 10,
-    Jack = 12,
-    Queen = 13,
-    King = 14
-}
-
-export enum CardFace {
-    Hidden = 0,
-    Shown = 1
+    Jack = 11,
+    Queen = 12,
+    King = 13
 }
 
 export class Card {
     suit: CardSuit;
-    number : CardNumber;
+    number: CardNumber;
+    color: CardColor;
     faceShown: boolean;
+    visibility: boolean;
     movable: boolean;
     picture: string;
 
@@ -37,7 +39,9 @@ export class Card {
     {
         this.suit = suit;
         this.number = number;
+        this.color = (suit == CardSuit.Diamonds || suit == CardSuit.Hearts)? CardColor.Red : CardColor.Black;
         this.faceShown = false;
+        this.visibility = true;
         this.movable = false;
         this.picture = suit + "_" + number;
     }

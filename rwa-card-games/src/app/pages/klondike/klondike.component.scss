@@ -70,10 +70,8 @@
     #card-stack-dragged {
         position: absolute;
         top: 110vh;
-        opacity: 1;
+        left: 110vw;
         pointer-events: none;
-        
-        
     }
 
     #ghost-image {
@@ -81,9 +79,17 @@
         display: none;
 
         position: absolute;
-        top: 110vh;
+        top: 140vh;
+        left: 140vw;
         width: 100px;
         height: 100px;
+    }
+
+    .hidden-card {
+        opacity: 0.0001;
+        ~ * {
+            opacity: 0.0001;
+        }
     }
 
     .non-interactable {
@@ -97,8 +103,6 @@
         bottom: 1vh;
         left: 1vh;
     }
-
-
 
     .bg-card-back {
         background-image: url("../../../assets/cards/back_1.svg");
