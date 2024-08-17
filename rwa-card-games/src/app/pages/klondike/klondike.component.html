@@ -6,22 +6,28 @@
         <div class="flex-auto flex flex-column flex-nowrap justify-content-start align-items-stretch row-gap-2 ">
             <div class="klondike-top-container flex flex-row flex-nowrap justify-content-between align-items-start">
                 <div class="flex-auto flex flex-row flex-nowrap justify-content-start column-gap-4">
-                    <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Hearts ,board.foundationHearts)" class="klondike-card-stack">
-                        <div *ngIf="board.foundationHearts.length == 0" class="klondike-card bg-card-hearts"></div>
+                    <div *ngFor="let f of board.foundation; let i = index" pDroppable (onDrop)="dropOnFoundation(i, f)" class="klondike-card-stack">
                         <div class="klondike-card"
-                        *ngFor="let card of board.foundationHearts; let i = index"
+                        [ngClass]="{
+                            'bg-card-clubs': i === 0,
+                            'bg-card-diamonds': i === 1,
+                            'bg-card-hearts': i === 2,
+                            'bg-card-spades': i === 3
+                        }"></div>
+                        <div class="klondike-card"
+                        *ngFor="let card of f; let j = index"
                         [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
                         pDraggable
-                        (onDragStart)="dragStart($event, board.foundationHearts, i)"
+                        (onDragStart)="dragStart($event, f, j)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
-                    <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Diamonds, board.foundationDiamonds)" class="klondike-card-stack">
-                        <div *ngIf="board.foundationDiamonds.length == 0" class="klondike-card bg-card-diamonds"></div>
+                    <!-- <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Diamonds, this.board.foundation[1])" class="klondike-card-stack">
+                        <div *ngIf="this.board.foundation[1].length == 0" class="klondike-card bg-card-diamonds"></div>
                         <div class="klondike-card"
-                        *ngFor="let card of board.foundationDiamonds; let i = index"
+                        *ngFor="let card of board.foundation[1]; let i = index"
                         [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
                         pDraggable
-                        (onDragStart)="dragStart($event, board.foundationDiamonds, i)"
+                        (onDragStart)="dragStart($event, board.foundation[1], i)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
                     <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Spades ,board.foundationSpades)" class="klondike-card-stack">
@@ -41,17 +47,17 @@
                         pDraggable
                         (onDragStart)="dragStart($event, board.foundationClubs, i)"
                         (onDragEnd)="dragEnd()"></div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="klondike-deck-container flex-auto flex flex-row flex-nowrap justify-content-end gap-4">
                     <div class="klondike-card-stack"
-                        [ngClass]="{
-                            'deck-waste-spread-1': board.deckWaste.length < 2,
-                            'deck-waste-spread-2': board.deckWaste.length == 2,
-                            'deck-waste-spread-3': board.deckWaste.length > 2,
-                            
-                        }">
-                        <div *ngIf="board.deckWaste.length == 0" class="klondike-card bg-card-placeholder" ></div>
+                    [ngClass]="{
+                        'deck-waste-spread-1': board.deckWaste.length < 2,
+                        'deck-waste-spread-2': board.deckWaste.length == 2,
+                        'deck-waste-spread-3': board.deckWaste.length > 2,
+                        
+                    }">
+                        <div  class="klondike-card bg-card-placeholder"></div>
                         <div class="klondike-card"
                         *ngFor="let card of board.deckWaste; let i = index"
                         [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
@@ -64,110 +70,19 @@
                 </div>
             </div>
             <div class="klondike-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau1)">
-                    <div *ngIf="board.tableau1.length == 0" class="klondike-card bg-card-placeholder"></div>
+                <div *ngFor="let tab of board.tableau" pDroppable (onDrop)="dropOnTableau(tab)">
+                    <div class="klondike-card bg-card-tableau-placeholder"></div>
                     <div class="klondike-card"
-                    *ngFor="let card of board.tableau1; let i = index"
+                    *ngFor="let card of tab; let i = index"
                     [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau1.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau1.length >= 15 && board.tableau1.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau1.length >= 18,
+                        'tableau-stack-element': i !== 0 && tab.length < 15,
+                        'tableau-stack-element-compact': i !== 0 && tab.length >= 15 && tab.length < 18,
+                        'tableau-stack-element-ultra-compact': i !== 0 && tab.length >= 18,
                         'non-interactable': !(card.movable)
                     }"
                     [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
-                    (onDragStart)="dragStart($event, board.tableau1, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau2)">
-                    <div *ngIf="board.tableau2.length == 0" class="klondike-card bg-card-placeholder"></div>
-                    <div class="klondike-card"
-                    *ngFor="let card of board.tableau2; let i = index"
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau2.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau2.length >= 15 && board.tableau2.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau2.length >= 18,
-                        'non-interactable': !(card.movable)
-                    }"
-                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, board.tableau2, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau3)">
-                    <div *ngIf="board.tableau3.length == 0" class="klondike-card bg-card-placeholder"></div>
-                    <div class="klondike-card"
-                    *ngFor="let card of board.tableau3; let i = index"
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau3.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau3.length >= 15 && board.tableau3.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau3.length >= 18,
-                        'non-interactable': !(card.movable)
-                    }"
-                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, board.tableau3, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau4)">
-                    <div *ngIf="board.tableau4.length == 0" class="klondike-card bg-card-placeholder"></div>
-                    <div class="klondike-card"
-                    *ngFor="let card of board.tableau4; let i = index"
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau4.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau4.length >= 15 && board.tableau4.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau4.length >= 18,
-                        'non-interactable': !(card.movable)
-                    }"
-                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, board.tableau4, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau5)">
-                    <div *ngIf="board.tableau5.length == 0" class="klondike-card bg-card-placeholder"></div>
-                    <div class="klondike-card"
-                    *ngFor="let card of board.tableau5; let i = index"
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau5.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau5.length >= 15 && board.tableau5.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau5.length >= 18,
-                        'non-interactable': !(card.movable)
-                    }"
-                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, board.tableau5, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau6)">
-                    <div *ngIf="board.tableau6.length == 0" class="klondike-card bg-card-placeholder"></div>
-                    <div class="klondike-card"
-                    *ngFor="let card of board.tableau6; let i = index"
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau6.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau6.length >= 15 && board.tableau6.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau6.length >= 18,
-                        'non-interactable': !(card.movable)
-                    }"
-                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, board.tableau6, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-                <div pDroppable (onDrop)="dropOnTableau(board.tableau7)">
-                    <div *ngIf="board.tableau7.length == 0" class="klondike-card bg-card-placeholder"></div>
-                    <div class="klondike-card"
-                    *ngFor="let card of board.tableau7; let i = index" 
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && board.tableau7.length < 15,
-                        'tableau-stack-element-compact': i !== 0 && board.tableau7.length >= 15 && board.tableau7.length < 18,
-                        'tableau-stack-element-ultra-compact': i !== 0 && board.tableau7.length >= 18,
-                        'non-interactable': !(card.movable),
-                        
-                    }"
-                    [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, board.tableau7, i)"
+                    (onDragStart)="dragStart($event, tab, i)"
                     (onDragEnd)="dragEnd()"></div>
                 </div>
             </div>

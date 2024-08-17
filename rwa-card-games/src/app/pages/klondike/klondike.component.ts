@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { Card, CardNumber, CardSuit } from '../../models/card';
-import { KlondikeBoard, KlondikeDifficulty } from '../../models/klondike-board'; 
+import { KlondikeBoard } from '../../models/klondike-board'; 
 
 @Component({
   selector: 'app-klondike',
@@ -11,9 +11,11 @@ import { KlondikeBoard, KlondikeDifficulty } from '../../models/klondike-board';
 export class KlondikeComponent implements AfterViewInit, OnDestroy {
 
   public CardSuit = CardSuit;
+
   board: KlondikeBoard;
 
   draggedCards: Card[] = [];
+  draggedCardsStartIndex: number | null = null;
   draggedCardsOrigin: Card[] | null = null;
 
   cardStackDragged: HTMLElement | null = null;
@@ -40,23 +42,19 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
   }
 
   startNewGame() {
-    this.resetBoard();
-    this.board.generateDeck();
-    this.board.fisherYatesShuffle();
-    this.board.placeInitialCards();
-    this.board.setUpInitialCardOrientations();
+    this.draggedCards = [];
+    this.draggedCardsStartIndex = null;
+    this.draggedCardsOrigin = null;
+
+    this.board.startNewGame();
   }
 
   resetBoard(): void {
-    this.board.clearBoard();
 
-    this.draggedCards = [];
-    this.draggedCardsOrigin = null;
   }
 
   changeDifficulty(): void {
     this.board.toggleDifficulty();
-    this.startNewGame();
   }
 
   clickOffset = (event: MouseEvent) => {
@@ -76,6 +74,7 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
   
   dragStart(ev: DragEvent, startArray: Card[], index: number) {
     this.draggedCards = startArray.slice(index);
+    this.draggedCardsStartIndex = index;
     this.draggedCardsOrigin = startArray;
 
     this.invisibleCard = ev.target as HTMLElement;
@@ -97,67 +96,27 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
     this.invisibleCard!.classList.remove("hidden-card");
     this.invisibleCard = null;
 
-
     this.draggedCards = [];
+    this.draggedCardsStartIndex = null;
     this.draggedCardsOrigin = null;
   }
 
-  drop(dropArray: Card[]): void {
-    for(let card of this.draggedCards) {
-      dropArray.push(card);
-    }
-    let origin_count = this.draggedCardsOrigin!.length;
-    let draged_count = this.draggedCards.length;
-
-    this.draggedCardsOrigin!.splice(origin_count - draged_count, draged_count);
-    
-    if (this.draggedCardsOrigin?.length !== 0) {
-      this.draggedCardsOrigin![this.draggedCardsOrigin!.length - 1].faceShown = true;
-      this.draggedCardsOrigin![this.draggedCardsOrigin!.length - 1].unlock();
-    }
-  }
-
   dropOnFoundation(cardSuit: CardSuit, dropArray: Card[]): void {
-    if (this.draggedCards.length <= 0 || this.draggedCardsOrigin == null) {
+    const dropSucess = this.board.dropOnFoundation(this.draggedCardsOrigin, dropArray, this.draggedCardsStartIndex ,cardSuit);
+    if (dropSucess) {
       this.dragEnd();
-      return;
     }
-  
-    const isSingleCardDragged = this.draggedCards.length === 1;
-    const isCorrectSuit = this.draggedCards[0].suit === cardSuit;
-    let isCorrectCard: boolean = false;
-    if (dropArray.length === 0) {
-      isCorrectCard = this.draggedCards[0].number === CardNumber.Ace;
-    } else {
-      isCorrectCard = this.draggedCards[0].number - dropArray[dropArray.length - 1].number === 1;
+    else {
+      console.log("dropOnFoundation Error - Klondike component");
     }
-    
-    if (isSingleCardDragged && isCorrectSuit && isCorrectCard) {
-      this.drop(dropArray);
-    }
-    this.dragEnd();
   }
 
   dropOnTableau(dropArray: Card[]) {
-    if (this.draggedCards.length <= 0 || this.draggedCardsOrigin == null) {
+    const dropSucess = this.board.dropOnTableau(this.draggedCardsOrigin, dropArray, this.draggedCardsStartIndex);
+    if (dropSucess) {
       this.dragEnd();
-      return;
-    }
-
-    let isCorrectSuit: boolean = false;
-    let isCorrectCard: boolean = false;
-
-    if (dropArray.length === 0) {
-      isCorrectSuit = true;
-      isCorrectCard = this.draggedCards[0].number === CardNumber.King;
     } else {
-      isCorrectSuit = this.draggedCards[0].color != dropArray[dropArray.length - 1].color;
-      isCorrectCard = dropArray[dropArray.length - 1].number - this.draggedCards[0].number === 1;
+      console.log("dropOnTableau Error - Klondike component");
     }
-
-    if (isCorrectSuit && isCorrectCard) {
-      this.drop(dropArray);
-    }
-    this.dragEnd();
   }
 }

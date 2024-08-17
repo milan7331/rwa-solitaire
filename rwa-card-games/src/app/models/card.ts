@@ -1,8 +1,8 @@
 export enum CardSuit {
-    Clubs = 'clubs',
-    Diamonds = 'diamonds',
-    Hearts = 'hearts',
-    Spades = 'spades'
+    Clubs = 0,
+    Diamonds = 1,
+    Hearts = 2,
+    Spades = 3
 }
 
 export enum CardColor {
@@ -26,6 +26,13 @@ export enum CardNumber {
     King = 13
 }
 
+const SuitDictionary: {[key in CardSuit]: string} = {
+    [CardSuit.Clubs]: "clubs",
+    [CardSuit.Diamonds]: "diamonds",
+    [CardSuit.Hearts]: "hearts",
+    [CardSuit.Spades]: "spades"
+}
+
 export class Card {
     suit: CardSuit;
     number: CardNumber;
@@ -43,7 +50,11 @@ export class Card {
         this.faceShown = false;
         this.visibility = true;
         this.movable = false;
-        this.picture = suit + "_" + number;
+        this.picture = this.setPicture(suit, number);
+    }
+
+    private setPicture(suit: CardSuit, number: CardNumber): string {
+        return SuitDictionary[suit] + "_" + number;
     }
 
     flip() {
