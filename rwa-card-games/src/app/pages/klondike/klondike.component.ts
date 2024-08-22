@@ -87,14 +87,21 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
     this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
   }
 
-  showHints(): void {
-    if (this.hints.moves.length < 1) return;
+  boardDraw(): void {
+    this.hideHints();
+    this.board.draw();
+    this.hints = this.helper.getHint(this.board);
+  }
 
+  showHints(): void {
     this.hintVisible = true;
-    this.hintIndex = (this.hintIndex + 1) % this.hints.moves.length;
-    console.log("showHintsLog");
-    console.log(this.hints.moves.length + "||" + this.hintVisible + "||" + this.hintIndex);
-    console.log("showHintsLogEnd!");
+
+    if(this.hints.moves.length < 1) {
+
+    } else {
+      this.hintIndex = (this.hintIndex + 1) % this.hints.moves.length;
+      console.log(this.hints.moves.length + "||" + this.hintVisible + "||" + this.hintIndex + "||" + this.hints.cycleDeck);
+    }
   }
 
   
@@ -126,6 +133,8 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
     if (!this.hintVisible) return false;
     return this.hints.cycleDeck;
   }
+
+
 
   isHighlighted_placeholder(containingStack: Card[]): boolean {
     if (this.hintIndex < 0 || !this.hintVisible) return false;

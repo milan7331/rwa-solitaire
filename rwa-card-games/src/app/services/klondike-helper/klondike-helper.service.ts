@@ -16,18 +16,18 @@ export class KlondikeHelperService {
   // returns an array of possible moves
   public getHint(board: KlondikeBoard): KlondikeHint {
     let nextMoves: KlondikeMove[] = [];
-    let cycleDeck: boolean = false;
 
-    nextMoves.push(...(this.lookForMove_TableauKingToEmpty(board.tableau)));
+    // nextMoves.push(...(this.lookForMove_TableauKingToEmpty(board.tableau)));
     nextMoves.push(...(this.lookForMove_TableauMove(board.tableau)));
     nextMoves.push(...(this.lookForMove_TableauToFoundation(board.tableau, board.foundation)));
     nextMoves.push(...(this.lookForMove_FoundationToTableau(board.tableau, board.foundation)));
     
     if (nextMoves.length < 1) {
-      nextMoves.push(...(this.lookForMove_DeckMove(board.tableau, board.foundation, board.deckStock, board.deckWaste, cycleDeck)));
+      console.log("now using waste / deck cards.");
+      return this.lookForMove_DeckMove(board.tableau, board.foundation, board.deckStock, board.deckWaste);
     }
 
-    return ({moves: nextMoves, cycleDeck: cycleDeck} as KlondikeHint);
+    return ({moves: nextMoves, cycleDeck: false} as KlondikeHint);
   }
 
 
@@ -58,12 +58,12 @@ export class KlondikeHelperService {
     let restOfBoard: Card[][] = [];
     let moveDestinations: Card[][] = [];
 
-    for (const tab of tableau.filter(tab => tab.length > 0)) {
+    for (const tab of tableau) {
       maxIndex = this.cardStack_find_maxMovableCardIndex(tab);
       if (maxIndex < 0) continue;
 
-      restOfBoard = tableau.filter(t => t !== tab);
-      moveDestinations = this.tableau_find_availableMoveDestinations(restOfBoard, tab.at(maxIndex)!);
+      restOfBoard = tableau.filter(tabEl => tabEl !== tab);
+      moveDestinations = this.tableau_find_availableMoveDestinations(restOfBoard, tab.at(maxIndex)!, maxIndex);
 
       for (const d of moveDestinations) {
         // moves that uncover new cards have priority
@@ -141,7 +141,7 @@ export class KlondikeHelperService {
         if (!nextTurn_moveCondition) continue;
 
         restOfTableau = tableau.filter(t => t != tab);
-        thisTurn_dests = this.tableau_find_availableMoveDestinations(restOfTableau, foundationCard);
+        thisTurn_dests = this.tableau_find_availableMoveDestinations(restOfTableau, foundationCard, f.length - 1);
         if (thisTurn_dests.length < 1) continue;
 
         for (let dest of thisTurn_dests) {
@@ -153,24 +153,20 @@ export class KlondikeHelperService {
     return results;
   }
 
-
-
-
   // if theres no move - return cycle deck else return available moves
-  private lookForMove_DeckMove(tableau: Card[][], foundation: Card[][], stock: Card[], waste: Card[], cycleDeck: boolean): KlondikeMove[] {
+  private lookForMove_DeckMove(tableau: Card[][], foundation: Card[][], stock: Card[], waste: Card[]): KlondikeHint {
     let results: KlondikeMove[] = [];
+    let cycleDeck: boolean = false;
 
     let wasteCard: Card;
     let tableauDests: Card[][] = [];
     let fDest: Card[];
 
-    cycleDeck = false;
-
-    if (waste.length >= 1) {
+    if (waste.length > 0) {
       wasteCard = waste.at(-1)!;
 
       // try tableau move first
-      tableauDests = this.tableau_find_availableMoveDestinations(tableau, wasteCard);
+      tableauDests = this.tableau_find_availableMoveDestinations(tableau, wasteCard, waste.length - 1);
       for (const dest of tableauDests) {
         results.push({source: waste, dest: dest, sourceIndex: waste.length - 1} as KlondikeMove);
       }
@@ -185,7 +181,8 @@ export class KlondikeHelperService {
     // if no moves are available go for deck cycle if theres still cards available
     // cycleDeck is an out parameter
     if (results.length < 1 && stock.length > 0) cycleDeck = true;
-    return results;
+
+    return ({moves: results, cycleDeck: cycleDeck} as KlondikeHint);
   }
 
 
@@ -193,24 +190,25 @@ export class KlondikeHelperService {
   private cardStack_find_maxMovableCardIndex(cardStack: Card[]) : number {
     if (cardStack.length <= 0) return -1;
 
-    let maxIndex: number = cardStack.findIndex(card => card.movable && card.faceShown);
+    let maxIndex: number = cardStack.findIndex(card => card.movable === true && card.faceShown === true);
 
     return maxIndex;
   }
 
-  private tableau_find_availableMoveDestinations(restOfTableau: Card[][], card: Card): Card[][] {
+  private tableau_find_availableMoveDestinations(restOfTableau: Card[][], card: Card, cardIndex: number): Card[][] {
     let result: Card[][] = [];
 
-    if (card.number === CardNumber.King) {
-      result = restOfTableau.filter(tab => tab.length === 0);
+    if (card.number === CardNumber.King)  {
+      if (cardIndex > 0) result = restOfTableau.filter(tab => tab.length === 0);
     } else {
-      result = restOfTableau.filter(tab => {
-        tab.length > 0 &&
-        tab.at(-1)!.number - card.number === 1 &&
-        tab.at(-1)!.color !== card.color &&
-        tab.at(-1)!.faceShown &&
-        tab.at(-1)!.movable
-      });
+      for (const tab of restOfTableau) {
+        if (tab.length < 1) continue;
+        if (tab.at(-1)!.number - card.number !== 1) continue;
+        if (tab.at(-1)!.color === card.color) continue;
+        if (tab.at(-1)!.faceShown === false) continue;
+        if (tab.at(-1)!.movable === false) continue;
+        result.push(tab);
+      }
     }
 
     return result;

@@ -44,7 +44,7 @@
                         (onDragEnd)="dragEnd()"></div>
                     </div>
                     <div class="klondike-card"
-                    (click)="board.draw()"
+                    (click)="boardDraw()"
                     [ngClass]="{
                         'highlighted-card': isHighlighted_deck(),
                         'bg-card-back': board.deckStock.length != 0,
