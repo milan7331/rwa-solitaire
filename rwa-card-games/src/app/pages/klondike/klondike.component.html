@@ -12,42 +12,19 @@
                             'bg-card-clubs': i === 0,
                             'bg-card-diamonds': i === 1,
                             'bg-card-hearts': i === 2,
-                            'bg-card-spades': i === 3
+                            'bg-card-spades': i === 3,
+                            'highlighted-card': isHighlighted_placeholder(f)
                         }"></div>
                         <div class="klondike-card"
                         *ngFor="let card of f; let j = index"
+                        [ngClass]="{
+                            'highlighted-card': isHighlighted(f, j)
+                        }"
                         [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
                         pDraggable
                         (onDragStart)="dragStart($event, f, j)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
-                    <!-- <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Diamonds, this.board.foundation[1])" class="klondike-card-stack">
-                        <div *ngIf="this.board.foundation[1].length == 0" class="klondike-card bg-card-diamonds"></div>
-                        <div class="klondike-card"
-                        *ngFor="let card of board.foundation[1]; let i = index"
-                        [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
-                        pDraggable
-                        (onDragStart)="dragStart($event, board.foundation[1], i)"
-                        (onDragEnd)="dragEnd()"></div>
-                    </div>
-                    <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Spades ,board.foundationSpades)" class="klondike-card-stack">
-                        <div *ngIf="board.foundationSpades.length == 0" class="klondike-card bg-card-spades"></div>
-                        <div class="klondike-card"
-                        *ngFor="let card of board.foundationSpades; let i = index"
-                        [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
-                        pDraggable
-                        (onDragStart)="dragStart($event, board.foundationSpades, i)"
-                        (onDragEnd)="dragEnd()"></div>
-                    </div>
-                    <div pDroppable (onDrop)="dropOnFoundation(CardSuit.Clubs ,board.foundationClubs)" class="klondike-card-stack">
-                        <div *ngIf="board.foundationClubs.length == 0" class="klondike-card bg-card-clubs"></div>
-                        <div class="klondike-card"
-                        *ngFor="let card of board.foundationClubs; let i = index"
-                        [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
-                        pDraggable
-                        (onDragStart)="dragStart($event, board.foundationClubs, i)"
-                        (onDragEnd)="dragEnd()"></div>
-                    </div> -->
                 </div>
                 <div class="klondike-deck-container flex-auto flex flex-row flex-nowrap justify-content-end gap-4">
                     <div class="klondike-card-stack"
@@ -78,7 +55,8 @@
                         'tableau-stack-element': i !== 0 && tab.length < 15,
                         'tableau-stack-element-compact': i !== 0 && tab.length >= 15 && tab.length < 18,
                         'tableau-stack-element-ultra-compact': i !== 0 && tab.length >= 18,
-                        'non-interactable': !(card.movable)
+                        'non-interactable': !(card.movable),
+                        'highlighted-card': isHighlighted(tab, i)
                     }"
                     [ngStyle]="{'background-image': (card.faceShown)? 'url(../../../assets/cards/'+ card.picture +'.svg)' : 'url(../../../assets/cards/back_1.svg'}"
                     pDraggable
@@ -99,8 +77,10 @@
         [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"></div>
     </div>
     <div id="ghost-image"></div>
-    <div id="demo-buttons">
-        <p-button (onClick)="startNewGame()">Restart game</p-button>
-        <p-button (onClick)="changeDifficulty()">Change difficulty</p-button>
+    <div id="demo-buttons" class="flex flex-row flex-nowrap">
+        <p-button class="mr-2" (onClick)="startNewGame()">Restart game</p-button>
+        <p-button class="mr-2" (onClick)="changeDifficulty()">Change difficulty</p-button>
+        <p-button class="mr-2" (onClick)="showHints()">Show hint</p-button>
+        <p-button class="mr-2" (onClick)="printCurrentHints()">Show hint list</p-button>
     </div>
 </div>

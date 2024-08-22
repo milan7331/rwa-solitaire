@@ -1,10 +1,7 @@
 // import { KlondikeSolverService } from "../services/klondike-solver.service";
-import { Card, CardNumber, CardSuit } from "./card";
-
-export enum KlondikeDifficulty {
-    Easy = 0,
-    Hard = 1
-}
+import { Card } from "./card";
+import { KlondikeDifficulty } from "./klondike-board.enums";
+import { CardSuit, CardNumber } from "./card.enums";
 
 export class KlondikeBoard {
 
@@ -66,13 +63,13 @@ export class KlondikeBoard {
         }
 
         this.tableau.forEach(tab => {
-            tab.at(-1)!.flip();
+            tab.at(-1)!.flipUp();
             tab.at(-1)!.unlock();
         })
 
         for (let i = 0; i < this.deckStock.length; i++) {
             this.deckStock[i].unlock();
-            this.deckStock[i].flip();
+            this.deckStock[i].flipUp();
         }
 
         return true;
@@ -93,9 +90,12 @@ export class KlondikeBoard {
             while (this.deckWaste.length > 0) this.deckStock.push(this.deckWaste.pop()!);
         } else {
             if (this.difficulty === KlondikeDifficulty.Hard) {
-                if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
-                if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
-                if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
+                for (let i = 0; i < 3; i++) {
+                    if (this.deckStock.length > 0) {
+                        this.deckWaste.push(this.deckStock.pop()!);
+                    }
+                    else break;
+                }
             } else {
                 if (this.deckStock.length > 0) this.deckWaste.push(this.deckStock.pop()!);
             }
@@ -123,7 +123,7 @@ export class KlondikeBoard {
 
     public dropOnFoundation(source: Card[] | null, dest: Card[] | null, sourceIndex: number | null, suit: CardSuit): boolean {
         if (this.canDropOnFoundation(source, dest, sourceIndex, suit)) {
-            return this.transferCards(source!, dest!, sourceIndex!);
+            return this.moveCards(source!, dest!, sourceIndex!);
         }
 
         return false;
@@ -148,13 +148,13 @@ export class KlondikeBoard {
 
     public dropOnTableau(source: Card[] | null, dest: Card[] | null, sourceIndex: number | null): boolean {
         if (this.canDropOnTableau(source, dest, sourceIndex)) {
-            return this.transferCards(source!, dest!, sourceIndex!);
+            return this.moveCards(source!, dest!, sourceIndex!);
         }
 
         return false;
     }
 
-    private transferCards(source: Card[], dest: Card[], sourceIndex: number): boolean {
+    private moveCards(source: Card[], dest: Card[], sourceIndex: number): boolean {
         if (sourceIndex < 0 || source.length <= sourceIndex) return false;
 
         const cardsToMove = source.slice(sourceIndex);
@@ -162,7 +162,7 @@ export class KlondikeBoard {
         source.length = sourceIndex;
 
         if (source.length !== 0) {
-            source[source.length - 1].faceShown = true;
+            source[source.length - 1].flipUp();
             source[source.length - 1].unlock();
         }
 

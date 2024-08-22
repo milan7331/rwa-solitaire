@@ -1,44 +1,10 @@
-export enum CardSuit {
-    Clubs = 0,
-    Diamonds = 1,
-    Hearts = 2,
-    Spades = 3
-}
-
-export enum CardColor {
-    Red = 1,
-    Black = 2
-}
-
-export enum CardNumber {
-    Ace = 1,
-    Two = 2,
-    Three = 3,
-    Four = 4,
-    Five = 5,
-    Six = 6,
-    Seven = 7,
-    Eight = 8,
-    Nine = 9,
-    Ten = 10,
-    Jack = 11,
-    Queen = 12,
-    King = 13
-}
-
-const SuitDictionary: {[key in CardSuit]: string} = {
-    [CardSuit.Clubs]: "clubs",
-    [CardSuit.Diamonds]: "diamonds",
-    [CardSuit.Hearts]: "hearts",
-    [CardSuit.Spades]: "spades"
-}
+import { CardSuit, CardColor, CardNumber } from "./card.enums";
 
 export class Card {
     suit: CardSuit;
     number: CardNumber;
     color: CardColor;
     faceShown: boolean;
-    visibility: boolean;
     movable: boolean;
     picture: string;
 
@@ -48,24 +14,54 @@ export class Card {
         this.number = number;
         this.color = (suit == CardSuit.Diamonds || suit == CardSuit.Hearts)? CardColor.Red : CardColor.Black;
         this.faceShown = false;
-        this.visibility = true;
         this.movable = false;
         this.picture = this.setPicture(suit, number);
     }
 
-    private setPicture(suit: CardSuit, number: CardNumber): string {
-        return SuitDictionary[suit] + "_" + number;
+    flipUp(): void {
+        this.faceShown = true;
     }
 
-    flip() {
-        (this.faceShown === false) ? this.faceShown = true : this.faceShown = false;
+    flipDown(): void {
+        this.faceShown = false;
     }
 
-    lock() {
+    lock(): void {
         this.movable = false;
     }
 
-    unlock() {
+    unlock(): void {
         this.movable = true;
     }
+
+    clone(): Card {
+        let newCard: Card = new Card(this.suit, this.number);
+        (this.faceShown)? newCard.flipUp() : newCard.flipDown();
+        (this.movable)? newCard.unlock() : newCard.lock();
+
+        return newCard;
+    }
+
+    private setPicture(suit: CardSuit, number: CardNumber): string {
+        const suitString: string | undefined = this.getCardSuitName(suit);
+
+        if (suitString === undefined) return "placeholder_default";
+        return suitString + "_" + number;
+    }
+
+    private getCardSuitName(suit: CardSuit): string | undefined {
+        switch (suit) {
+            case CardSuit.Clubs:
+                return "clubs";
+            case CardSuit.Diamonds:
+                return "diamonds";
+            case CardSuit.Hearts:
+                return "hearts";
+            case CardSuit.Spades:
+                return "spades";
+            default:
+                return undefined;
+        }
+    }
+    
 }

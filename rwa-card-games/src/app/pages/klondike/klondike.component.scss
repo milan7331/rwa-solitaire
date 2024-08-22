@@ -92,6 +92,16 @@
         }
     }
 
+    .highlighted-card {
+        box-shadow: 0 0 0.5vh 0.25vh gold inset;
+        border-radius: 0.8vh;
+
+        ~ * {
+            box-shadow: 0 0 0.5vh 0.25vh gold inset;
+            border-radius: 0.8vh;
+        }
+    }
+
     .non-interactable {
         pointer-events: none;
     }
