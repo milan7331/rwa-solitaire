@@ -37,18 +37,24 @@
                         <div  class="klondike-card bg-card-placeholder"></div>
                         <div class="klondike-card"
                         *ngFor="let card of board.deckWaste; let i = index"
+                        [ngClass]="{'highlighted-card': isHighlighted(board.deckWaste, i)}"
                         [ngStyle]="{'background-image': 'url(../../../assets/cards/'+ card.picture +'.svg)'}"
                         pDraggable
                         (onDragStart)="dragStart($event, board.deckWaste, i)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
-                    <div class="klondike-card" (click)="board.draw()" 
-                    [ngClass]="{'bg-card-back': board.deckStock.length != 0, 'bg-card-placeholder': board.deckStock.length == 0}"></div>
+                    <div class="klondike-card"
+                    (click)="board.draw()"
+                    [ngClass]="{
+                        'highlighted-card': isHighlighted_deck(),
+                        'bg-card-back': board.deckStock.length != 0,
+                        'bg-card-placeholder': board.deckStock.length == 0
+                    }"></div>
                 </div>
             </div>
             <div class="klondike-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">
                 <div *ngFor="let tab of board.tableau" pDroppable (onDrop)="dropOnTableau(tab)">
-                    <div class="klondike-card bg-card-tableau-placeholder"></div>
+                    <div class="klondike-card bg-card-tableau-placeholder" [ngClass]="{'highlighted-card': isHighlighted_placeholder(tab)}"></div>
                     <div class="klondike-card"
                     *ngFor="let card of tab; let i = index"
                     [ngClass]="{

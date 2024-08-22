@@ -122,13 +122,18 @@ export class KlondikeComponent implements AfterViewInit, OnDestroy {
     return false;
   }
 
+  isHighlighted_deck(): boolean {
+    if (!this.hintVisible) return false;
+    return this.hints.cycleDeck;
+  }
+
   isHighlighted_placeholder(containingStack: Card[]): boolean {
     if (this.hintIndex < 0 || !this.hintVisible) return false;
     if (!this.hints.moves[this.hintIndex]) return false;
   
     let selectedHint: KlondikeMove = this.hints.moves[this.hintIndex];
   
-    // Highlight the placeholder if it's the destination and the stack is empty
+    // placeholder highlight
     return selectedHint.dest === containingStack && containingStack.length === 0;
     
   }
