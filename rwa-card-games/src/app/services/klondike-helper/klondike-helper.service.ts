@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Card } from '../../models/card';
-import { CardNumber } from '../../models/card.enums';
-import { KlondikeMove } from '../../models/klondike-move';
-import { KlondikeHint } from '../../models/klondike-hint';
-import { KlondikeBoard } from '../../models/klondike-board';
+import { Card, CardNumber } from '../../models/game/card';
+import { KlondikeMove } from '../../models/game/klondike-move';
+import { KlondikeHints } from '../../models/game/klondike-hints';
+import { KlondikeBoard } from '../../models/game/klondike-board';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +13,7 @@ export class KlondikeHelperService {
 
 
   // returns an array of possible moves
-  public getHint(board: KlondikeBoard): KlondikeHint {
+  public getHints(board: KlondikeBoard): KlondikeHints {
     let nextMoves: KlondikeMove[] = [];
 
     // nextMoves.push(...(this.lookForMove_TableauKingToEmpty(board.tableau)));
@@ -27,7 +26,7 @@ export class KlondikeHelperService {
       return this.lookForMove_DeckMove(board.tableau, board.foundation, board.deckStock, board.deckWaste);
     }
 
-    return ({moves: nextMoves, cycleDeck: false} as KlondikeHint);
+    return ({moves: nextMoves, cycleDeck: false} as KlondikeHints);
   }
 
 
@@ -154,7 +153,7 @@ export class KlondikeHelperService {
   }
 
   // if theres no move - return cycle deck else return available moves
-  private lookForMove_DeckMove(tableau: Card[][], foundation: Card[][], stock: Card[], waste: Card[]): KlondikeHint {
+  private lookForMove_DeckMove(tableau: Card[][], foundation: Card[][], stock: Card[], waste: Card[]): KlondikeHints {
     let results: KlondikeMove[] = [];
     let cycleDeck: boolean = false;
 
@@ -182,7 +181,7 @@ export class KlondikeHelperService {
     // cycleDeck is an out parameter
     if (results.length < 1 && stock.length > 0) cycleDeck = true;
 
-    return ({moves: results, cycleDeck: cycleDeck} as KlondikeHint);
+    return ({moves: results, cycleDeck: cycleDeck} as KlondikeHints);
   }
 
 

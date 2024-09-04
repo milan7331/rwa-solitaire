@@ -1,0 +1,157 @@
+.klondike-container {
+    height: 100vh;
+    overflow: hidden;
+
+    .klondike-top-container {
+
+        min-height: 17vh;
+        height: fit-content;
+        max-height: 20%;
+        overflow: hidden;
+
+        .klondike-card-stack {
+            display: grid;
+
+            > * {
+                grid-row: 1;
+                grid-column: 1;
+            }
+        }
+
+        .klondike-deck-container {
+            width: fit-content;
+            max-width: 40%;
+            overflow: hidden;
+
+            .deck-waste-spread-1 {
+                margin-right: 6vh;
+            }
+
+            .deck-waste-spread-2 {
+                margin-right: 3vh;
+
+                :nth-last-child(1) {
+                    margin-left: 3vh;
+                }
+            }
+
+            .deck-waste-spread-3 {
+                :nth-last-child(2) {
+                    margin-left: 3vh;
+                }
+                :nth-last-child(1) {
+                    margin-left: 6vh;
+                }
+            }
+        }
+    }
+
+    .tableau-stack-element {
+        margin-top: -13vh;
+    }
+
+    .tableau-stack-element-compact {
+        margin-top: -13.75vh;
+    }
+
+    .tableau-stack-element-ultra-compact {
+        margin-top: -14vh;
+    }
+
+    .klondike-card {
+        height: 17vh;
+        aspect-ratio: 0.714285; // 2.5 x 3.5
+
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    #card-stack-dragged {
+        position: absolute;
+        top: 110vh;
+        left: 110vw;
+        pointer-events: none;
+    }
+
+    #ghost-image {
+        opacity: 0;
+        display: none;
+
+        position: absolute;
+        top: 140vh;
+        left: 140vw;
+        width: 100px;
+        height: 100px;
+    }
+
+    .hidden-card {
+        opacity: 0.0001;
+        ~ * {
+            opacity: 0.0001;
+        }
+    }
+
+    .highlighted-card {
+        box-shadow: 0 0 0.5vh 0.25vh gold inset;
+        border-radius: 0.8vh;
+
+        ~ * {
+            box-shadow: 0 0 0.5vh 0.25vh gold inset;
+            border-radius: 0.8vh;
+        }
+    }
+
+    .non-interactable {
+        pointer-events: none;
+    }
+
+    #demo-buttons {
+        position: absolute;
+
+        display: flex;
+        bottom: 1vh;
+        left: 1vh;
+    }
+
+    .bg-card-back {
+        background-image: url("/assets/cards/back_1.svg");
+    }
+
+    .bg-card-back-alternative {
+        background-image: url("/assets/cards/back_2.svg");
+    }
+
+    .bg-card-back-2 {
+        background-image: url("/assets/cards/back_3.svg");
+    }
+
+    .bg-card-back-2-alternative {
+        background-image: url("/assets/cards/back_4.svg");
+    }
+
+    .bg-card-placeholder {
+        background-image: url("/assets/cards/placeholder_default.svg");
+    }
+
+    .bg-card-tableau-placeholder {
+        background-image: url("/assets/cards/placeholder_default.svg");
+        margin-bottom: -17vh;
+    }
+
+    .bg-card-clubs {
+        background-image: url("/assets/cards/placeholder_clubs.svg");
+    }
+
+    .bg-card-diamonds {
+        background-image: url("/assets/cards/placeholder_diamonds.svg");
+    }
+
+    .bg-card-hearts {
+        background-image: url("/assets/cards/placeholder_hearts.svg");
+    }
+
+    .bg-card-spades {
+        background-image: url("/assets/cards/placeholder_spades.svg");
+    }
+}

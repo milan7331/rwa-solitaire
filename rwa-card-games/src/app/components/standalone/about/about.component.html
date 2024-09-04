@@ -1,0 +1,19 @@
+<p-dialog
+[(visible)]="visible"
+(visibleChange)="visibilityChanged()"
+modal="true"
+dismissableMask="true"
+closable="true"
+[header]="'About'">
+<div>
+    This is a university project for the course 'Razvoj Web Aplikacija',<br>
+    featuring a simple solitaire game built in Angular.<br>
+    The app demonstrates key functionalities of NgRX, RxJS,<br>
+    and utilizes NestJS as the backend.<br>
+    <br>
+    <p-button
+    label="This project on Github"
+    icon="pi pi-github"
+    (onClick)="openInNewTab('https://github.com/milan7331/rwa-solitaire')"></p-button>
+</div>
+</p-dialog>

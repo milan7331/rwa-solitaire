@@ -15,43 +15,37 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { InputTextModule } from 'primeng/inputtext';
 import { SidebarModule } from 'primeng/sidebar';
+import { FieldsetModule } from 'primeng/fieldset';
+import { DialogModule } from 'primeng/dialog';
 import { DragDropModule } from 'primeng/dragdrop';
 import { SpeedDialModule } from 'primeng/speeddial';
 
 import { AppComponent } from './app.component';
-import { SettingsMenuComponent } from './components/settings-menu/settings-menu.component';
-import { TopBarComponent } from './components/top-bar/top-bar.component';
-import { HomeComponent } from './pages/home/home.component';
-import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.component';
-import { LeaderboardsComponent } from './pages/leaderboards/leaderboards.component';
-import { AboutComponent } from './components/about/about.component';
-import { KlondikeComponent } from './pages/klondike/klondike.component';
-import { FreecellComponent } from './pages/freecell/freecell.component';
-import { SpiderComponent } from './pages/spider/spider.component';
-import { PyramidComponent } from './pages/pyramid/pyramid.component';
-import { TripeaksComponent } from './pages/tripeaks/tripeaks.component';
-import { RegistrationComponent } from './pages/registration/registration.component';
-import { LoginComponent } from './pages/login/login.component';
-import { UserDataComponent } from './pages/user-data/user-data.component';
+import { TopBarComponent } from './components/standalone/top-bar/top-bar.component';
+import { HomeComponent } from './components/pages/home/home.component';
+import { PageNotFoundComponent } from './components/pages/page-not-found/page-not-found.component';
+import { LeaderboardsComponent } from './components/pages/leaderboards/leaderboards.component';
+import { KlondikeComponent } from './components/pages/klondike/klondike.component';
+import { RegistrationComponent } from './components/pages/registration/registration.component';
+import { LoginComponent } from './components/pages/login/login.component';
+import { UserDataComponent } from './components/pages/user-data/user-data.component';
+import { AboutComponent } from './components/standalone/about/about.component';
+import { GameEndComponent } from './components/standalone/game-end/game-end.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    SettingsMenuComponent,
     TopBarComponent,
     HomeComponent,
     PageNotFoundComponent,
     LeaderboardsComponent,
-    AboutComponent,
     KlondikeComponent,
-    FreecellComponent,
-    SpiderComponent,
-    PyramidComponent,
-    TripeaksComponent,
     RegistrationComponent,
     LoginComponent,
     UserDataComponent,
+    AboutComponent,
+    GameEndComponent,
   ],
   imports: [
     BrowserModule,
@@ -70,6 +64,8 @@ import { UserDataComponent } from './pages/user-data/user-data.component';
     SplitButtonModule,
     InputTextModule,
     SidebarModule,
+    FieldsetModule,
+    DialogModule,
     DragDropModule,
     SpeedDialModule
   ],

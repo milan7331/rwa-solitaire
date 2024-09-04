@@ -1,0 +1,9 @@
+.home-container {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.font-title {
+    font-size: clamp(1rem, 20vh, 15rem);
+    font-weight: 900;
+}
