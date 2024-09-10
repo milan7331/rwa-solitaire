@@ -4,6 +4,7 @@ import { SolitaireBoard } from '../../../models/game/solitaire-board';
 import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
 import { SolitaireMove } from '../../../models/game/solitaire-move';
 import { SolitaireHints } from '../../../models/game/solitaire-hints';
+import { AudioService } from '../../../services/audio/audio.service';
 
 @Component({
   selector: 'app-solitaire',
@@ -14,7 +15,8 @@ import { SolitaireHints } from '../../../models/game/solitaire-hints';
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
   public CardSuit = CardSuit;
   
-  private helper: SolitaireHelperService;
+  private solitaireHelper: SolitaireHelperService;
+  private audio: AudioService;
   
   board: SolitaireBoard;
   
@@ -37,7 +39,8 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     this.board = new SolitaireBoard();
-    this.helper = inject(SolitaireHelperService);
+    this.solitaireHelper = inject(SolitaireHelperService);
+    this.audio = inject(AudioService);
     this.startNewGame();
     
   }
@@ -53,27 +56,27 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     document.removeEventListener("mousedown", this.clickOffset);
   }
 
-  startNewGame() {
+  public startNewGame() {
     this.draggedCards = [];
     this.draggedCardsStartIndex = null;
     this.draggedCardsOrigin = null;
 
     this.board.startNewGame();
 
-    this.hints = this.helper.getHints(this.board);
+    this.hints = this.solitaireHelper.getHints(this.board);
     this.hintIndex = -1;
     this.hintVisible = false;
   }
 
-  resetBoard(): void {
+  public resetBoard(): void {
     // add a restart deal feature?
   }
 
-  changeDifficulty(): void {
+  public changeDifficulty(): void {
     this.board.toggleDifficulty();
   }
 
-  clickOffset = (event: MouseEvent) => {
+  private clickOffset = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
     
     if (target) {
@@ -83,30 +86,27 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  followCursor = (event: DragEvent) => {
+  private followCursor = (event: DragEvent) => {
     this.cardStackDragged!.style.left = (event.clientX - this.clickedElementOffsetX) + "px";
     this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
   }
 
-  boardDrawCards(): void {
+  public boardDrawCards(): void {
     this.hideHints();
+    this.audio.play_deckDraw(this.board);
     this.board.drawCards();
-    this.hints = this.helper.getHints(this.board);
+    this.hints = this.solitaireHelper.getHints(this.board);
   }
 
-  showHints(): void {
+  public showHints(): void {
     this.hintVisible = true;
 
-    if(this.hints.moves.length < 1) {
-
-    } else {
+    if (this.hints.moves.length > 0) {
       this.hintIndex = (this.hintIndex + 1) % this.hints.moves.length;
-      console.log(this.hints.moves.length + "||" + this.hintVisible + "||" + this.hintIndex + "||" + this.hints.cycleDeck);
     }
   }
 
-  
-  hideHints(): void {
+  public hideHints(): void {
     this.hintVisible = false;
     const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
     const highlightedCards = document.querySelectorAll(".highlighted-card-single");
@@ -115,7 +115,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
   }
 
-  isHighlighted(containingStack: Card[], elementIndex: number): boolean {
+  public isHighlighted(containingStack: Card[], elementIndex: number): boolean {
     if (this.hintIndex < 0 || !this.hintVisible) return false;
     if (!this.hints.moves[this.hintIndex]) return false;
     
@@ -130,14 +130,12 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     return false;
   }
 
-  isHighlighted_deck(): boolean {
+  public isHighlighted_deck(): boolean {
     if (!this.hintVisible) return false;
     return this.hints.cycleDeck;
   }
 
-
-
-  isHighlighted_placeholder(containingStack: Card[]): boolean {
+  public isHighlighted_placeholder(containingStack: Card[]): boolean {
     if (this.hintIndex < 0 || !this.hintVisible) return false;
     if (!this.hints.moves[this.hintIndex]) return false;
   
@@ -148,7 +146,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     
   }
   
-  dragStart(ev: DragEvent, startArray: Card[], index: number) {
+  public dragStart(ev: DragEvent, startArray: Card[], index: number) {
     this.draggedCards = startArray.slice(index);
     this.draggedCardsStartIndex = index;
     this.draggedCardsOrigin = startArray;
@@ -160,39 +158,43 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
     this.hideHints();
 
+    this.audio.play_cardPickUp();
+
     document.addEventListener('drag', this.followCursor);
   }
 
-  dragEnd() {
+  public dragEnd() {
+    this.audio.play_cardDropUnsuccessful();
     this.dragAndDropCleanUp();
   }
 
-  dropOnFoundation(cardSuit: CardSuit, dropArray: Card[]): void {
+  public dropOnFoundation(cardSuit: CardSuit, dropArray: Card[]): void {
     const dropSucess = this.board.dropOnFoundation(this.draggedCardsOrigin, dropArray, this.draggedCardsStartIndex ,cardSuit);
-    if (dropSucess) {
-      this.hints = this.helper.getHints(this.board);
-      this.hintIndex = -1;
-      
-      this.dragAndDropCleanUp();
-
-
-    }
+    if (dropSucess) this.cardDroppedSuccessfuly();
 
   }
 
-  dropOnTableau(dropArray: Card[]) {
+  public dropOnTableau(dropArray: Card[]) {
     const dropSucess = this.board.dropOnTableau(this.draggedCardsOrigin, dropArray, this.draggedCardsStartIndex);
-    if (dropSucess) {
-      this.hints = this.helper.getHints(this.board);
-      this.hintIndex = -1;
-      
-      this.dragAndDropCleanUp();
-    }
+    if (dropSucess) this.cardDroppedSuccessfuly();
 
   }
 
-  gameEndCheck() {
-    this.gameEndVisible = this.helper.lookForGameEndCondition(this.board);
+  private cardDroppedSuccessfuly(): void {
+    this.audio.play_cardDropSuccessful();
+    this.gameEndCheck();
+    this.getNewHints();
+    this.dragAndDropCleanUp();
+  }
+
+  private getNewHints(): void {
+    this.hints = this.solitaireHelper.getHints(this.board);
+    this.hintIndex = -1;
+  }
+
+  private gameEndCheck() {
+    this.gameEndVisible = this.solitaireHelper.lookForGameEndCondition(this.board);
+    if (this.gameEndVisible) this.audio.play_levelComplete();
   }
 
   private dragAndDropCleanUp(): void {
@@ -206,23 +208,18 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.invisibleCard!.classList.remove("hidden-card");
     this.invisibleCard = null;
 
-    
-
     this.draggedCards = [];
     this.draggedCardsStartIndex = null;
     this.draggedCardsOrigin = null;
   }
 
-  fakeGameEnd() {
+  public fakeGameEnd() {
     this.gameEndVisible = true;
   }
 
-  printCurrentHints(): void {
-    console.log("Hint index: " + this.hintIndex);
-    console.log("------------------------");
-    for (const hint of this.hints.moves) {
-      console.log(hint.source.length + "::" + hint.dest.length + "::" + hint.sourceIndex);
-    }
-    console.log("------------------------");
+  public handleButtonPress(cb: Function): void {
+    this.audio.play_buttonPress();
+    cb();
   }
+
 }

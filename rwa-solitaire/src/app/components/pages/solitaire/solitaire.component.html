@@ -84,11 +84,10 @@
     </div>
     <div id="ghost-image"></div>
     <div id="demo-buttons" class="flex flex-row flex-nowrap">
-        <p-button class="mr-2" (onClick)="startNewGame()">New game</p-button>
-        <p-button class="mr-2" (onClick)="changeDifficulty()">Change difficulty</p-button>
-        <p-button class="mr-2" (onClick)="showHints()">Show hint</p-button>
-        <p-button class="mr-2" (onClick)="printCurrentHints()">Show hint list</p-button>
-        <p-button class="mr-2" (onClick)="fakeGameEnd()">Fake game end</p-button>
+        <p-button class="mr-2" (onClick)="handleButtonPress(startNewGame.bind(this))">New game</p-button>
+        <p-button class="mr-2" (onClick)="handleButtonPress(changeDifficulty.bind(this))">Change difficulty</p-button>
+        <p-button class="mr-2" (onClick)="handleButtonPress(showHints.bind(this))">Show hint</p-button>
+        <p-button class="mr-2" (onClick)="handleButtonPress(fakeGameEnd.bind(this))">Fake game end</p-button>
         <app-game-end [(visible)]="gameEndVisible" (newGame)="startNewGame()"></app-game-end>
     </div>
 </div>

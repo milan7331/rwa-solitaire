@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AudioService } from '../../../services/audio/audio.service';
 
 @Component({
   selector: 'app-home',
@@ -8,13 +9,17 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent {
   aboutVisible: boolean = false;
-  
-  constructor(private router: Router) {
+  private audio: AudioService;
+  private router: Router;
 
+  constructor() {
+    this.audio = inject(AudioService);
+    this.router = inject(Router);
   }
 
   loadAboutPage(): void {
     this.aboutVisible = true;
+    this.audio.play_buttonPress();
   }
 
   loadSolitairePage(difficulty: string): void {
@@ -31,9 +36,11 @@ export class HomeComponent {
         this.router.navigate(["/*"]);
         break;
     }
+    this.audio.play_buttonPress();
   }
 
   loadLeaderboardsPage(): void {
     this.router.navigate(["/leaderboards"]);
+    this.audio.play_buttonPress();
   }
 }
