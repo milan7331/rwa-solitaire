@@ -19,6 +19,8 @@ import { FieldsetModule } from 'primeng/fieldset';
 import { DialogModule } from 'primeng/dialog';
 import { DragDropModule } from 'primeng/dragdrop';
 import { SpeedDialModule } from 'primeng/speeddial';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { SliderModule } from 'primeng/slider';
 
 import { AppComponent } from './app.component';
 import { TopBarComponent } from './components/standalone/top-bar/top-bar.component';
@@ -32,6 +34,7 @@ import { UserDataComponent } from './components/pages/user-data/user-data.compon
 import { AboutComponent } from './components/standalone/about/about.component';
 import { GameEndComponent } from './components/standalone/game-end/game-end.component';
 import { NewGameConfirmationComponent } from './components/standalone/new-game-confirmation/new-game-confirmation.component';
+import { AudioControlComponent } from './components/standalone/audio-control/audio-control.component';
 
 
 @NgModule({
@@ -48,6 +51,7 @@ import { NewGameConfirmationComponent } from './components/standalone/new-game-c
     AboutComponent,
     GameEndComponent,
     NewGameConfirmationComponent,
+    AudioControlComponent,
   ],
   imports: [
     BrowserModule,
@@ -69,7 +73,9 @@ import { NewGameConfirmationComponent } from './components/standalone/new-game-c
     FieldsetModule,
     DialogModule,
     DragDropModule,
-    SpeedDialModule
+    SpeedDialModule,
+    OverlayPanelModule,
+    SliderModule
   ],
   providers: [],
   bootstrap: [AppComponent]

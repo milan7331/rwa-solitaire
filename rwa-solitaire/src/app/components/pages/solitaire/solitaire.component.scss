@@ -50,12 +50,32 @@
         margin-top: -13vh;
     }
 
-    .tableau-stack-element-compact {
+    .tableau-stack-element-compact-1 {
+        margin-top: -13.25vh;
+    }
+
+    .tableau-stack-element-compact-2 {
+        margin-top: -13.50vh;
+    }
+
+    .tableau-stack-element-compact-3 {
         margin-top: -13.75vh;
     }
 
-    .tableau-stack-element-ultra-compact {
+    .tableau-stack-element-compact-4 {
         margin-top: -14vh;
+    }
+
+    .tableau-stack-element-compact-5 {
+        margin-top: -14.25vh;
+    }
+
+    .tableau-stack-element-compact-6 {
+        margin-top: -14.40vh;
+    }
+
+    .tableau-stack-element-compact-7 {
+        margin-top: -14.50vh;
     }
 
     .solitaire-card {
@@ -107,8 +127,7 @@
     }
 
     #demo-buttons {
-        position: absolute;
-
+        
         display: flex;
         bottom: 1vh;
         left: 1vh;
