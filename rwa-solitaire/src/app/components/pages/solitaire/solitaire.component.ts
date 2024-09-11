@@ -25,6 +25,8 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   hintVisible: boolean = false;
 
   gameEndVisible: boolean = false;
+  newGameConfirmationVisible: boolean = false;
+  changeDiffConfirmationVisible: boolean = false;
 
   draggedCards: Card[] = [];
   draggedCardsStartIndex: number | null = null;
@@ -213,13 +215,26 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.draggedCardsOrigin = null;
   }
 
-  public fakeGameEnd() {
+  public pressed_newGameButton(): void {
+    this.audio.play_buttonPress();
+    this.newGameConfirmationVisible = true;
+  }
+
+  public pressed_changeDifficultyButton(): void {
+    this.audio.play_buttonPress();
+    this.changeDiffConfirmationVisible = true;
+  }
+
+  public pressed_showHintButton(): void {
+    this.audio.play_buttonPress();
+    this.showHints();
+  }
+
+  public pressed_showFakeGameEndButton(): void {
+    this.audio.play_buttonPress();
     this.gameEndVisible = true;
   }
 
-  public handleButtonPress(cb: Function): void {
-    this.audio.play_buttonPress();
-    cb();
-  }
+
 
 }

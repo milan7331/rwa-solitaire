@@ -31,6 +31,7 @@ import { LoginComponent } from './components/pages/login/login.component';
 import { UserDataComponent } from './components/pages/user-data/user-data.component';
 import { AboutComponent } from './components/standalone/about/about.component';
 import { GameEndComponent } from './components/standalone/game-end/game-end.component';
+import { NewGameConfirmationComponent } from './components/standalone/new-game-confirmation/new-game-confirmation.component';
 
 
 @NgModule({
@@ -46,6 +47,7 @@ import { GameEndComponent } from './components/standalone/game-end/game-end.comp
     UserDataComponent,
     AboutComponent,
     GameEndComponent,
+    NewGameConfirmationComponent,
   ],
   imports: [
     BrowserModule,

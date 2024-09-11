@@ -1,23 +1,20 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { AudioService } from '../../../services/audio/audio.service';
 
 @Component({
-  selector: 'app-game-end',
-  templateUrl: './game-end.component.html',
-  styleUrl: './game-end.component.scss'
+  selector: 'app-new-game-confirmation',
+  templateUrl: './new-game-confirmation.component.html',
+  styleUrl: './new-game-confirmation.component.scss'
 })
-
-export class GameEndComponent {
+export class NewGameConfirmationComponent {
   @Input() visible: boolean = false;
+  @Input() diffChange: boolean = false;
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() newGame: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  private router: Router;
   private audio: AudioService;
 
   constructor() {
-    this.router = inject(Router);
     this.audio = inject(AudioService);
   }
 
@@ -25,18 +22,17 @@ export class GameEndComponent {
     this.visibleChange.emit(this.visible);
   }
 
-  playAgain(): void {
+  startNewGame(): void {
     this.audio.play_buttonPress();
     this.visible = false;
     this.visibilityChanged();
     this.newGame.emit(true);
   }
 
-  backToHome(): void {
+  cancel(): void {
     this.audio.play_buttonPress();
     this.visible = false;
     this.visibilityChanged();
-    this.router.navigate(["/"]);
   }
 
 }
