@@ -93,17 +93,25 @@
         [ngStyle]="{'background-image': 'url(/assets/cards/'+ card.picture +'.svg)'}"></div>
     </div>
     <div id="ghost-image"></div>
+    <!-- todo: odvojiti u bottom bar komponentu nakon ngrx transformacije . . . -->
     <p-toolbar styleClass="bg-black-alpha-20 border-transparent border-none">
-        <div id="demo-buttons" class="flex flex-row flex-nowrap">
-            <p-button class="mr-2" (onClick)="pressed_newGameButton()">New game</p-button>
-            <p-button class="mr-2" (onClick)="pressed_changeDifficultyButton()">Change difficulty</p-button>
-            <p-button class="mr-2" (onClick)="pressed_showHintButton()">Show hint</p-button>
-            <p-button class="mr-2" (onClick)="pressed_showFakeGameEndButton()">Fake game end</p-button>
-            <app-audio-control></app-audio-control>
+        <div class="p-toolbar-group-start">
+            
+        </div>
+        <div id="demo-buttons" class="p-toolbar-group-center">
+            <p-button class="mr-2" [outlined]="true" (onClick)="pressed_newGameButton()">New game</p-button>
+            <p-button class="mr-2" [outlined]="true" (onClick)="pressed_changeDifficultyButton()">Change difficulty</p-button>
+            <p-button class="mr-2" [outlined]="true" (onClick)="pressed_showHintButton()">Show hint</p-button>
+            <p-button class="mr-2" [outlined]="true" (onClick)="pressed_showFakeGameEndButton()">Fake game end</p-button>
+        </div>
+        <div class="p-toolbar-group-end">
+
+        </div>
+    </p-toolbar>
+
+            
             <app-new-game-confirmation [(visible)]="newGameConfirmationVisible" [diffChange]="false" (newGame)="startNewGame()"></app-new-game-confirmation>
             <app-new-game-confirmation [(visible)]="changeDiffConfirmationVisible" [diffChange]="true" (newGame)="changeDifficulty()"></app-new-game-confirmation>
             <app-game-end [(visible)]="gameEndVisible" (newGame)="startNewGame()"></app-game-end>
-        </div>
-    </p-toolbar>
 
 </div>

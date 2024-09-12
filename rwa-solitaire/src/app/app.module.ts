@@ -35,6 +35,7 @@ import { AboutComponent } from './components/standalone/about/about.component';
 import { GameEndComponent } from './components/standalone/game-end/game-end.component';
 import { NewGameConfirmationComponent } from './components/standalone/new-game-confirmation/new-game-confirmation.component';
 import { AudioControlComponent } from './components/standalone/audio-control/audio-control.component';
+import { BottomBarComponent } from './components/standalone/bottom-bar/bottom-bar.component';
 
 
 @NgModule({
@@ -52,6 +53,7 @@ import { AudioControlComponent } from './components/standalone/audio-control/aud
     GameEndComponent,
     NewGameConfirmationComponent,
     AudioControlComponent,
+    BottomBarComponent,
   ],
   imports: [
     BrowserModule,
