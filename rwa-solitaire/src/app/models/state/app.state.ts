@@ -1,6 +1,8 @@
-
+import { SolitaireState } from "./solitaire.state";
 
 export interface AppState {
     quickPlay: boolean;
-    gameScreen: boolean;
+    
+
+    solitaire: SolitaireState;
 }

@@ -44,23 +44,23 @@ export class Card {
         this.picture = this.setPicture(suit, number);
     }
 
-    flipUp(): void {
+    public flipUp(): void {
         this.faceShown = true;
     }
 
-    flipDown(): void {
+    public flipDown(): void {
         this.faceShown = false;
     }
 
-    lock(): void {
+    public lock(): void {
         this.movable = false;
     }
 
-    unlock(): void {
+    public unlock(): void {
         this.movable = true;
     }
 
-    clone(): Card {
+    public clone(): Card {
         let newCard: Card = new Card(this.suit, this.number);
         (this.faceShown)? newCard.flipUp() : newCard.flipDown();
         (this.movable)? newCard.unlock() : newCard.lock();

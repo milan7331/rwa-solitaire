@@ -43,4 +43,13 @@ export class HomeComponent {
     this.router.navigate(["/leaderboards"]);
     this.audio.play_buttonPress();
   }
+
+
+  addButtonIcons(type: string): void {
+
+  }
+
+  removeButtonIcons(type: string): void {
+    
+  }
 }

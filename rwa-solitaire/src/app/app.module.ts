@@ -61,6 +61,8 @@ import { BottomBarComponent } from './components/standalone/bottom-bar/bottom-ba
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
+
+    // import efekte posebno za app i za features kasnije!!
     
     //StoreModule.forRoot<AppState>({ solitaireState: solitaireReducer }),
     
