@@ -1,11 +1,13 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { AppRoutingModule } from './app-routing.module';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 import { DockModule } from 'primeng/dock';
 import { CardModule } from 'primeng/card';
@@ -37,51 +39,63 @@ import { NewGameConfirmationComponent } from './components/standalone/new-game-c
 import { AudioControlComponent } from './components/standalone/audio-control/audio-control.component';
 import { BottomBarComponent } from './components/standalone/bottom-bar/bottom-bar.component';
 
+import { appReducer } from './store/reducers/app.reducer';
+
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    TopBarComponent,
-    HomeComponent,
-    PageNotFoundComponent,
-    LeaderboardsComponent,
-    SolitaireComponent,
-    RegistrationComponent,
-    LoginComponent,
-    UserDataComponent,
-    AboutComponent,
-    GameEndComponent,
-    NewGameConfirmationComponent,
-    AudioControlComponent,
-    BottomBarComponent,
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    FormsModule,
-    HttpClientModule,
+    declarations: [
+        AppComponent,
+        TopBarComponent,
+        HomeComponent,
+        PageNotFoundComponent,
+        LeaderboardsComponent,
+        SolitaireComponent,
+        RegistrationComponent,
+        LoginComponent,
+        UserDataComponent,
+        AboutComponent,
+        GameEndComponent,
+        NewGameConfirmationComponent,
+        AudioControlComponent,
+        BottomBarComponent,
+    ],
+    bootstrap: [
+        AppComponent
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        AppRoutingModule,
+        FormsModule,
 
-    // import efekte posebno za app i za features kasnije!!
-    
-    //StoreModule.forRoot<AppState>({ solitaireState: solitaireReducer }),
-    
-    DockModule,
-    CardModule,
-    ToolbarModule,
-    ButtonModule,
-    RadioButtonModule,
-    SplitButtonModule,
-    InputTextModule,
-    SidebarModule,
-    FieldsetModule,
-    DialogModule,
-    DragDropModule,
-    SpeedDialModule,
-    OverlayPanelModule,
-    SliderModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
+
+        // import efekte posebno za app i za features kasnije!!
+        StoreModule.forRoot(appReducer),
+        StoreDevtoolsModule.instrument({
+            maxAge: 25,
+            logOnly: !isDevMode(),
+            autoPause: true,
+            trace: false,
+            traceLimit: 50
+        }),
+
+        DockModule,
+        CardModule,
+        ToolbarModule,
+        ButtonModule,
+        RadioButtonModule,
+        SplitButtonModule,
+        InputTextModule,
+        SidebarModule,
+        FieldsetModule,
+        DialogModule,
+        DragDropModule,
+        SpeedDialModule,
+        OverlayPanelModule,
+        SliderModule,
+    ],
+    providers: [
+        provideHttpClient(withInterceptorsFromDi())
+    ]
+}) 
 export class AppModule { }

@@ -1,43 +1,49 @@
-import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Injectable, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { selectAppVolume, selectAppMuted } from '../../store/selectors/audio.selectors';
 import { SolitaireBoard, SolitaireDifficulty } from '../../models/game/solitaire-board';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AudioService {
-  private _volume: number;
-  private _muted: boolean;
+export class AudioService implements OnDestroy {
+  private _store: Store;
+  private _destroy$ = new Subject<void>();
+
+  private _volume: number = 0.8;
+  private _muted: boolean = false;
 
   private _sound_cardDropSucessful: HTMLAudioElement;
   private _sound_cardDropUnsuccessful: HTMLAudioElement;
   private _sound_cardFlipUp: HTMLAudioElement;
   private _sound_cardPickUp: HTMLAudioElement;
-
   private _sound_deckDraw3: HTMLAudioElement;
   private _sound_deckRewind: HTMLAudioElement;
-  
   private _sound_levelComplete: HTMLAudioElement;
-  
   private _sound_button: HTMLAudioElement;
   private _sound_notification: HTMLAudioElement;
   private _sound_popUp: HTMLAudioElement;
   private _sound_undo: HTMLAudioElement;
   private _sound_error: HTMLAudioElement;
 
-  constructor() {
-    this._volume = 0.8;
-    this._muted = false;
+  constructor(store: Store) {
+    this._store = store;
+    this._store.select(selectAppVolume)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((volume) => this._volume = volume);
+
+    this._store.select(selectAppMuted)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((muted) => this._muted = muted);
 
     this._sound_cardDropSucessful = new Audio("/assets/sounds/card-drop-successful.wav");
     this._sound_cardDropUnsuccessful = new Audio("/assets/sounds/card-drop-unsuccessful.wav");
     this._sound_cardFlipUp = new Audio("/assets/sounds/card-flip-up.wav");
     this._sound_cardPickUp = new Audio("/assets/sounds/card-pickup.wav");
-  
     this._sound_deckDraw3 = new Audio("/assets/sounds/deck-draw-3.wav");
     this._sound_deckRewind = new Audio("/assets/sounds/deck-rewind.wav");
-    
     this._sound_levelComplete = new Audio("/assets/sounds/level-complete.wav");
-    
     this._sound_button = new Audio("/assets/sounds/button.wav");
     this._sound_notification = new Audio("/assets/sounds/notification.wav");
     this._sound_popUp = new Audio("/assets/sounds/popup.wav");
@@ -45,24 +51,9 @@ export class AudioService {
     this._sound_error = new Audio("/assets/sounds/error.wav");
   }
 
-  get volume(): number {
-    return this._volume;
-  }
-  
-  set volume(value: number) {
-    this._volume = (value % 1.01);
-  }
-
-  get muted(): boolean {
-    return this._muted;
-  }
-
-  set muted(value: boolean) {
-    this._muted = value;
-  }
-
-  public toggleMute(): boolean {
-    return this.muted = !this.muted;
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   private prepareSound(soundElement: HTMLAudioElement): void {

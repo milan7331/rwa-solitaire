@@ -1,8 +1,8 @@
-import { SolitaireState } from "./solitaire.state";
+import { AudioState } from "./audio.state";
+import { VisibilityState } from "./visibility.state";
 
 export interface AppState {
-    quickPlay: boolean;
+    audioState: AudioState,
+    visibilityState: VisibilityState
     
-
-    solitaire: SolitaireState;
 }
