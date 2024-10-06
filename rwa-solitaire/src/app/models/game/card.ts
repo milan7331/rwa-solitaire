@@ -26,7 +26,19 @@ export enum CardNumber {
     King = 13
 }
 
-export class Card {
+export interface Card {
+    id: number;
+    suit: CardSuit;
+    number: CardNumber;
+    color: CardColor;
+    faceShown: boolean;
+    movable: boolean;
+    picture: string;
+}
+
+
+
+export class Card1 {
     suit: CardSuit;
     number: CardNumber;
     color: CardColor;

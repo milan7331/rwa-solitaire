@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AudioService } from '../../../services/audio/audio.service';
 
 @Component({
@@ -12,11 +12,7 @@ export class NewGameConfirmationComponent {
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() newGame: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  private audio: AudioService;
-
-  constructor() {
-    this.audio = inject(AudioService);
-  }
+  constructor(private audio: AudioService) {}
 
   visibilityChanged(): void {
     this.visibleChange.emit(this.visible);

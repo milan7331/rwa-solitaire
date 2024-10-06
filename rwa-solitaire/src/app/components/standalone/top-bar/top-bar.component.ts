@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router'
 import { AudioService } from '../../../services/audio/audio.service';
 @Component({
@@ -7,13 +7,7 @@ import { AudioService } from '../../../services/audio/audio.service';
   styleUrl: './top-bar.component.scss'
 })
 export class TopBarComponent {
-  private router: Router;
-  private audio: AudioService;
-
-  constructor() {
-    this.router = inject(Router);
-    this.audio = inject(AudioService);
-  }
+  constructor(private router: Router, private audio: AudioService) {}
 
   loadHomePage(): void {
     this.router.navigate(["/home"]);

@@ -12,26 +12,26 @@ import { volumeControlActions } from '../../../store/actions/audio.actions';
   styleUrl: './audio-control.component.scss'
 })
 export class AudioControlComponent implements OnDestroy {
-  private _destroy$: Subject<void> = new Subject<void>();
+  private destroy$: Subject<void> = new Subject<void>();
   public overlayVisible: boolean = false;
   public muted: boolean = false;
   public volume: number = 0.8;
 
   @ViewChild('op') opElement!: OverlayPanel;
 
-  constructor(private _store: Store, private _audio: AudioService) {
-    this._store.select(selectAppVolume)
-      .pipe(takeUntil(this._destroy$))
+  constructor(private store: Store, private audio: AudioService) {
+    this.store.select(selectAppVolume)
+      .pipe(takeUntil(this.destroy$))
       .subscribe((volume) => this.volume = volume);
 
-    this._store.select(selectAppMuted)
-      .pipe(takeUntil(this._destroy$))
+    this.store.select(selectAppMuted)
+      .pipe(takeUntil(this.destroy$))
       .subscribe((muted) => this.muted = muted);
   }
 
   ngOnDestroy(): void {
-    this._destroy$.next();
-    this._destroy$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get volumeIcon(): string {
@@ -51,17 +51,17 @@ export class AudioControlComponent implements OnDestroy {
   }
 
   public toggleOverlay(event: Event): void {
-    this._audio.play_buttonPress();
+    this.audio.play_buttonPress();
     this.opElement.toggle(event);
   }
 
   public toggleMute(): void {
-    this._store.dispatch(volumeControlActions.toggleMute());
-    this._audio.play_buttonPress();
+    this.store.dispatch(volumeControlActions.toggleMute());
+    this.audio.play_buttonPress();
   }
 
   public changeVolume(): void {
-    this._store.dispatch(volumeControlActions.setVolume({value: this.volume}));
+    this.store.dispatch(volumeControlActions.setVolume({value: this.volume}));
   }
   
 }

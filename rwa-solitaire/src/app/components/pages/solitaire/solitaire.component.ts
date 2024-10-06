@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, inject } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { Card, CardSuit } from "../../../models/game/card";
 import { SolitaireBoard } from '../../../models/game/solitaire-board'; 
 import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
@@ -13,10 +13,7 @@ import { AudioService } from '../../../services/audio/audio.service';
 })
 
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
-  public CardSuit = CardSuit;
-  
-  private solitaireHelper: SolitaireHelperService;
-  private audio: AudioService;
+  // public CardSuit = CardSuit;
   
   board: SolitaireBoard;
   
@@ -39,12 +36,9 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   clickedElementOffsetX: number = 0;
   clickedElementOffsetY: number = 0;
 
-  constructor() {
+  constructor(private solitaireHelper: SolitaireHelperService, private audio: AudioService) {
     this.board = new SolitaireBoard();
-    this.solitaireHelper = inject(SolitaireHelperService);
-    this.audio = inject(AudioService);
     this.startNewGame();
-    
   }
 
   ngAfterViewInit(): void {

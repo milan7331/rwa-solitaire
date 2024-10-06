@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AudioService } from '../../../services/audio/audio.service';
 
@@ -9,13 +9,8 @@ import { AudioService } from '../../../services/audio/audio.service';
 })
 export class HomeComponent {
   aboutVisible: boolean = false;
-  private audio: AudioService;
-  private router: Router;
 
-  constructor() {
-    this.audio = inject(AudioService);
-    this.router = inject(Router);
-  }
+  constructor(private router: Router, private audio: AudioService) {}
 
   loadAboutPage(): void {
     this.aboutVisible = true;
@@ -42,14 +37,5 @@ export class HomeComponent {
   loadLeaderboardsPage(): void {
     this.router.navigate(["/leaderboards"]);
     this.audio.play_buttonPress();
-  }
-
-
-  addButtonIcons(type: string): void {
-
-  }
-
-  removeButtonIcons(type: string): void {
-    
   }
 }

@@ -14,7 +14,7 @@ export const audioReducer = createReducer(
     initialAudioState,
     on(volumeControlActions.setVolume, (state, {value}) => ({
         ...state,
-        audioVolume: value % 1.01
+        audioVolume: Math.max(0.00, Math.min(value, 1.00))
     })),
     on(volumeControlActions.mute, (state) => ({
         ...state,

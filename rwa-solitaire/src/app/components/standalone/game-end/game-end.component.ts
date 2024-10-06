@@ -13,13 +13,7 @@ export class GameEndComponent {
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() newGame: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  private router: Router;
-  private audio: AudioService;
-
-  constructor() {
-    this.router = inject(Router);
-    this.audio = inject(AudioService);
-  }
+  constructor(private router: Router, private audio: AudioService) {}
 
   visibilityChanged(): void {
     this.visibleChange.emit(this.visible);

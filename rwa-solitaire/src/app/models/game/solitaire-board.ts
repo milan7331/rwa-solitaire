@@ -1,11 +1,22 @@
 import { Card, CardColor, CardNumber, CardSuit } from "./card";
+import { EntityState } from "@ngrx/entity";
+
 
 export enum SolitaireDifficulty {
     Easy = 0,
     Hard = 1
 }
 
-export class SolitaireBoard {
+export interface SolitaireBoard {
+    moveNumber: number,
+    foundation: number[][];
+    tableau: number[][];
+    deckStock: number[];
+    deckWaste: number[];
+    difficulty: SolitaireDifficulty;
+}
+
+export class SolitaireBoard1 {
 
     foundation: Card[][] = [[], [], [], []];
     tableau: Card[][] = [[], [], [], [], [], [], []];
@@ -170,5 +181,4 @@ export class SolitaireBoard {
 
         return true;
     }
-
 }
