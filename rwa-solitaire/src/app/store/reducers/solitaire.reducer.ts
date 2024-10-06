@@ -20,7 +20,6 @@ export const initialSolitaireState: SolitaireState = {
 
 export const solitaireReducer = createReducer(
     initialSolitaireState,
-    // proveriti da li ne menja stanje već kreira sve novo
     on(solitaireActions.startNewGame, (state, {difficulty}) => {
         let newBoard: SolitaireBoard;
         let newCards: Card[] = generateDeck();
@@ -33,7 +32,6 @@ export const solitaireReducer = createReducer(
             cards: cardAdapter.setAll(newCards, state.cards)
         } as SolitaireState;
     }),
-    // proveriti da li ne menja stanje već kreira sve novo
     on(solitaireActions.restartGame, (state) => {
         const updateCardIds: number[] = [
             ...state.boards.entities[0]!.deckStock,
@@ -53,28 +51,21 @@ export const solitaireReducer = createReducer(
     }),
     on(solitaireActions.drawCards, (state) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
-        if (currentBoard === undefined) return state;
+        if (currentBoard === undefined)  return state;
+        if (currentBoard.deckStock.length === 0 && currentBoard.deckWaste.length === 0) return state;
 
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
+        newBoard.moveNumber += 1;
 
-        if (newBoard.deckStock.length === 0 && newBoard.deckWaste.length !== 0) {
-            newBoard.deckStock = newBoard.deckStock.concat(newBoard.deckWaste.reverse());
+        if (newBoard.deckStock.length > 0) {
+            const drawCount = (newBoard.difficulty === SolitaireDifficulty.Hard)? 3 : 1;
+            const cardsToDraw = newBoard.deckStock.slice(-drawCount);
+            newBoard.deckWaste.push(...cardsToDraw);
+            newBoard.deckStock = newBoard.deckStock.slice(0, -cardsToDraw.length);
+
+        } else if (newBoard.deckStock.length === 0 && newBoard.deckWaste.length > 0) {
+            newBoard.deckStock = [...newBoard.deckWaste.reverse()];
             newBoard.deckWaste = [];
-            newBoard.moveNumber += 1;
-        } else {
-            if (newBoard.difficulty === SolitaireDifficulty.Hard) {
-                if (newBoard.deckStock.length > 0) newBoard.moveNumber += 1;
-                for (let i = 0; i < 3; i++) {
-                    if (newBoard.deckStock.length > 0) {
-                        newBoard.deckWaste.push(newBoard.deckStock.pop()!);
-                    } else break;
-                }
-            } else {
-                if (newBoard.deckStock.length > 0) {
-                    newBoard.deckWaste.push(newBoard.deckStock.pop()!);
-                    newBoard.moveNumber += 1;
-                }
-            }
         }
 
         return {
@@ -135,6 +126,21 @@ function generateEmptyBoard(cards: Card[], difficulty: SolitaireDifficulty): Sol
     } as SolitaireBoard;
 }
 
+function makePureBoardCopy(board: SolitaireBoard): SolitaireBoard {
+    return {
+        moveNumber: board.moveNumber,
+        foundation: board.foundation.map(fStack => [...fStack]),
+        tableau: board.tableau.map(tab => [...tab]),
+        deckStock: [...board.deckStock],
+        deckWaste: [...board.deckWaste],
+        difficulty: board.difficulty
+    } as SolitaireBoard;
+}
+
+function makePureCardsCopy(cards: Card[]): Card[] {
+    return cards.map(card => ({ ...card }));
+}
+
 function fisherYatesDeckShuffle(cards: number[]): number[] {
     let newDeck: number[] = [...cards];
     
@@ -146,30 +152,8 @@ function fisherYatesDeckShuffle(cards: number[]): number[] {
     return newDeck;
 }
 
-function placeInitialCards(board: SolitaireBoard, cards: Card[]): [SolitaireBoard, Card[]] {
-    let newBoard: SolitaireBoard = {...board};
-    let newCards: Card[] = [...cards];
-    let updateList: number[] = [];
-    
-    if (newBoard.deckStock.length !== 52) {
-        console.log("Deck length error!!");
-        return [newBoard, newCards];
-    }
-    
-    for (let i = 0; i < newBoard.tableau.length; i++) {
-        for (let j = 0; j < i + 1; j++) {
-            newBoard.tableau[i].push(newBoard.deckStock.pop()!);
-        }
-        updateList.push(newBoard.tableau[i].at(-1)!);
-    }
-    updateList = updateList.concat(newBoard.deckStock);
-    newCards = updateCards(newCards, updateList, true);
-    
-    return [newBoard, newCards];
-}
-
 function updateCards(cards: Card[], updateList: number[], unlock: boolean): Card[] {
-    let newCards: Card[] = [...cards];
+    let newCards: Card[] = makePureCardsCopy(cards);
 
     for (let i = 0; i < updateList.length; i++) {
         for (let j = 0; j < newCards.length; j++) {
@@ -182,6 +166,39 @@ function updateCards(cards: Card[], updateList: number[], unlock: boolean): Card
     }
 
     return newCards;
+}
+
+function placeInitialCards(board: SolitaireBoard, cards: Card[]): [SolitaireBoard, Card[]] {
+    if (board.deckStock.length !== 52) {
+        console.log("Deck length error!!");
+        return [board, cards];
+    }
+
+    let newBoard: SolitaireBoard = makePureBoardCopy(board);
+    let newCards: Card[] = makePureCardsCopy(cards);
+    let updateList: number[] = [];
+    
+    
+    for (let i = 0; i < newBoard.tableau.length; i++) {
+        for (let j = 0; j < i + 1; j++) {
+            newBoard.tableau[i].push(newBoard.deckStock.pop()!);
+        }
+        updateList.push(newBoard.tableau[i].at(-1)!);
+    }
+    updateList = updateList.concat(newBoard.deckStock);
+    let updatedCards = updateCards(newCards, updateList, true);
+    
+    return [newBoard, updatedCards];
+}
+
+function setUpInitialBoardAndCards(cards: Card[], difficulty: SolitaireDifficulty): [SolitaireBoard, Card[]] {
+    let newCards = makePureCardsCopy(cards);
+    let newBoard = generateEmptyBoard(newCards, difficulty);
+
+    newBoard.deckStock = fisherYatesDeckShuffle(newBoard.deckStock);
+    [newBoard, newCards] = placeInitialCards(newBoard, newCards);
+
+    return [newBoard, newCards];
 }
 
 function updateCardsForGameRestart(cards: Card[], updateCardIds: number[]): Update<Card>[] {
@@ -197,38 +214,20 @@ function updateCardsForGameRestart(cards: Card[], updateCardIds: number[]): Upda
     } as Update<Card>));
 }
 
-function setUpInitialBoardAndCards(cards: Card[], difficulty: SolitaireDifficulty): [SolitaireBoard, Card[]] {
-    let newBoard = generateEmptyBoard(cards, difficulty);
-    let newCards = [...cards];
-
-    newBoard.deckStock = fisherYatesDeckShuffle(newBoard.deckStock);
-    [newBoard, newCards] = placeInitialCards(newBoard, newCards);
-
-    return [newBoard, newCards];
-}
-
 function findCurrentBoard(state: SolitaireState): SolitaireBoard | undefined {
     const currentBordId = state.boards.ids.at(-1);
-    if (currentBordId === undefined) return undefined;
+    if (currentBordId === undefined) {
+        console.log("currentBoard-undefined!");
+        return undefined;
+    }
 
     return state.boards.entities[currentBordId];
 }
 
-function makePureBoardCopy(board: SolitaireBoard): SolitaireBoard {
-    return {
-        moveNumber: board.moveNumber,
-        foundation: board.foundation.map(fStack => [...fStack]),
-        tableau: board.tableau.map(tab => [...tab]),
-        deckStock: [...board.deckStock],
-        deckWaste: [...board.deckWaste],
-        difficulty: board.difficulty
-    } as SolitaireBoard;
-}
-
 function resetDeck(cards: Card[]): Card[] {
-    return cards.map(card => {
-        card.faceShown = false;
-        card.movable = false;
-        return card;
-    })
+    return cards.map(card => ({
+        ...card,
+        faceShown: false,
+        movable: false
+    }))
 }
