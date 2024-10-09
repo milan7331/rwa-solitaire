@@ -73,6 +73,12 @@ export const solitaireReducer = createReducer(
             boards: boardAdapter.addOne(newBoard, state.boards)
         } as SolitaireState;
     }),
+    on(solitaireActions.dropOnFoundation, (state, {source, dest, sourceIndex, suit}) => {
+        
+
+
+        return state;
+    })
 
 )
 
@@ -222,6 +228,36 @@ function findCurrentBoard(state: SolitaireState): SolitaireBoard | undefined {
     }
 
     return state.boards.entities[currentBordId];
+}
+
+function canDropOnFoundation(
+    src: number[] | null,
+    dest: number[] | null,
+    srcIndex: number | null,
+    suit: CardSuit | null,
+    cardsES: EntityState<Card> | null
+): boolean {
+    // parameter check
+    if (src === null || dest === null || srcIndex === null || suit === null || cardsES === null) return false; 
+    if (srcIndex < 0 || src.length <= srcIndex) return false;
+
+    // array check
+    const cardsToMove: number[] = src.slice(srcIndex);
+    if (cardsToMove.length !== 1) return false;
+
+    // card check
+    const cardId: number = cardsToMove[0];
+    const cardToMove: Card | undefined = cardsES.entities[cardId];
+    if (cardToMove === undefined) return false;
+    if (cardToMove!.suit !== suit) return false;
+
+    // ace check
+    if (dest.length === 0 && cardToMove.number === CardNumber.Ace) return true;
+    // regular card check
+    if ( true) return true;
+
+    // default
+    return false;
 }
 
 function resetDeck(cards: Card[]): Card[] {
