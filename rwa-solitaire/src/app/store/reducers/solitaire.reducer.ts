@@ -73,11 +73,24 @@ export const solitaireReducer = createReducer(
             boards: boardAdapter.addOne(newBoard, state.boards)
         } as SolitaireState;
     }),
-    on(solitaireActions.dropOnFoundation, (state, {source, dest, sourceIndex, suit}) => {
+    on(solitaireActions.dropOnFoundation, (state, {cardsES, suit, src, dest, srcIndex}) => {
+        const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
+        if (currentBoard === undefined) return state;
+
+        if (!canDropOnFoundation(cardsES, suit, src, dest, srcIndex)) return state;
+
+        let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
+        newBoard.moveNumber += 1;
+
+
         
 
 
-        return state;
+        return {
+            ...state,
+            boards: boardAdapter.addOne(newBoard, state.boards),
+            cards: cardAdapter.updateMany(updates, state.cards)
+        } as SolitaireState;
     })
 
 )
@@ -230,12 +243,40 @@ function findCurrentBoard(state: SolitaireState): SolitaireBoard | undefined {
     return state.boards.entities[currentBordId];
 }
 
+function findArraysInNewBoard(newBoard: SolitaireBoard, ...oldArrays: number[][]): number[][] {
+    
+    let newArrays: number[][] = [
+        ...newBoard.foundation,
+        ...newBoard.tableau,
+        newBoard.deckStock,
+        newBoard.deckWaste
+    ]
+    
+    for (let oldArray of oldArrays) {
+        boardArrays.forEach(boardArray => {
+            if (arraysAreEqual(arr, boardArray)) {
+                
+            }
+        })
+        
+    }
+
+
+
+    return [];
+}
+
+function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
+    if (arr1.length !== arr2.length) return false;
+    return arr1.every((el, index) => el === arr2[index]);
+}
+
 function canDropOnFoundation(
+    cardsES: EntityState<Card> | null,
+    suit: CardSuit | null,
     src: number[] | null,
     dest: number[] | null,
-    srcIndex: number | null,
-    suit: CardSuit | null,
-    cardsES: EntityState<Card> | null
+    srcIndex: number | null
 ): boolean {
     // parameter check
     if (src === null || dest === null || srcIndex === null || suit === null || cardsES === null) return false; 
@@ -254,10 +295,19 @@ function canDropOnFoundation(
     // ace check
     if (dest.length === 0 && cardToMove.number === CardNumber.Ace) return true;
     // regular card check
-    if ( true) return true;
+    const destTopCard: Card | undefined = cardsES.entities[dest.at(-1)!];
+    if (destTopCard !== undefined && cardToMove.number - destTopCard.number === 1) return true;
 
     // default
     return false;
+}
+
+function moveCards(cardssrc: number[], dest: number[], srcIndex: number): number[] {
+    let newDest = 
+
+
+
+    return [];
 }
 
 function resetDeck(cards: Card[]): Card[] {
