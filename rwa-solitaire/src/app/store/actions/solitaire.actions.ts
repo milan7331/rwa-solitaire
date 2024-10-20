@@ -10,13 +10,9 @@ export const solitaireActions = createActionGroup({
         'Restart game': emptyProps(),
         
         'Draw cards': emptyProps(),
-        'Drop on foundation': props<{cardsES: EntityState<Card>, suit: CardSuit, src: number[], dest: number[], srcIndex: number}>(),
-        'Drop on tableau': props<{source: number[], dest: number[], sourceIndex: number, suit: CardSuit}>(),
+        'Drop on foundation': props<{suit: CardSuit, src: number[], dest: number[], srcIndex: number}>(),
+        'Drop on tableau': props<{suit: CardSuit, src: number[], dest: number[], srcIndex: number}>(),
         'Undo': emptyProps(),
-
-        'Can drop on foundation': emptyProps(),
-        'Can drop on tableau': emptyProps(),
-        'Move cards': emptyProps(),
 
     }
 })

@@ -3,7 +3,7 @@ import { SolitaireState } from "../../models/state/solitaire.state";
 import { solitaireActions } from "../actions/solitaire.actions";
 import { SolitaireBoard, SolitaireDifficulty } from "../../models/game/solitaire-board";
 import { Card, CardNumber, CardSuit, CardColor } from "../../models/game/card";
-import { createEntityAdapter, Dictionary, EntityAdapter, EntityState, Update } from "@ngrx/entity";
+import { createEntityAdapter, EntityAdapter, EntityState, Update } from "@ngrx/entity";
 
 
 export const boardAdapter: EntityAdapter<SolitaireBoard> = createEntityAdapter<SolitaireBoard>({
@@ -73,23 +73,51 @@ export const solitaireReducer = createReducer(
             boards: boardAdapter.addOne(newBoard, state.boards)
         } as SolitaireState;
     }),
-    on(solitaireActions.dropOnFoundation, (state, {cardsES, suit, src, dest, srcIndex}) => {
+    on(solitaireActions.dropOnFoundation, (state, {suit, src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
 
-        if (!canDropOnFoundation(cardsES, suit, src, dest, srcIndex)) return state;
+        if (!canDropOnFoundation(state.cards, suit, src, dest, srcIndex)) return state;
 
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
 
+        let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
 
-        
-
+        let cardToUpdate: Update<Card> | undefined = moveCards(newSrc, newDest, srcIndex);
 
         return {
             ...state,
             boards: boardAdapter.addOne(newBoard, state.boards),
-            cards: cardAdapter.updateMany(updates, state.cards)
+            cards: (cardToUpdate)? cardAdapter.updateOne(cardToUpdate, state.cards) : state.cards
+        } as SolitaireState;
+    }),
+    on(solitaireActions.dropOnTableau, (state, {suit, src, dest, srcIndex}) => {
+        const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
+        if (currentBoard === undefined) return state;
+
+        if (!canDropOnTableau(state.cards, suit, src, dest, srcIndex)) return state;
+
+        let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
+        newBoard.moveNumber += 1;
+
+        let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
+
+        let cardToUpdate: Update<Card> | undefined = moveCards(newSrc, newDest, srcIndex);
+
+        return {
+            ...state,
+            boards: boardAdapter.addOne(newBoard, state.boards),
+            cards: (cardToUpdate)? cardAdapter.updateOne(cardToUpdate, state.cards) : state.cards
+        } as SolitaireState;
+    }),
+    on(solitaireActions.undo, (state) => {
+
+
+
+
+        return {
+            ...state
         } as SolitaireState;
     })
 
@@ -251,19 +279,11 @@ function findArraysInNewBoard(newBoard: SolitaireBoard, ...oldArrays: number[][]
         newBoard.deckStock,
         newBoard.deckWaste
     ]
-    
-    for (let oldArray of oldArrays) {
-        boardArrays.forEach(boardArray => {
-            if (arraysAreEqual(arr, boardArray)) {
-                
-            }
-        })
-        
-    }
 
+    return oldArrays
+        .map(oldArray => newArrays.find(newArray => arraysAreEqual(oldArray, newArray)))
+        .filter(Boolean) as number[][];
 
-
-    return [];
 }
 
 function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
@@ -302,12 +322,53 @@ function canDropOnFoundation(
     return false;
 }
 
-function moveCards(cardssrc: number[], dest: number[], srcIndex: number): number[] {
-    let newDest = 
+function canDropOnTableau(
+    cardsES: EntityState<Card> | null,
+    suit: CardSuit | null,
+    src: number[] | null,
+    dest: number[] | null,
+    srcIndex: number | null
+): boolean {
+    // parameter check
+    if (src === null || dest === null || srcIndex === null || suit === null || cardsES === null) return false; 
+    if (srcIndex < 0 || src.length <= srcIndex) return false;
 
+    // cards check
+    const cardsToMove: number[] = src.slice(srcIndex);
+    if (cardsToMove.length <= 0) return false;
 
+    // first card from the moved stack
+    const firstCardMoved: Card | undefined = cardsES.entities[cardsToMove[0]];
+    if (firstCardMoved === undefined) return false;
 
-    return [];
+    // can drop king
+    if (dest.length === 0 && firstCardMoved!.number === CardNumber.King) return true;
+
+    // dest stack top
+    const destStackTop: Card | undefined = (dest.length > 0)? cardsES.entities[dest.at(-1)!] : undefined;
+    if (destStackTop === undefined) return false;
+
+    // regular card drop test
+    if (firstCardMoved!.color !== destStackTop!.color && destStackTop!.number - firstCardMoved!.number === 1) return true;
+
+    return false;
+}
+
+function moveCards(src: number[], dest: number[], srcIndex: number): Update<Card> | undefined {
+    if (srcIndex < 0 || src.length <= srcIndex) return undefined;
+
+    dest.push(...src.slice(srcIndex));
+    src.length = srcIndex;
+
+    if (src.length === 0) return undefined;
+
+    return {
+        id: src.at(-1)!,
+        changes: {
+            movable: true,
+            faceShown: true
+        }
+    } as Update<Card>;
 }
 
 function resetDeck(cards: Card[]): Card[] {
