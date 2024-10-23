@@ -1,5 +1,5 @@
 import { Card, CardColor, CardNumber, CardSuit } from "./card";
-import { EntityState } from "@ngrx/entity";
+import { EntityState, Update } from "@ngrx/entity";
 
 
 export enum SolitaireDifficulty {
@@ -8,7 +8,9 @@ export enum SolitaireDifficulty {
 }
 
 export interface SolitaireBoard {
-    moveNumber: number,
+    moveNumber: number;
+    previousCardUpdate: Update<Card> | undefined;
+
     foundation: number[][];
     tableau: number[][];
     deckStock: number[];

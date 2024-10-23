@@ -83,41 +83,48 @@ export const solitaireReducer = createReducer(
         newBoard.moveNumber += 1;
 
         let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
+        if (!moveCards(newSrc, newDest, srcIndex)) return state;
 
-        let cardToUpdate: Update<Card> | undefined = moveCards(newSrc, newDest, srcIndex);
+        newBoard.previousCardUpdate = updateCardIfStackTopIsHidden(state.cards, newSrc);
 
         return {
             ...state,
             boards: boardAdapter.addOne(newBoard, state.boards),
-            cards: (cardToUpdate)? cardAdapter.updateOne(cardToUpdate, state.cards) : state.cards
+            cards: (newBoard.previousCardUpdate !== undefined)?
+                cardAdapter.updateOne(newBoard.previousCardUpdate, state.cards) : state.cards
         } as SolitaireState;
     }),
     on(solitaireActions.dropOnTableau, (state, {suit, src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
-
         if (!canDropOnTableau(state.cards, suit, src, dest, srcIndex)) return state;
 
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
 
         let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
+        if (!moveCards(newSrc, newDest, srcIndex)) return state;
 
-        let cardToUpdate: Update<Card> | undefined = moveCards(newSrc, newDest, srcIndex);
+        newBoard.previousCardUpdate = updateCardIfStackTopIsHidden(state.cards, newSrc);
 
         return {
             ...state,
             boards: boardAdapter.addOne(newBoard, state.boards),
-            cards: (cardToUpdate)? cardAdapter.updateOne(cardToUpdate, state.cards) : state.cards
+            cards: (newBoard.previousCardUpdate !== undefined)?
+                cardAdapter.updateOne(newBoard.previousCardUpdate, state.cards) : state.cards
         } as SolitaireState;
     }),
     on(solitaireActions.undo, (state) => {
+        const currentBoard = findCurrentBoard(state);
+        if (currentBoard === undefined) return state;
 
-
-
+        const lastChange =  revertLastChangeForUndo(state.cards, currentBoard?.previousCardUpdate);
 
         return {
-            ...state
+            ...state,
+            boards: boardAdapter.removeOne(currentBoard!.moveNumber, state.boards),
+            cards: (lastChange !== undefined)?
+                cardAdapter.updateOne(lastChange, state.cards): state.cards
         } as SolitaireState;
     })
 
@@ -165,6 +172,7 @@ function generateDeck(): Card[] {
 function generateEmptyBoard(cards: Card[], difficulty: SolitaireDifficulty): SolitaireBoard {
     return {
         moveNumber: 0,
+        previousCardUpdate: undefined,
         foundation: Array.from({length: 4}, () => { return [] as number[] }),
         tableau: Array.from({length: 7}, () => { return [] as number[] }),
         deckStock: cards.map(card => card.id),
@@ -176,6 +184,7 @@ function generateEmptyBoard(cards: Card[], difficulty: SolitaireDifficulty): Sol
 function makePureBoardCopy(board: SolitaireBoard): SolitaireBoard {
     return {
         moveNumber: board.moveNumber,
+        previousCardUpdate: board.previousCardUpdate,
         foundation: board.foundation.map(fStack => [...fStack]),
         tableau: board.tableau.map(tab => [...tab]),
         deckStock: [...board.deckStock],
@@ -262,13 +271,13 @@ function updateCardsForGameRestart(cards: Card[], updateCardIds: number[]): Upda
 }
 
 function findCurrentBoard(state: SolitaireState): SolitaireBoard | undefined {
-    const currentBordId = state.boards.ids.at(-1);
-    if (currentBordId === undefined) {
+    const currentBoardId = state.boards.ids.at(-1);
+    if (currentBoardId === undefined) {
         console.log("currentBoard-undefined!");
         return undefined;
     }
 
-    return state.boards.entities[currentBordId];
+    return state.boards.entities[currentBoardId];
 }
 
 function findArraysInNewBoard(newBoard: SolitaireBoard, ...oldArrays: number[][]): number[][] {
@@ -281,14 +290,57 @@ function findArraysInNewBoard(newBoard: SolitaireBoard, ...oldArrays: number[][]
     ]
 
     return oldArrays
-        .map(oldArray => newArrays.find(newArray => arraysAreEqual(oldArray, newArray)))
+        .map(oldArray => newArrays.find(newArray => checkArraysAreEqual(oldArray, newArray)))
         .filter(Boolean) as number[][];
 
 }
 
-function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
+function checkArraysAreEqual(arr1: number[], arr2: number[]): boolean {
     if (arr1.length !== arr2.length) return false;
     return arr1.every((el, index) => el === arr2[index]);
+}
+
+function updateCardIfStackTopIsHidden(cardsES: EntityState<Card>, stack: number[]): Update<Card> | undefined {
+    if (!checkIfStackTopIsHidden(cardsES, stack)) return undefined;
+
+    const topCard: Card | undefined = cardsES.entities[stack.at(-1)!];
+
+    if (topCard === undefined) return undefined;
+    if (topCard.faceShown === true) return undefined;
+    if (topCard.movable === true) return undefined; 
+
+    return {
+        id: stack.at(-1),
+        changes: {
+            faceShown: true,
+            movable: true
+        }
+    } as Update<Card>;
+}
+
+function revertLastChangeForUndo(cardsES: EntityState<Card>, lastUpdate: Update<Card> | undefined): Update<Card> | undefined {
+    if (lastUpdate === undefined) return undefined;
+
+    const card: Card = cardsES.entities[lastUpdate.id]!;
+
+    return {
+        id:lastUpdate.id,
+        changes: {
+            movable: !card.movable,
+            faceShown: !card.faceShown,
+        }
+
+    } as Update<Card>;
+}
+
+function checkIfStackTopIsHidden(cardsES: EntityState<Card>, stack: number[]): boolean {
+    if (stack.length <= 0) return false;
+
+    const topCard: Card | undefined = cardsES.entities[stack.at(-1)!];
+
+    if (topCard !== undefined && topCard.faceShown === false && topCard.movable === false) return true;
+
+    return false;
 }
 
 function canDropOnFoundation(
@@ -354,21 +406,13 @@ function canDropOnTableau(
     return false;
 }
 
-function moveCards(src: number[], dest: number[], srcIndex: number): Update<Card> | undefined {
-    if (srcIndex < 0 || src.length <= srcIndex) return undefined;
+function moveCards(src: number[], dest: number[], srcIndex: number): boolean {
+    if (srcIndex < 0 || src.length <= srcIndex) return false;
 
     dest.push(...src.slice(srcIndex));
     src.length = srcIndex;
 
-    if (src.length === 0) return undefined;
-
-    return {
-        id: src.at(-1)!,
-        changes: {
-            movable: true,
-            faceShown: true
-        }
-    } as Update<Card>;
+    return true;
 }
 
 function resetDeck(cards: Card[]): Card[] {
