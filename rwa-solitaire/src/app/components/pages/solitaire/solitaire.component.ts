@@ -13,13 +13,12 @@ import { AudioService } from '../../../services/audio/audio.service';
 })
 
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
-  // public CardSuit = CardSuit;
   
   board: SolitaireBoard;
   
-  hints: SolitaireHints = {moves: [], cycleDeck: false} as SolitaireHints;
-  hintIndex: number = -1;
-  hintVisible: boolean = false;
+  // hints: SolitaireHints = {moves: [], cycleDeck: false} as SolitaireHints;
+  // hintIndex: number = -1;
+  // hintVisible: boolean = false;
 
   gameEndVisible: boolean = false;
   newGameConfirmationVisible: boolean = false;
