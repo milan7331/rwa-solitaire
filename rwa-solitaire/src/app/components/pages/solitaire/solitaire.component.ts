@@ -1,10 +1,15 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Subject, takeUntil } from 'rxjs';
+
+import { selectBoard, selectCards } from '../../../store/selectors/solitaire.selectors'
+import { AudioService } from '../../../services/audio/audio.service';
 import { Card, CardSuit } from "../../../models/game/card";
-import { SolitaireBoard } from '../../../models/game/solitaire-board'; 
-import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
 import { SolitaireMove } from '../../../models/game/solitaire-move';
 import { SolitaireHints } from '../../../models/game/solitaire-hints';
-import { AudioService } from '../../../services/audio/audio.service';
+import { SolitaireBoard, SolitaireDifficulty } from '../../../models/game/solitaire-board'; 
+import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
+import { solitaireActions } from '../../../store/actions/solitaire.actions';
 
 @Component({
   selector: 'app-solitaire',
@@ -13,20 +18,24 @@ import { AudioService } from '../../../services/audio/audio.service';
 })
 
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
+  #destroy$: Subject<void> = new Subject<void>();
   
-  board: SolitaireBoard;
+  board: SolitaireBoard | undefined | null;
+  cards: Card[] | undefined | null;
   
+  // hintovi na kraj treba da se izmene
   // hints: SolitaireHints = {moves: [], cycleDeck: false} as SolitaireHints;
   // hintIndex: number = -1;
   // hintVisible: boolean = false;
 
+  // za prikaz random komponenti nema veze sa ovom komponentom. . . izmeniti nekada
   gameEndVisible: boolean = false;
   newGameConfirmationVisible: boolean = false;
   changeDiffConfirmationVisible: boolean = false;
 
-  draggedCards: Card[] = [];
+  draggedCards: number[] = [];
   draggedCardsStartIndex: number | null = null;
-  draggedCardsOrigin: Card[] | null = null;
+  draggedCardsOrigin: number[] | null = null;
 
   cardStackDragged: HTMLElement | null = null;
   ghostImage: HTMLElement | null = null;
@@ -35,9 +44,17 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   clickedElementOffsetX: number = 0;
   clickedElementOffsetY: number = 0;
 
-  constructor(private solitaireHelper: SolitaireHelperService, private audio: AudioService) {
-    this.board = new SolitaireBoard();
-    this.startNewGame();
+  constructor(private audio: AudioService, private store: Store) {
+    //private solitaireHelper: SolitaireHelperService,
+    this.store.select(selectBoard)
+      .pipe(takeUntil(this.#destroy$))
+      .subscribe((board) => this.board = board);
+
+    this.store.select(selectCards)
+      .pipe(takeUntil(this.#destroy$))
+      .subscribe((cards) => this.cards = cards);
+
+    this.start();
   }
 
   ngAfterViewInit(): void {
@@ -49,26 +66,56 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     document.removeEventListener("mousedown", this.clickOffset);
+
+    this.#destroy$.next();
+    this.#destroy$.complete();
   }
 
-  public startNewGame() {
+  public start() {
+    // ovde treba provera za acc ako je neka igra u toku?? inače start new bez pitanja
+    // takođe difficulty pitanje da iskače prozor ili nešto
+
+
+    this.startNewGame(SolitaireDifficulty.Hard);
+  }
+
+  public startNewGame(difficulty: SolitaireDifficulty = SolitaireDifficulty.Hard) {
     this.draggedCards = [];
     this.draggedCardsStartIndex = null;
     this.draggedCardsOrigin = null;
 
-    this.board.startNewGame();
+    this.store.dispatch(solitaireActions.startNewGame({difficulty}));
 
-    this.hints = this.solitaireHelper.getHints(this.board);
-    this.hintIndex = -1;
-    this.hintVisible = false;
+    // this.hints = this.solitaireHelper.getHints(this.board);
+    // this.hintIndex = -1;
+    // this.hintVisible = false;
   }
 
-  public resetBoard(): void {
+  public restartGame(): void {
     // add a restart deal feature?
+
+    this.draggedCards = [];
+    this.draggedCardsStartIndex = null;
+    this.draggedCardsOrigin = null;
+
+    // this.hints = this.solitaireHelper.getHints(this.board);
+    // this.hintIndex = -1;
+    // this.hintVisible = false;
+
+    this.store.dispatch(solitaireActions.restartGame());
   }
 
   public changeDifficulty(): void {
-    this.board.toggleDifficulty();
+    // fali confirmation provera neka??
+    // ne znam da li to ide ovde ispitati naknadno
+
+    if (!this.board) return;
+
+    const newDifficulty = this.board!.difficulty === SolitaireDifficulty.Hard
+      ? SolitaireDifficulty.Easy
+      : SolitaireDifficulty.Hard
+
+    this.startNewGame(newDifficulty);
   }
 
   private clickOffset = (event: MouseEvent) => {
@@ -86,62 +133,65 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
   }
 
-  public boardDrawCards(): void {
-    this.hideHints();
+  public drawCards(): void {
+    //this.hideHints();
+
+    if (!this.board) return;
     this.audio.play_deckDraw(this.board);
-    this.board.drawCards();
-    this.hints = this.solitaireHelper.getHints(this.board);
+    this.store.dispatch(solitaireActions.drawCards());
+
+    //this.hints = this.solitaireHelper.getHints(this.board);
   }
 
-  public showHints(): void {
-    this.hintVisible = true;
+  // public showHints(): void {
+  //   this.hintVisible = true;
 
-    if (this.hints.moves.length > 0) {
-      this.hintIndex = (this.hintIndex + 1) % this.hints.moves.length;
-    }
-  }
+  //   if (this.hints.moves.length > 0) {
+  //     this.hintIndex = (this.hintIndex + 1) % this.hints.moves.length;
+  //   }
+  // }
 
-  public hideHints(): void {
-    this.hintVisible = false;
-    const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
-    const highlightedCards = document.querySelectorAll(".highlighted-card-single");
+  // public hideHints(): void {
+  //   this.hintVisible = false;
+  //   const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
+  //   const highlightedCards = document.querySelectorAll(".highlighted-card-single");
 
-    highlightedCardStacks.forEach((el) => { el.classList.remove("highlighted-card-stack"); });
-    highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
-  }
+  //   highlightedCardStacks.forEach((el) => { el.classList.remove("highlighted-card-stack"); });
+  //   highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
+  // }
 
-  public isHighlighted(containingStack: Card[], elementIndex: number): boolean {
-    if (this.hintIndex < 0 || !this.hintVisible) return false;
-    if (!this.hints.moves[this.hintIndex]) return false;
+  // public isHighlighted(containingStack: Card[], elementIndex: number): boolean {
+  //   if (this.hintIndex < 0 || !this.hintVisible) return false;
+  //   if (!this.hints.moves[this.hintIndex]) return false;
     
-    let selectedHint: SolitaireMove = this.hints.moves[this.hintIndex];
+  //   let selectedHint: SolitaireMove = this.hints.moves[this.hintIndex];
     
-    // source highlight
-    if (selectedHint.source === containingStack && selectedHint.sourceIndex === elementIndex) return true;
+  //   // source highlight
+  //   if (selectedHint.source === containingStack && selectedHint.sourceIndex === elementIndex) return true;
     
-    // dest highlight
-    if (selectedHint.dest === containingStack && containingStack.length - 1 === elementIndex) return true;
+  //   // dest highlight
+  //   if (selectedHint.dest === containingStack && containingStack.length - 1 === elementIndex) return true;
 
-    return false;
-  }
+  //   return false;
+  // }
 
-  public isHighlighted_deck(): boolean {
-    if (!this.hintVisible) return false;
-    return this.hints.cycleDeck;
-  }
+  // public isHighlighted_deck(): boolean {
+  //   if (!this.hintVisible) return false;
+  //   return this.hints.cycleDeck;
+  // }
 
-  public isHighlighted_placeholder(containingStack: Card[]): boolean {
-    if (this.hintIndex < 0 || !this.hintVisible) return false;
-    if (!this.hints.moves[this.hintIndex]) return false;
+  // public isHighlighted_placeholder(containingStack: Card[]): boolean {
+  //   if (this.hintIndex < 0 || !this.hintVisible) return false;
+  //   if (!this.hints.moves[this.hintIndex]) return false;
   
-    let selectedHint: SolitaireMove = this.hints.moves[this.hintIndex];
+  //   let selectedHint: SolitaireMove = this.hints.moves[this.hintIndex];
   
-    // placeholder highlight
-    return selectedHint.dest === containingStack && containingStack.length === 0;
+  //   // placeholder highlight
+  //   return selectedHint.dest === containingStack && containingStack.length === 0;
     
-  }
+  // }
   
-  public dragStart(ev: DragEvent, startArray: Card[], index: number) {
+  public dragStart(ev: DragEvent, startArray: number[], index: number) {
     this.draggedCards = startArray.slice(index);
     this.draggedCardsStartIndex = index;
     this.draggedCardsOrigin = startArray;
@@ -149,9 +199,9 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.invisibleCard = ev.target as HTMLElement;
     this.invisibleCard.classList.add("hidden-card");
 
-    if(this.ghostImage) ev.dataTransfer?.setDragImage(this.ghostImage, 0, 0);
+    if (this.ghostImage) ev.dataTransfer?.setDragImage(this.ghostImage, 0, 0);
 
-    this.hideHints();
+    // this.hideHints();
 
     this.audio.play_cardPickUp();
 
@@ -163,34 +213,53 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.dragAndDropCleanUp();
   }
 
-  public dropOnFoundation(cardSuit: CardSuit, dropArray: Card[]): void {
-    const dropSucess = this.board.dropOnFoundation(this.draggedCardsOrigin, dropArray, this.draggedCardsStartIndex ,cardSuit);
-    if (dropSucess) this.cardDroppedSuccessfuly();
+  public dropOnFoundation(cardSuit: CardSuit, dropArray: number[]): void {
+    if (!this.board) return;
+    if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
+    const initialValue = this.board?.moveNumber;
+    this.store.dispatch(solitaireActions.dropOnFoundation({
+      suit: cardSuit,
+      src: this.draggedCardsOrigin,
+      dest: dropArray,
+      srcIndex: this.draggedCardsStartIndex
+    }));
+
+    if (this.board.moveNumber > initialValue) this.cardDroppedSuccessfuly();
   }
 
-  public dropOnTableau(dropArray: Card[]) {
-    const dropSucess = this.board.dropOnTableau(this.draggedCardsOrigin, dropArray, this.draggedCardsStartIndex);
-    if (dropSucess) this.cardDroppedSuccessfuly();
+  public dropOnTableau(dropArray: number[]) {
+    if (!this.board) return;
+    if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
+    const initialValue = this.board?.moveNumber;
+    this.store.dispatch(solitaireActions.dropOnTableau({
+      src: this.draggedCardsOrigin,
+      dest: dropArray,
+      srcIndex: this.draggedCardsStartIndex
+    }));
+
+    if (this.board.moveNumber > initialValue) this.cardDroppedSuccessfuly();
   }
 
   private cardDroppedSuccessfuly(): void {
     this.audio.play_cardDropSuccessful();
-    this.gameEndCheck();
-    this.getNewHints();
+
+    // game end check je broken treba ga prepraviti veoma zajebano rip
+    // this.gameEndCheck(); // zar ne treba ovo sranje da bude negde drugde a ne da komponenta za prikaz ovo računa???
+    // this.getNewHints();
     this.dragAndDropCleanUp();
   }
 
-  private getNewHints(): void {
-    this.hints = this.solitaireHelper.getHints(this.board);
-    this.hintIndex = -1;
-  }
+  // private getNewHints(): void {
+  //   this.hints = this.solitaireHelper.getHints(this.board);
+  //   this.hintIndex = -1;
+  // }
 
-  private gameEndCheck() {
-    this.gameEndVisible = this.solitaireHelper.lookForGameEndCondition(this.board);
-    if (this.gameEndVisible) this.audio.play_levelComplete();
-  }
+  // private gameEndCheck() {
+  //   this.gameEndVisible = this.solitaireHelper.lookForGameEndCondition(this.board);
+  //   if (this.gameEndVisible) this.audio.play_levelComplete();
+  // }
 
   private dragAndDropCleanUp(): void {
     document.removeEventListener('drag', this.followCursor);
@@ -203,10 +272,16 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.invisibleCard!.classList.remove("hidden-card");
     this.invisibleCard = null;
 
+    this.resetDraggedCards();
+  }
+
+  private resetDraggedCards(): void {
     this.draggedCards = [];
     this.draggedCardsStartIndex = null;
     this.draggedCardsOrigin = null;
   }
+
+  // ostalo je potrebno preneti u bottom bar komponentu i koristiti store za pozivanje prozora i čega već
 
   public pressed_newGameButton(): void {
     this.audio.play_buttonPress();
@@ -220,7 +295,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
   public pressed_showHintButton(): void {
     this.audio.play_buttonPress();
-    this.showHints();
+    // this.showHints();
   }
 
   public pressed_showFakeGameEndButton(): void {

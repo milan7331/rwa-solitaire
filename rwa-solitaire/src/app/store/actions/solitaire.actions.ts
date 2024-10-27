@@ -11,7 +11,7 @@ export const solitaireActions = createActionGroup({
         
         'Draw cards': emptyProps(),
         'Drop on foundation': props<{suit: CardSuit, src: number[], dest: number[], srcIndex: number}>(),
-        'Drop on tableau': props<{suit: CardSuit, src: number[], dest: number[], srcIndex: number}>(),
+        'Drop on tableau': props<{src: number[], dest: number[], srcIndex: number}>(),
         'Undo': emptyProps(),
 
     }

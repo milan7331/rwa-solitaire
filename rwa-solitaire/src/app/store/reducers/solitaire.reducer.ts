@@ -94,10 +94,10 @@ export const solitaireReducer = createReducer(
                 cardAdapter.updateOne(newBoard.previousCardUpdate, state.cards) : state.cards
         } as SolitaireState;
     }),
-    on(solitaireActions.dropOnTableau, (state, {suit, src, dest, srcIndex}) => {
+    on(solitaireActions.dropOnTableau, (state, {src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
-        if (!canDropOnTableau(state.cards, suit, src, dest, srcIndex)) return state;
+        if (!canDropOnTableau(state.cards, src, dest, srcIndex)) return state;
 
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
@@ -376,13 +376,12 @@ function canDropOnFoundation(
 
 function canDropOnTableau(
     cardsES: EntityState<Card> | null,
-    suit: CardSuit | null,
     src: number[] | null,
     dest: number[] | null,
     srcIndex: number | null
 ): boolean {
     // parameter check
-    if (src === null || dest === null || srcIndex === null || suit === null || cardsES === null) return false; 
+    if (src === null || dest === null || srcIndex === null || cardsES === null) return false; 
     if (srcIndex < 0 || src.length <= srcIndex) return false;
 
     // cards check
