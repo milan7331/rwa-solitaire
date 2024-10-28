@@ -2,9 +2,6 @@ import { createReducer, on } from "@ngrx/store";
 import { AudioState } from "../../models/state/audio.state";
 import { volumeControlActions } from "../actions/audio.actions";
 
-// dodati ono sranje za gornju granicu %%%%
-// ispraviti nije baš dobro sa %
-
 export const initialAudioState: AudioState = {
     audioVolume: 0.8,
     audioMuted: false

@@ -131,7 +131,7 @@ export const solitaireReducer = createReducer(
 )
 
 function generateCard(suit: CardSuit, number: CardNumber): Card {
-    const id = (suit + 1) * number;
+    const id = number + (suit * 13);
     const clr = (suit == CardSuit.Diamonds || suit == CardSuit.Hearts)? CardColor.Red : CardColor.Black;
     const suitString: string | undefined = (() => {
         switch (suit) {
@@ -209,19 +209,15 @@ function fisherYatesDeckShuffle(cards: number[]): number[] {
 }
 
 function updateCards(cards: Card[], updateList: number[], unlock: boolean): Card[] {
-    let newCards: Card[] = makePureCardsCopy(cards);
+    const idsToUpdate = new Set(updateList);
+    const newCards: Card[] = makePureCardsCopy(cards);
 
-    for (let i = 0; i < updateList.length; i++) {
-        for (let j = 0; j < newCards.length; j++) {
-            if (updateList[i] === newCards[j].id) {
-                newCards[j].faceShown = unlock;
-                newCards[j].movable = unlock;
-                break;
-            }
+    return newCards.map(card => {
+        if (idsToUpdate.has(card.id)) {
+            return { ...card, faceShown: unlock, movable: unlock };
         }
-    }
-
-    return newCards;
+        return card;
+    });
 }
 
 function placeInitialCards(board: SolitaireBoard, cards: Card[]): [SolitaireBoard, Card[]] {
@@ -232,16 +228,14 @@ function placeInitialCards(board: SolitaireBoard, cards: Card[]): [SolitaireBoar
 
     let newBoard: SolitaireBoard = makePureBoardCopy(board);
     let newCards: Card[] = makePureCardsCopy(cards);
-    let updateList: number[] = [];
-    
-    
-    for (let i = 0; i < newBoard.tableau.length; i++) {
-        for (let j = 0; j < i + 1; j++) {
-            newBoard.tableau[i].push(newBoard.deckStock.pop()!);
-        }
-        updateList.push(newBoard.tableau[i].at(-1)!);
-    }
-    updateList = updateList.concat(newBoard.deckStock);
+
+    let updateList: number[] = newBoard.tableau.map((stack, index) => {
+        const cardsToAdd = newBoard.deckStock.splice(-index - 1, index + 1);
+        stack.push(...cardsToAdd);
+        return stack.at(-1)!;
+    });
+
+    updateList.push(...newBoard.deckStock);
     let updatedCards = updateCards(newCards, updateList, true);
     
     return [newBoard, updatedCards];
@@ -252,6 +246,7 @@ function setUpInitialBoardAndCards(cards: Card[], difficulty: SolitaireDifficult
     let newBoard = generateEmptyBoard(newCards, difficulty);
 
     newBoard.deckStock = fisherYatesDeckShuffle(newBoard.deckStock);
+
     [newBoard, newCards] = placeInitialCards(newBoard, newCards);
 
     return [newBoard, newCards];

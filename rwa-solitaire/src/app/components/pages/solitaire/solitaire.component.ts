@@ -10,6 +10,7 @@ import { SolitaireHints } from '../../../models/game/solitaire-hints';
 import { SolitaireBoard, SolitaireDifficulty } from '../../../models/game/solitaire-board'; 
 import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
+import { EntityState } from '@ngrx/entity';
 
 @Component({
   selector: 'app-solitaire',
@@ -18,11 +19,13 @@ import { solitaireActions } from '../../../store/actions/solitaire.actions';
 })
 
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
+  difficulty = SolitaireDifficulty;
+
   #destroy$: Subject<void> = new Subject<void>();
   
-  board: SolitaireBoard | undefined | null;
-  cards: Card[] | undefined | null;
-  
+  board$: SolitaireBoard | undefined | null;
+  cards$: Card[] | undefined | null;
+
   // hintovi na kraj treba da se izmene
   // hints: SolitaireHints = {moves: [], cycleDeck: false} as SolitaireHints;
   // hintIndex: number = -1;
@@ -46,13 +49,18 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
   constructor(private audio: AudioService, private store: Store) {
     //private solitaireHelper: SolitaireHelperService,
+
     this.store.select(selectBoard)
       .pipe(takeUntil(this.#destroy$))
-      .subscribe((board) => this.board = board);
+      .subscribe((board) => {
+        this.board$ = board;
+      });
 
     this.store.select(selectCards)
       .pipe(takeUntil(this.#destroy$))
-      .subscribe((cards) => this.cards = cards);
+      .subscribe((cards) => {
+        this.cards$ = cards;
+      });
 
     this.start();
   }
@@ -80,9 +88,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   }
 
   public startNewGame(difficulty: SolitaireDifficulty = SolitaireDifficulty.Hard) {
-    this.draggedCards = [];
-    this.draggedCardsStartIndex = null;
-    this.draggedCardsOrigin = null;
+    this.resetDraggedCards();
 
     this.store.dispatch(solitaireActions.startNewGame({difficulty}));
 
@@ -93,10 +99,8 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
   public restartGame(): void {
     // add a restart deal feature?
-
-    this.draggedCards = [];
-    this.draggedCardsStartIndex = null;
-    this.draggedCardsOrigin = null;
+    
+    this.resetDraggedCards();
 
     // this.hints = this.solitaireHelper.getHints(this.board);
     // this.hintIndex = -1;
@@ -109,9 +113,9 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     // fali confirmation provera neka??
     // ne znam da li to ide ovde ispitati naknadno
 
-    if (!this.board) return;
+    if (!this.board$) return;
 
-    const newDifficulty = this.board!.difficulty === SolitaireDifficulty.Hard
+    const newDifficulty = this.board$!.difficulty === SolitaireDifficulty.Hard
       ? SolitaireDifficulty.Easy
       : SolitaireDifficulty.Hard
 
@@ -136,8 +140,8 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   public drawCards(): void {
     //this.hideHints();
 
-    if (!this.board) return;
-    this.audio.play_deckDraw(this.board);
+    if (!this.board$) return;
+    this.audio.play_deckDraw(this.board$);
     this.store.dispatch(solitaireActions.drawCards());
 
     //this.hints = this.solitaireHelper.getHints(this.board);
@@ -214,10 +218,10 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   }
 
   public dropOnFoundation(cardSuit: CardSuit, dropArray: number[]): void {
-    if (!this.board) return;
+    if (!this.board$) return;
     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
-    const initialValue = this.board?.moveNumber;
+    const initialValue = this.board$?.moveNumber;
     this.store.dispatch(solitaireActions.dropOnFoundation({
       suit: cardSuit,
       src: this.draggedCardsOrigin,
@@ -225,21 +229,21 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
       srcIndex: this.draggedCardsStartIndex
     }));
 
-    if (this.board.moveNumber > initialValue) this.cardDroppedSuccessfuly();
+    if (this.board$.moveNumber > initialValue) this.cardDroppedSuccessfuly();
   }
 
   public dropOnTableau(dropArray: number[]) {
-    if (!this.board) return;
+    if (!this.board$) return;
     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
-    const initialValue = this.board?.moveNumber;
+    const initialValue = this.board$?.moveNumber;
     this.store.dispatch(solitaireActions.dropOnTableau({
       src: this.draggedCardsOrigin,
       dest: dropArray,
       srcIndex: this.draggedCardsStartIndex
     }));
 
-    if (this.board.moveNumber > initialValue) this.cardDroppedSuccessfuly();
+    if (this.board$.moveNumber > initialValue) this.cardDroppedSuccessfuly();
   }
 
   private cardDroppedSuccessfuly(): void {
@@ -303,6 +307,13 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.gameEndVisible = true;
   }
 
+  public loggg(): void {
+    // console.log("--LOG-- Move number: " + board?.moveNumber);
+    console.log("----------");
+    console.log(this.cards$);
+    console.log(this.board$);
+    console.log("----------");
 
+  }
 
 }
