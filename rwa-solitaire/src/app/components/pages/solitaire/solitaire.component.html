@@ -41,7 +41,7 @@
                         <div class="solitaire-card"
                         *ngFor="let cardId of board$.deckWaste; let i = index"
                         [ngClass]="{
-
+                            'non-interactable': i !== board$.deckWaste.length - 1
                         }"
                         [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards$[cardId].picture +'.svg)'}"
                         pDraggable

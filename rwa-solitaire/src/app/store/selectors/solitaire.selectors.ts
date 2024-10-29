@@ -1,17 +1,23 @@
 import { createFeatureSelector, createSelector } from "@ngrx/store";
 import { SolitaireState } from "../../models/state/solitaire.state";
-import { boardAdapter, cardAdapter } from "../reducers/solitaire.reducer";
+import { boardAdapter, cardAdapter } from "../reducers/game.reducer";
+import { GameState } from "../../models/state/game.state";
 
 const selectSolitaireState = createFeatureSelector<SolitaireState>('solitaireState');
 
-const selectCardsState = createSelector(
+const selectGameState = createSelector(
     selectSolitaireState,
-    (state: SolitaireState) => state.cards
+    (state: SolitaireState) => state.gameState
+)
+
+const selectCardsState = createSelector(
+    selectGameState,
+    (state: GameState) => state.cards
 );
 
 const selectBoardsState = createSelector(
-  selectSolitaireState,
-  (state: SolitaireState) => state.boards
+  selectGameState,
+  (state: GameState) => state.boards
 );
 
 const { selectAll: selectCardsAll } = cardAdapter.getSelectors(selectCardsState);

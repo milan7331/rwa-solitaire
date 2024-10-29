@@ -1,9 +1,8 @@
 import { createAction, createActionGroup, emptyProps, props } from "@ngrx/store";
 import { SolitaireDifficulty } from "../../models/game/solitaire-board";
-import { Card, CardSuit } from "../../models/game/card";
-import { EntityState } from "@ngrx/entity";
+import { CardSuit } from "../../models/game/card";
 
-export const solitaireActions = createActionGroup({
+export const gameActions = createActionGroup({
     source: "Solitaire game",
     events: {
         'Start new game': props<{difficulty: SolitaireDifficulty}>(),

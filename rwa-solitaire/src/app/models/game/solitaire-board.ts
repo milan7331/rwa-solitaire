@@ -1,5 +1,5 @@
-import { Card, CardColor, CardNumber, CardSuit } from "./card";
-import { EntityState, Update } from "@ngrx/entity";
+import { Card } from "./card";
+import { Update } from "@ngrx/entity";
 
 
 export enum SolitaireDifficulty {
