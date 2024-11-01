@@ -307,13 +307,17 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.gameEndVisible = true;
   }
 
-  public loggg(): void {
+  public pressed_logButton(): void {
     // console.log("--LOG-- Move number: " + board?.moveNumber);
     console.log("----------");
     console.log(this.cards$);
     console.log(this.board$);
     console.log("----------");
+  }
 
+  public pressed_undoButton(): void {
+    this.audio.play_buttonPress();
+    this.store.dispatch(gameActions.undo());
   }
 
 }

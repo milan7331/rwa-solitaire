@@ -4,6 +4,7 @@ import { SolitaireBoard, SolitaireDifficulty } from "../../models/game/solitaire
 import { Card, CardNumber, CardSuit, CardColor } from "../../models/game/card";
 import { createEntityAdapter, EntityAdapter, EntityState, Update } from "@ngrx/entity";
 import { GameState } from "../../models/state/game.state";
+import { PreviousUpdate } from "../../models/game/previous-update";
 
 
 
@@ -14,9 +15,15 @@ export const cardAdapter: EntityAdapter<Card> = createEntityAdapter<Card>({
     selectId: (card: Card) => card.id,
 });
 
+export const previousCardUpdateAdapter: EntityAdapter<PreviousUpdate> = createEntityAdapter<PreviousUpdate>({
+    selectId: (update: PreviousUpdate) => update.moveNumber,
+});
+
 export const initialGameState: GameState = {
     boards: boardAdapter.getInitialState(),
-    cards: cardAdapter.getInitialState()
+    cards: cardAdapter.getInitialState(),
+    previousCardUpdate: previousCardUpdateAdapter.getInitialState(),
+    winCondition: false
 }
 
 export const gameReducer = createReducer(
@@ -24,16 +31,20 @@ export const gameReducer = createReducer(
     on(gameActions.startNewGame, (state, {difficulty}) => {
         let newBoard: SolitaireBoard;
         let newCards: Card[] = generateDeck();
+        let newWinCondition: boolean = false;
 
         [newBoard, newCards] = setUpInitialBoardAndCards(newCards, difficulty);
 
         return {
             ...state,
             boards: boardAdapter.setAll([newBoard], state.boards),
-            cards: cardAdapter.setAll(newCards, state.cards)
+            cards: cardAdapter.setAll(newCards, state.cards),
+            winCondition: newWinCondition
         } as GameState;
     }),
     on(gameActions.restartGame, (state) => {
+        if (state.boards.ids.length < 2) return state;
+
         const updateCardIds: number[] = [
             ...state.boards.entities[0]!.deckStock,
             ...state.boards.entities[0]!.tableau.map(tab => tab.at(-1)!).filter(cardId => !!cardId)
@@ -47,7 +58,9 @@ export const gameReducer = createReducer(
         return {
             ...state,
             boards: boardAdapter.removeMany([0], state.boards),
-            cards: cardAdapter.updateMany(updates, state.cards)
+            cards: cardAdapter.updateMany(updates, state.cards),
+            previousCardUpdate: previousCardUpdateAdapter.removeAll(state.previousCardUpdate),
+            winCondition: false
         } as GameState;
     }),
     on(gameActions.drawCards, (state) => {
@@ -77,7 +90,6 @@ export const gameReducer = createReducer(
     on(gameActions.dropOnFoundation, (state, {suit, src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
-
         if (!canDropOnFoundation(state.cards, suit, src, dest, srcIndex)) return state;
 
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
@@ -86,13 +98,14 @@ export const gameReducer = createReducer(
         let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
         if (!moveCards(newSrc, newDest, srcIndex)) return state;
 
-        newBoard.previousCardUpdate = updateCardIfStackTopIsHidden(state.cards, newSrc);
-
+        const updates = updateCardsAfterMove(state.cards, newSrc, newBoard);
+  
         return {
             ...state,
             boards: boardAdapter.addOne(newBoard, state.boards),
-            cards: (newBoard.previousCardUpdate !== undefined)?
-                cardAdapter.updateOne(newBoard.previousCardUpdate, state.cards) : state.cards
+            cards: (updates)? cardAdapter.updateOne(updates.cardUpdate, state.cards) : state.cards,
+            previousCardUpdate: (updates)? previousCardUpdateAdapter.addOne(updates.previousUpdate, state.previousCardUpdate) : state.previousCardUpdate,
+            winCondition: checkWinCondition(newBoard),
         } as GameState;
     }),
     on(gameActions.dropOnTableau, (state, {src, dest, srcIndex}) => {
@@ -106,26 +119,29 @@ export const gameReducer = createReducer(
         let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
         if (!moveCards(newSrc, newDest, srcIndex)) return state;
 
-        newBoard.previousCardUpdate = updateCardIfStackTopIsHidden(state.cards, newSrc);
+        const updates = updateCardsAfterMove(state.cards, newSrc, newBoard);
 
         return {
             ...state,
             boards: boardAdapter.addOne(newBoard, state.boards),
-            cards: (newBoard.previousCardUpdate !== undefined)?
-                cardAdapter.updateOne(newBoard.previousCardUpdate, state.cards) : state.cards
+            cards: (updates)? cardAdapter.updateOne(updates.cardUpdate, state.cards) : state.cards,
+            previousCardUpdate: (updates)? previousCardUpdateAdapter.addOne(updates.previousUpdate, state.previousCardUpdate) :state.previousCardUpdate,
+            winCondition: checkWinCondition(newBoard)
         } as GameState;
     }),
     on(gameActions.undo, (state) => {
         const currentBoard = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
 
-        const lastChange =  revertLastChangeForUndo(state.cards, currentBoard?.previousCardUpdate);
+        const previousUpdate = state.previousCardUpdate.entities[currentBoard.moveNumber];
+        const lastChange =  undoLastCardUpdate(state.previousCardUpdate, currentBoard);
 
         return {
             ...state,
             boards: boardAdapter.removeOne(currentBoard!.moveNumber, state.boards),
-            cards: (lastChange !== undefined)?
-                cardAdapter.updateOne(lastChange, state.cards): state.cards
+            cards: (lastChange)? cardAdapter.updateOne(lastChange, state.cards) : state.cards,
+            previousCardUpdate: (lastChange)? previousCardUpdateAdapter.removeOne(currentBoard.moveNumber, state.previousCardUpdate) : state.previousCardUpdate,
+            winCondition: false
         } as GameState;
     })
 
@@ -185,7 +201,6 @@ function generateEmptyBoard(cards: Card[], difficulty: SolitaireDifficulty): Sol
 function makePureBoardCopy(board: SolitaireBoard): SolitaireBoard {
     return {
         moveNumber: board.moveNumber,
-        previousCardUpdate: board.previousCardUpdate,
         foundation: board.foundation.map(fStack => [...fStack]),
         tableau: board.tableau.map(tab => [...tab]),
         deckStock: [...board.deckStock],
@@ -296,36 +311,41 @@ function checkArraysAreEqual(arr1: number[], arr2: number[]): boolean {
     return arr1.every((el, index) => el === arr2[index]);
 }
 
-function updateCardIfStackTopIsHidden(cardsES: EntityState<Card>, stack: number[]): Update<Card> | undefined {
+function updateCardsAfterMove(cardsES: EntityState<Card>, stack: number[], currentBoard: SolitaireBoard): { previousUpdate: PreviousUpdate, cardUpdate: Update<Card> } | undefined {
     if (!checkIfStackTopIsHidden(cardsES, stack)) return undefined;
 
     const topCard: Card | undefined = cardsES.entities[stack.at(-1)!];
 
     if (topCard === undefined) return undefined;
-    if (topCard.faceShown === true) return undefined;
-    if (topCard.movable === true) return undefined; 
+    if (topCard.faceShown === true) return undefined; 
+    if (topCard.movable === true) return undefined;
 
-    return {
-        id: stack.at(-1),
+    const cardUpdate: Update<Card> = {
+        id: stack.at(-1)!,
         changes: {
             faceShown: true,
             movable: true
         }
-    } as Update<Card>;
+    }
+
+    const previousUpdate: PreviousUpdate = {
+        moveNumber: currentBoard.moveNumber,
+        cardUpdate: cardUpdate
+    }
+
+    return { previousUpdate, cardUpdate };
 }
 
-function revertLastChangeForUndo(cardsES: EntityState<Card>, lastUpdate: Update<Card> | undefined): Update<Card> | undefined {
+function undoLastCardUpdate(previousCardUpdateES: EntityState<PreviousUpdate>, currentBoard: SolitaireBoard): Update<Card> | undefined {
+    const lastUpdate = previousCardUpdateES.entities[currentBoard.moveNumber];
     if (lastUpdate === undefined) return undefined;
 
-    const card: Card = cardsES.entities[lastUpdate.id]!;
-
     return {
-        id:lastUpdate.id,
+        id: lastUpdate.cardUpdate.id,
         changes: {
-            movable: !card.movable,
-            faceShown: !card.faceShown,
+            movable: !lastUpdate.cardUpdate.changes.movable,
+            faceShown: !lastUpdate.cardUpdate.changes.faceShown
         }
-
     } as Update<Card>;
 }
 
@@ -339,13 +359,7 @@ function checkIfStackTopIsHidden(cardsES: EntityState<Card>, stack: number[]): b
     return false;
 }
 
-function canDropOnFoundation(
-    cardsES: EntityState<Card> | null,
-    suit: CardSuit | null,
-    src: number[] | null,
-    dest: number[] | null,
-    srcIndex: number | null
-): boolean {
+function canDropOnFoundation(cardsES: EntityState<Card> | null, suit: CardSuit | null, src: number[] | null, dest: number[] | null, srcIndex: number | null): boolean {
     // parameter check
     if (src === null || dest === null || srcIndex === null || suit === null || cardsES === null) return false; 
     if (srcIndex < 0 || src.length <= srcIndex) return false;
@@ -370,12 +384,7 @@ function canDropOnFoundation(
     return false;
 }
 
-function canDropOnTableau(
-    cardsES: EntityState<Card> | null,
-    src: number[] | null,
-    dest: number[] | null,
-    srcIndex: number | null
-): boolean {
+function canDropOnTableau(cardsES: EntityState<Card> | null, src: number[] | null, dest: number[] | null, srcIndex: number | null): boolean {
     // parameter check
     if (src === null || dest === null || srcIndex === null || cardsES === null) return false; 
     if (srcIndex < 0 || src.length <= srcIndex) return false;
@@ -399,6 +408,15 @@ function canDropOnTableau(
     if (firstCardMoved!.color !== destStackTop!.color && destStackTop!.number - firstCardMoved!.number === 1) return true;
 
     return false;
+}
+
+function checkWinCondition(board: SolitaireBoard): boolean {
+    if (board.deckWaste.length > 0) return false;
+    if (board.deckStock.length > 0) return false;
+    for (let tab of board.tableau) if (tab.length > 0) return false;
+    for (let f of board.foundation) if (f.length !== 13) return false;
+
+    return true;
 }
 
 function moveCards(src: number[], dest: number[], srcIndex: number): boolean {

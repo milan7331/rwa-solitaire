@@ -9,8 +9,6 @@ export enum SolitaireDifficulty {
 
 export interface SolitaireBoard {
     moveNumber: number;
-    previousCardUpdate: Update<Card> | undefined;
-
     foundation: number[][];
     tableau: number[][];
     deckStock: number[];
