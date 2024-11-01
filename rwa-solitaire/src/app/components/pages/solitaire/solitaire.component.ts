@@ -4,12 +4,12 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { selectBoard, selectCards } from '../../../store/selectors/solitaire.selectors'
 import { AudioService } from '../../../services/audio/audio.service';
-import { Card, CardSuit } from "../../../models/game/card";
-import { SolitaireMove } from '../../../models/game/solitaire-move';
-import { SolitaireHints } from '../../../models/game/solitaire-hints';
-import { SolitaireBoard, SolitaireDifficulty } from '../../../models/game/solitaire-board'; 
+import { Card, CardSuit } from "../../../models/solitaire/card";
+import { SolitaireMove } from '../../../models/solitaire/solitaire-move';
+import { SolitaireHints } from '../../../models/solitaire/solitaire-hints';
+import { SolitaireBoard, SolitaireDifficulty } from '../../../models/solitaire/solitaire-board'; 
 import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
-import { gameActions } from '../../../store/actions/game.actions';
+import { solitaireActions } from '../../../store/actions/solitaire.actions';
 import { EntityState } from '@ngrx/entity';
 
 @Component({
@@ -17,6 +17,9 @@ import { EntityState } from '@ngrx/entity';
   templateUrl: './solitaire.component.html',
   styleUrl: './solitaire.component.scss'
 })
+
+
+// DODATI UNDO SELEKTOR ZA DOSTUPNOST DUGMETA??
 
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
   difficulty = SolitaireDifficulty;
@@ -90,7 +93,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   public startNewGame(difficulty: SolitaireDifficulty = SolitaireDifficulty.Hard) {
     this.resetDraggedCards();
 
-    this.store.dispatch(gameActions.startNewGame({difficulty}));
+    this.store.dispatch(solitaireActions.startNewGame({difficulty}));
 
     // this.hints = this.solitaireHelper.getHints(this.board);
     // this.hintIndex = -1;
@@ -106,7 +109,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     // this.hintIndex = -1;
     // this.hintVisible = false;
 
-    this.store.dispatch(gameActions.restartGame());
+    this.store.dispatch(solitaireActions.restartGame());
   }
 
   public changeDifficulty(): void {
@@ -142,7 +145,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
     if (!this.board$) return;
     this.audio.play_deckDraw(this.board$);
-    this.store.dispatch(gameActions.drawCards());
+    this.store.dispatch(solitaireActions.drawCards());
 
     //this.hints = this.solitaireHelper.getHints(this.board);
   }
@@ -222,7 +225,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
     const lastMove = this.board$?.moveNumber;
-    this.store.dispatch(gameActions.dropOnFoundation({
+    this.store.dispatch(solitaireActions.dropOnFoundation({
       suit: cardSuit,
       src: this.draggedCardsOrigin,
       dest: dropArray,
@@ -237,7 +240,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
     const lastMove = this.board$?.moveNumber;
-    this.store.dispatch(gameActions.dropOnTableau({
+    this.store.dispatch(solitaireActions.dropOnTableau({
       src: this.draggedCardsOrigin,
       dest: dropArray,
       srcIndex: this.draggedCardsStartIndex
@@ -317,7 +320,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
   public pressed_undoButton(): void {
     this.audio.play_buttonPress();
-    this.store.dispatch(gameActions.undo());
+    this.store.dispatch(solitaireActions.undo());
   }
 
 }

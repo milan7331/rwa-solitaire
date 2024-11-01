@@ -1,7 +1,11 @@
-import { GameState } from "./game.state";
-import { HintState } from "./hints.state";
+import { EntityState, Update } from "@ngrx/entity";
+import { Card } from "../solitaire/card";
+import { SolitaireBoard } from "../solitaire/solitaire-board";
+import { PreviousUpdate } from "../solitaire/previous-update";
 
 export interface SolitaireState {
-    gameState: GameState;
-    // hintsState: HintState;
+    cards: EntityState<Card>;
+    boards: EntityState<SolitaireBoard>;
+    previousCardUpdate: EntityState<PreviousUpdate>;
+    winCondition: boolean;
 }

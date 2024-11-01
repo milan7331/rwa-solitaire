@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { selectAppVolume, selectAppMuted } from '../../store/selectors/audio.selectors';
-import { SolitaireBoard, SolitaireDifficulty } from '../../models/game/solitaire-board';
+import { SolitaireBoard, SolitaireDifficulty } from '../../models/solitaire/solitaire-board';
 
 @Injectable({
   providedIn: 'root'

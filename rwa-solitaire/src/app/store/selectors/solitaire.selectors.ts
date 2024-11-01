@@ -1,26 +1,22 @@
 import { createFeatureSelector, createSelector } from "@ngrx/store";
 import { SolitaireState } from "../../models/state/solitaire.state";
-import { boardAdapter, cardAdapter } from "../reducers/game.reducer";
-import { GameState } from "../../models/state/game.state";
+import { boardAdapter, cardAdapter } from "../reducers/solitaire.reducer";
 
 const selectSolitaireState = createFeatureSelector<SolitaireState>('solitaireState');
 
-const selectGameState = createSelector(
-    selectSolitaireState,
-    (state: SolitaireState) => state.gameState
-)
-
 const selectCardsState = createSelector(
-    selectGameState,
-    (state: GameState) => state.cards
+    selectSolitaireState,
+    (state: SolitaireState) => state.cards
 );
 
 const selectBoardsState = createSelector(
-  selectGameState,
-  (state: GameState) => state.boards
+  selectSolitaireState,
+  (state: SolitaireState) => state.boards
 );
 
 const { selectAll: selectCardsAll } = cardAdapter.getSelectors(selectCardsState);
+const { selectTotal: selectBoardsTotal } = boardAdapter.getSelectors(selectBoardsState);
+
 
 export const selectCards = createSelector(
     selectCardsAll,
@@ -36,3 +32,10 @@ export const selectBoard = createSelector(
         return (lastId !== undefined) ? entities[lastId] : undefined;
     }
 );
+
+export const selectUndoAvailability = createSelector(
+    selectBoardsTotal,
+    (total) => {
+        return (total > 1)? true : false;
+    }
+)
