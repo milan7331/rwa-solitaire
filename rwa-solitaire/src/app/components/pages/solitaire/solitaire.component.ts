@@ -147,6 +147,8 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     if (this.hints.moves.length > 0) {
       this.hints.hintIndex = (this.hints.hintIndex + 1) % this.hints.moves.length;
     }
+
+    console.log(this.hints);
   }
 
   public hideHints(): void {

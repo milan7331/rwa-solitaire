@@ -215,7 +215,7 @@ export class SolitaireHelperService {
   }
 
   #card_can_moveToFoundation(card: Card | undefined, fDest: number[], cards: Card[]): boolean {
-    const stackTop = cards.find(card => card.id = fDest.at(-1)!);
+    const stackTop = cards.find(card => card.id === fDest.at(-1)!);
     if (!card) return false;
     
     // can drop ace

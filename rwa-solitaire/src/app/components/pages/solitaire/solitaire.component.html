@@ -7,20 +7,19 @@
             <div class="solitaire-top-container flex flex-row flex-nowrap justify-content-between align-items-start">
                 <div class="flex-auto flex flex-row flex-nowrap justify-content-start column-gap-4">
                     <div *ngFor="let f of board.foundation; let i = index" pDroppable (onDrop)="dropOnFoundation(i, f)" class="solitaire-card-stack">
-                        <!-- 'highlighted-card': isHighlighted_placeholder(f) -->
                         <div class="solitaire-card"
                         [ngClass]="{
                             'bg-card-clubs': i === 0,
                             'bg-card-diamonds': i === 1,
                             'bg-card-hearts': i === 2,
                             'bg-card-spades': i === 3,
-                            
+                            'highlighted-card': isHighlighted_placeholder(f)
                         }"></div>
-                        <!-- 'highlighted-card': isHighlighted(f, j) -->
+
                         <div class="solitaire-card"
                         *ngFor="let cardId of f; let j = index"
                         [ngClass]="{
-                            
+                            'highlighted-card': isHighlighted(f, j)
                         }"
                         [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"
                         pDraggable
@@ -37,10 +36,10 @@
                         
                     }">
                         <div  class="solitaire-card bg-card-placeholder"></div>
-                        <!-- 'highlighted-card': isHighlighted(board.deckWaste, i) -->
                         <div class="solitaire-card"
                         *ngFor="let cardId of board.deckWaste; let i = index"
                         [ngClass]="{
+                            'highlighted-card': isHighlighted(board.deckWaste, i),
                             'non-interactable': i !== board.deckWaste.length - 1
                         }"
                         [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"
@@ -48,11 +47,10 @@
                         (onDragStart)="dragStart($event, board.deckWaste, i)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
-                    <!-- 'highlighted-card': isHighlighted_deck(), -->
                     <div class="solitaire-card"
                     (click)="drawCards()"
-                    [ngClass]="{
-
+                    [ngClass]="{                        
+                        'highlighted-card': isHighlighted_deck(),
                         'bg-card-back': board.deckStock.length != 0,
                         'bg-card-placeholder': board.deckStock.length == 0
                     }"></div>
@@ -60,11 +58,9 @@
             </div>
             <div class="solitaire-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">
                 <div *ngFor="let tab of board.tableau" pDroppable (onDrop)="dropOnTableau(tab)">
-                    <!-- 'highlighted-card': isHighlighted_placeholder(tab) -->
                     <div class="solitaire-card bg-card-tableau-placeholder" [ngClass]="{
-
+                        'highlighted-card': isHighlighted_placeholder(tab)
                     }"></div>
-                    <!-- 'highlighted-card': isHighlighted(tab, i) -->
                     <div class="solitaire-card"
                     *ngFor="let cardId of tab; let i = index"
                     [ngClass]="{
@@ -77,7 +73,7 @@
                         'tableau-stack-element-compact-6': i !== 0 && tab.length == 18,
                         'tableau-stack-element-compact-7': i !== 0 && tab.length > 18,
                         'non-interactable': !(cards[cardId].movable),
-                        
+                        'highlighted-card': isHighlighted(tab, i)    
                     }"
                     [ngStyle]="{'background-image': (cards[cardId].faceShown)? 'url(/assets/cards/'+ cards[cardId].picture +'.svg)' : 'url(/assets/cards/back_0.svg'}"
                     pDraggable
