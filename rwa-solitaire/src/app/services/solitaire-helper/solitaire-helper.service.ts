@@ -1,234 +1,231 @@
 import { Injectable } from '@angular/core';
 import { Card, CardNumber } from '../../models/solitaire/card';
-import { SolitaireMove } from '../../models/solitaire/solitaire-move';
-import { SolitaireHints } from '../../models/solitaire/solitaire-hints';
+import { SolitaireHints, SolitaireMove } from '../../models/solitaire/solitaire-hints';
 import { SolitaireBoard } from '../../models/solitaire/solitaire-board';
+import { EntityState } from '@ngrx/entity';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SolitaireHelperService {
-
   constructor() { }
 
+  // returns an array of possible moves
+  getHints(board: SolitaireBoard, cards: Card[]): SolitaireHints {
+    let nextMoves: SolitaireMove[] = [];
+    let cycleDeck: boolean = false;
 
-  // // returns an array of possible moves
-  // public getHints(board: SolitaireBoard): SolitaireHints {
-  //   let nextMoves: SolitaireMove[] = [];
-
-  //   // nextMoves.push(...(this.lookForMove_TableauKingToEmpty(board.tableau)));
-  //   nextMoves.push(...(this.lookForMove_TableauMove(board.tableau)));
-  //   nextMoves.push(...(this.lookForMove_TableauToFoundation(board.tableau, board.foundation)));
-  //   nextMoves.push(...(this.lookForMove_FoundationToTableau(board.tableau, board.foundation)));
+    // nextMoves.push(...(this.lookForMove_TableauKingToEmpty(board.tableau)));
+    nextMoves.push(...(this.#lookForMove_TableauMove(board.tableau, cards)));
+    nextMoves.push(...(this.#lookForMove_TableauToFoundation(board.tableau, board.foundation, cards)));
+    nextMoves.push(...(this.#lookForMove_FoundationToTableau(board.tableau, board.foundation, cards)));
     
-  //   if (nextMoves.length < 1) {
-  //     console.log("now using waste / deck cards.");
-  //     return this.lookForMove_DeckMove(board.tableau, board.foundation, board.deckStock, board.deckWaste);
-  //   }
+    if (nextMoves.length < 1) {
+      nextMoves.push(...(this.#lookForMove_DeckMove(board.tableau, board.foundation, board.deckStock, board.deckWaste, cards)));
+    }
 
-  //   return ({moves: nextMoves, cycleDeck: false} as SolitaireHints);
-  // }
+    if (nextMoves.length < 1) {
+      cycleDeck = this.#lookForMove_CycleDeck(board.deckStock);
+    }
 
-  // public lookForGameEndCondition(board: SolitaireBoard): boolean {
-  //   if (board.deckWaste.length > 0) return false;
-  //   if (board.deckStock.length > 0) return false;
-  //   for (let tab of board.tableau) {
-  //     if (tab.length > 0) return false;
-  //   }
-  //   for (let f of board.foundation) {
-  //     if (f.length != 13) return false;
-  //   }
+    return {
+      moves: nextMoves,
+      cycleDeck: cycleDeck,
+      hintIndex: -1,
+      hintVisible: false
+    } as SolitaireHints;
+  }
 
-  //   return true;
-  // }
+  // check if a tableau move that uncovers new cards / moves cards from an empty field exists
+  #lookForMove_TableauMove(tableau: number[][], cards: Card[]): SolitaireMove[] {
+    let results: SolitaireMove[] = [];
 
+    let maxIndex: number = -1;
+    let restOfBoard: number[][] = [];
+    let moveDestinations: number[][] = [];
 
-  // // check if a king from the tableau can be moved to an empty field if hes not already on one
-  // private lookForMove_TableauKingToEmpty(tableau: Card[][]): SolitaireMove[] {
-  //   let results: SolitaireMove[] = [];
+    for (const tab of tableau) {
+      maxIndex = this.#cardStack_find_maxMovableCardIndex(tab, cards);
+      if (maxIndex < 0) continue;
+      let card = cards.find(card => card.id === tab[maxIndex]);
+      if (!card) continue;
 
-  //   let maxIndex: number  = -1;
-  //   const emptyTab: Card[] | undefined = tableau.find(tab => tab.length === 0);
+      restOfBoard = tableau.filter(tabEl => tabEl !== tab);
+      moveDestinations = this.#tableau_find_availableMoveDestinations(restOfBoard, card, maxIndex, cards);
 
-  //   if (!emptyTab) return results;
+      for (const d of moveDestinations) {
+        // moves that uncover new cards have priority
+        if (maxIndex !== 0) {
+          results.unshift({source: tab, dest: d, sourceIndex: maxIndex} as SolitaireMove);
+        } else {
+          results.push({source: tab, dest: d, sourceIndex: maxIndex} as SolitaireMove); 
+        }
+      }
+    }
 
-  //   for (const tab of tableau.filter(tab => tab.length > 0)) {
-  //     maxIndex = this.cardStack_find_maxMovableCardIndex(tab);
-  //     if (maxIndex > 0 && tab[maxIndex].number === CardNumber.King) {
-  //       results.push({source: tab, dest: emptyTab, sourceIndex: maxIndex} as SolitaireMove);
-  //     }
-  //   }
+    return results;
+  }
 
-  //   return results;
-  // }
+  // check if cards can be moved to the foundation
+  // moves that uncover hidden cards or free an entire tableau have priority
+  #lookForMove_TableauToFoundation(tableau: number[][], foundation: number[][], cards: Card[]): SolitaireMove[] {
+    let results: SolitaireMove[] = [];
 
-  // // check if a tableau move that uncovers new cards / moves cards from an empty field exists
-  // private lookForMove_TableauMove(tableau: Card[][]): SolitaireMove[] {
-  //   let results: SolitaireMove[] = [];
+    let tabs: number[][] = tableau.filter(tab => tab.length > 0);
+    for (const tab of tabs) {
+      const topCard = cards[tab.at(-1)!];
+      const secondCard = (tab.length > 1)? cards[tab.at(-2)!] : undefined;
 
-  //   let maxIndex: number = -1;
-  //   let restOfBoard: Card[][] = [];
-  //   let moveDestinations: Card[][] = [];
+      if (!topCard) continue;
+      const dest = foundation[topCard.suit];
+      if (!this.#card_can_moveToFoundation(topCard, dest, cards)) continue;
 
-  //   for (const tab of tableau) {
-  //     maxIndex = this.cardStack_find_maxMovableCardIndex(tab);
-  //     if (maxIndex < 0) continue;
-
-  //     restOfBoard = tableau.filter(tabEl => tabEl !== tab);
-  //     moveDestinations = this.tableau_find_availableMoveDestinations(restOfBoard, tab.at(maxIndex)!, maxIndex);
-
-  //     for (const d of moveDestinations) {
-  //       // moves that uncover new cards have priority
-  //       if (maxIndex !== 0) {
-  //         results.unshift({source: tab, dest: d, sourceIndex: maxIndex} as SolitaireMove);
-  //       } else {
-  //         results.push({source: tab, dest: d, sourceIndex: maxIndex} as SolitaireMove); 
-  //       }
-  //     }
-  //   }
-
-  //   return results;
-  // }
-
-  // // check if cards can be moved to the foundation
-  // // moves that uncover hidden cards or free an entire tableau have priority
-  // private lookForMove_TableauToFoundation(tableau: Card[][], foundation: Card[][]): SolitaireMove[] {
-  //   let results: SolitaireMove[] = [];
-
-  //   let topCard: Card;
-  //   let dest: Card[];
-
-  //   let canMove: boolean = false;
-  //   let clearsTableauStack: boolean = false;
-  //   let uncoversHiddenCard: boolean = false;
-
-  //   let tabs: Card[][] = tableau.filter(tab => tab.length > 0);
-  //   for (const tab of tabs) {
-  //     topCard = tab.at(-1)!;
-  //     dest = foundation[topCard.suit];
-
-  //     canMove = this.card_can_moveToFoundation(topCard, dest);
-  //     if (!canMove) continue;
+      const move: SolitaireMove = {
+        source: tab,
+        dest: dest,
+        sourceIndex: tab.length - 1
+      };
       
-  //     uncoversHiddenCard = tab.length > 1 && tab.at(-2)!.faceShown === false && tab.at(-2)!.movable === false;
-  //     clearsTableauStack = tab.length === 1;
+      // uncovers hidden card
+      if (tab.length > 1 && secondCard?.faceShown === false && secondCard?.movable === false) {
+        results.unshift(move);
+        continue;
+      }
       
-  //     if (uncoversHiddenCard || clearsTableauStack) {
-  //       results.unshift({source: tab, dest: dest, sourceIndex: tab.length - 1} as SolitaireMove);
-  //     } else {
-  //       results.push({source: tab, dest: dest, sourceIndex: tab.length - 1} as SolitaireMove);
-  //     }
+      // clears tableau stack
+      if (tab.length === 1) { 
+        results.unshift(move);
+        continue;
+      }
+      
+      results.push(move);
+      }
+
+    return results;
+  }
+
+
+  // check if a hidden card can be uncovered or a tableau stack freed in the next move, 
+  // if a certain card from the foundation returns to the tableau in this move
+  #lookForMove_FoundationToTableau(tableau: number[][], foundation: number[][], cards: Card[]): SolitaireMove[] {
+    let results: SolitaireMove[] = [];
+
+    let foundationCard: Card | undefined;
+    let restOfTableau: number[][];
+
+    let thisTurn_dests: number[][] = [];
+
+    let nextTurn_topCardIndex: number;
+    let nextTurn_topCard: Card | undefined;
+    let nextTurn_moveCondition: boolean = false;
+
+    for (let f of foundation) {
+      if (f.length < 2) continue;
+      foundationCard = cards.find(card => card.id === f.at(-1)!);
+      if (!foundationCard) continue;
+
+
+      const tabs = tableau.filter(tab => tab.length > 0);
+      for (const tab of tabs) {
+        nextTurn_topCardIndex = this.#cardStack_find_maxMovableCardIndex(tab, cards);
+        if (nextTurn_topCardIndex < 0) continue;
+        nextTurn_topCard = cards[tab.at(nextTurn_topCardIndex)!];
+        if (!nextTurn_topCard) continue;
+
+        nextTurn_moveCondition = (foundationCard.number - nextTurn_topCard!.number === 1 && foundationCard.color !== nextTurn_topCard!.color);
+        if (!nextTurn_moveCondition) continue;
+
+        restOfTableau = tableau.filter(t => t != tab);
+        thisTurn_dests = this.#tableau_find_availableMoveDestinations(restOfTableau, foundationCard, f.length - 1, cards);
+        if (thisTurn_dests.length < 1) continue;
+
+        for (let dest of thisTurn_dests) {
+          results.push({source: f, dest: dest, sourceIndex: f.length - 1} as SolitaireMove);
+        }
+      }
+    }
+
+    return results;
+  }
+
+  // if theres no tableau / foundation move - return available deck moves 
+  #lookForMove_DeckMove(tableau: number[][], foundation: number[][], stock: number[], waste: number[], cards: Card[]): SolitaireMove[] {
+    let results: SolitaireMove[] = [];
+
+    let wasteCard: Card | undefined;
+    let tableauDests: number[][] = [];
+    let fDest: number[];
+
+    if (waste.length > 0) {
+      wasteCard = cards[waste.at(-1)!];
+      if (!wasteCard) return results;
+
+      // try tableau move first
+      tableauDests = this.#tableau_find_availableMoveDestinations(tableau, wasteCard, waste.length - 1, cards);
+      for (const dest of tableauDests) {
+        results.push({source: waste, dest: dest, sourceIndex: waste.length - 1} as SolitaireMove);
+      }
+
+      // then try foundation move
+      fDest = foundation[wasteCard.suit];
+      if (this.#card_can_moveToFoundation(wasteCard, fDest, cards)) {
+        results.push({source: waste, dest: fDest, sourceIndex: waste.length -1} as SolitaireMove);
+      }
+    }
+
+    return results;
+  }
+
+  // if no moves are available go for deck cycle if theres still cards available
+  #lookForMove_CycleDeck(stock: number[]) { 
+    return (stock.length > 0)
+  }
+
+  #cardStack_find_maxMovableCardIndex(cardStack: number[], cards: Card[]) : number {
+    if (cardStack.length <= 0) return -1;
+
+    let maxIndex: number = cardStack.findIndex(cardId => {
+      let card = cards.find(card => card.id === cardId);
+      return card?.movable === true && card?.faceShown === true;
+    });
+
+    return maxIndex;
+  }
+
+  #tableau_find_availableMoveDestinations(restOfTableau: number[][], card: Card, cardIndex: number, cards: Card[]): number[][] {
+    let result: number[][] = [];
+    if (!card) return result;
+
+    if (card.number === CardNumber.King) {
+      if (cardIndex > 0) result = restOfTableau.filter(tab => tab.length === 0);
+    } else {
+      for (const tab of restOfTableau) {
+        if (tab.length < 1) continue;
+        const topCard = cards.find(card => card.id === tab.at(-1)!);
+        if (!topCard) continue;
+        if (topCard.number - card.number !== 1) continue;
+        if (topCard.color === card.color) continue;
+        if (topCard.faceShown === false) continue;
+        if (topCard.movable === false) continue;
+        result.push(tab);
+      }
+    }
+
+    return result;
+  }
+
+  #card_can_moveToFoundation(card: Card | undefined, fDest: number[], cards: Card[]): boolean {
+    const stackTop = cards.find(card => card.id = fDest.at(-1)!);
+    if (!card) return false;
     
-  //   }
+    // can drop ace
+    if (fDest.length === 0 && card.number === CardNumber.Ace) return true;
 
-  //   return results;
-  // }
+    if (fDest.length === 0 || !stackTop) return false;
 
+    // can drop regular card
+    if (fDest.length > 0 && card.number - stackTop.number === 1) return true;
 
-  // // check if a hidden card can be uncovered or a tableau stack freed in the next move, 
-  // // if a certain card from the foundation returns to the tableau in this move
-  // private lookForMove_FoundationToTableau(tableau: Card[][], foundation: Card[][]): SolitaireMove[] {
-  //   let results: SolitaireMove[] = [];
-
-  //   let foundationCard: Card;
-  //   let restOfTableau: Card[][];
-
-  //   let thisTurn_dests: Card[][] = [];
-
-  //   let nextTurn_topCardIndex: number;
-  //   let nextTurn_topCard: Card;
-  //   let nextTurn_moveCondition: boolean = false;
-
-  //   for (let f of foundation) {
-  //     if (f.length < 1) continue;
-  //     foundationCard = f.at(-1)!;
-
-  //     const tabs = tableau.filter(tab => tab.length > 0);
-  //     for (const tab of tabs) {
-  //       nextTurn_topCardIndex = this.cardStack_find_maxMovableCardIndex(tab);
-  //       if (nextTurn_topCardIndex < 0) continue;
-  //       nextTurn_topCard = tab.at(nextTurn_topCardIndex)!;
-
-  //       nextTurn_moveCondition = (foundationCard.number - nextTurn_topCard!.number === 1 && foundationCard.color !== nextTurn_topCard!.color);
-  //       if (!nextTurn_moveCondition) continue;
-
-  //       restOfTableau = tableau.filter(t => t != tab);
-  //       thisTurn_dests = this.tableau_find_availableMoveDestinations(restOfTableau, foundationCard, f.length - 1);
-  //       if (thisTurn_dests.length < 1) continue;
-
-  //       for (let dest of thisTurn_dests) {
-  //         results.push({source: f, dest: dest, sourceIndex: f.length - 1} as SolitaireMove);
-  //       }
-  //     }
-  //   }
-
-  //   return results;
-  // }
-
-  // // if theres no move - return cycle deck else return available moves
-  // private lookForMove_DeckMove(tableau: Card[][], foundation: Card[][], stock: Card[], waste: Card[]): SolitaireHints {
-  //   let results: SolitaireMove[] = [];
-  //   let cycleDeck: boolean = false;
-
-  //   let wasteCard: Card;
-  //   let tableauDests: Card[][] = [];
-  //   let fDest: Card[];
-
-  //   if (waste.length > 0) {
-  //     wasteCard = waste.at(-1)!;
-
-  //     // try tableau move first
-  //     tableauDests = this.tableau_find_availableMoveDestinations(tableau, wasteCard, waste.length - 1);
-  //     for (const dest of tableauDests) {
-  //       results.push({source: waste, dest: dest, sourceIndex: waste.length - 1} as SolitaireMove);
-  //     }
-
-  //     // then try foundation move
-  //     fDest = foundation[wasteCard.suit];
-  //     if (this.card_can_moveToFoundation(wasteCard, fDest)) {
-  //       results.push({source: waste, dest: fDest, sourceIndex: waste.length -1} as SolitaireMove);
-  //     }
-  //   }
-    
-  //   // if no moves are available go for deck cycle if theres still cards available
-  //   if (results.length < 1 && stock.length > 0) cycleDeck = true;
-
-  //   return ({moves: results, cycleDeck: cycleDeck} as SolitaireHints);
-  // }
-
-  // private cardStack_find_maxMovableCardIndex(cardStack: Card[]) : number {
-  //   if (cardStack.length <= 0) return -1;
-
-  //   let maxIndex: number = cardStack.findIndex(card => card.movable === true && card.faceShown === true);
-
-  //   return maxIndex;
-  // }
-
-  // private tableau_find_availableMoveDestinations(restOfTableau: Card[][], card: Card, cardIndex: number): Card[][] {
-  //   let result: Card[][] = [];
-
-  //   if (card.number === CardNumber.King)  {
-  //     if (cardIndex > 0) result = restOfTableau.filter(tab => tab.length === 0);
-  //   } else {
-  //     for (const tab of restOfTableau) {
-  //       if (tab.length < 1) continue;
-  //       if (tab.at(-1)!.number - card.number !== 1) continue;
-  //       if (tab.at(-1)!.color === card.color) continue;
-  //       if (tab.at(-1)!.faceShown === false) continue;
-  //       if (tab.at(-1)!.movable === false) continue;
-  //       result.push(tab);
-  //     }
-  //   }
-
-  //   return result;
-  // }
-
-  // private card_can_moveToFoundation(card: Card, fDest: Card[]): boolean {
-  //   const canMoveAce = fDest.length === 0 && card.number === CardNumber.Ace;
-  //   const canMoveRegular = fDest.length > 0 && card.number - fDest.at(-1)!.number === 1;
-
-  //   if (canMoveAce  || canMoveRegular) return true;
-
-  //   return false;
-  // }
+    return false;
+  }
 }

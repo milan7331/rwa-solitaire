@@ -3,10 +3,10 @@
         <div>
             <app-top-bar></app-top-bar>
         </div>
-        <div *ngIf="cards$ && board$" class="flex-auto flex flex-column flex-nowrap justify-content-start align-items-stretch row-gap-2">
+        <div *ngIf="cards && board" class="flex-auto flex flex-column flex-nowrap justify-content-start align-items-stretch row-gap-2">
             <div class="solitaire-top-container flex flex-row flex-nowrap justify-content-between align-items-start">
                 <div class="flex-auto flex flex-row flex-nowrap justify-content-start column-gap-4">
-                    <div *ngFor="let f of board$.foundation; let i = index" pDroppable (onDrop)="dropOnFoundation(i, f)" class="solitaire-card-stack">
+                    <div *ngFor="let f of board.foundation; let i = index" pDroppable (onDrop)="dropOnFoundation(i, f)" class="solitaire-card-stack">
                         <!-- 'highlighted-card': isHighlighted_placeholder(f) -->
                         <div class="solitaire-card"
                         [ngClass]="{
@@ -22,7 +22,7 @@
                         [ngClass]="{
                             
                         }"
-                        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards$[cardId].picture +'.svg)'}"
+                        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"
                         pDraggable
                         (onDragStart)="dragStart($event, f, j)"
                         (onDragEnd)="dragEnd()"></div>
@@ -31,21 +31,21 @@
                 <div class="solitaire-deck-container flex-auto flex flex-row flex-nowrap justify-content-end gap-4">
                     <div class="solitaire-card-stack"
                     [ngClass]="{
-                        'deck-waste-spread-1': board$.deckWaste.length < 2,
-                        'deck-waste-spread-2': board$.deckWaste.length == 2,
-                        'deck-waste-spread-3': board$.deckWaste.length > 2,
+                        'deck-waste-spread-1': board.deckWaste.length < 2,
+                        'deck-waste-spread-2': board.deckWaste.length == 2,
+                        'deck-waste-spread-3': board.deckWaste.length > 2,
                         
                     }">
                         <div  class="solitaire-card bg-card-placeholder"></div>
                         <!-- 'highlighted-card': isHighlighted(board.deckWaste, i) -->
                         <div class="solitaire-card"
-                        *ngFor="let cardId of board$.deckWaste; let i = index"
+                        *ngFor="let cardId of board.deckWaste; let i = index"
                         [ngClass]="{
-                            'non-interactable': i !== board$.deckWaste.length - 1
+                            'non-interactable': i !== board.deckWaste.length - 1
                         }"
-                        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards$[cardId].picture +'.svg)'}"
+                        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"
                         pDraggable
-                        (onDragStart)="dragStart($event, board$.deckWaste, i)"
+                        (onDragStart)="dragStart($event, board.deckWaste, i)"
                         (onDragEnd)="dragEnd()"></div>
                     </div>
                     <!-- 'highlighted-card': isHighlighted_deck(), -->
@@ -53,13 +53,13 @@
                     (click)="drawCards()"
                     [ngClass]="{
 
-                        'bg-card-back': board$.deckStock.length != 0,
-                        'bg-card-placeholder': board$.deckStock.length == 0
+                        'bg-card-back': board.deckStock.length != 0,
+                        'bg-card-placeholder': board.deckStock.length == 0
                     }"></div>
                 </div>
             </div>
             <div class="solitaire-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">
-                <div *ngFor="let tab of board$.tableau" pDroppable (onDrop)="dropOnTableau(tab)">
+                <div *ngFor="let tab of board.tableau" pDroppable (onDrop)="dropOnTableau(tab)">
                     <!-- 'highlighted-card': isHighlighted_placeholder(tab) -->
                     <div class="solitaire-card bg-card-tableau-placeholder" [ngClass]="{
 
@@ -76,10 +76,10 @@
                         'tableau-stack-element-compact-5': i !== 0 && tab.length == 17,
                         'tableau-stack-element-compact-6': i !== 0 && tab.length == 18,
                         'tableau-stack-element-compact-7': i !== 0 && tab.length > 18,
-                        'non-interactable': !(cards$[cardId].movable),
+                        'non-interactable': !(cards[cardId].movable),
                         
                     }"
-                    [ngStyle]="{'background-image': (cards$[cardId].faceShown)? 'url(/assets/cards/'+ cards$[cardId].picture +'.svg)' : 'url(/assets/cards/back_0.svg'}"
+                    [ngStyle]="{'background-image': (cards[cardId].faceShown)? 'url(/assets/cards/'+ cards[cardId].picture +'.svg)' : 'url(/assets/cards/back_0.svg'}"
                     pDraggable
                     (onDragStart)="dragStart($event, tab, i)"
                     (onDragEnd)="dragEnd()"></div>
@@ -87,7 +87,7 @@
             </div>
         </div>
     </div>
-    <div  *ngIf="cards$ && board$" id="card-stack-dragged">
+    <div  *ngIf="cards && board" id="card-stack-dragged">
         <div class="solitaire-card"
         *ngFor="let cardId of draggedCards; let i = index" 
         [ngClass]="{
@@ -100,7 +100,7 @@
             'tableau-stack-element-compact-6': i !== 0 && draggedCardsOrigin!.length == 18,
             'tableau-stack-element-compact-7': i !== 0 && draggedCardsOrigin!.length > 18
         }"
-        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards$[cardId].picture +'.svg)'}"></div>
+        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"></div>
     </div>
     <div id="ghost-image"></div>
     <!-- todo: odvojiti u bottom bar komponentu nakon ngrx transformacije . . . -->
