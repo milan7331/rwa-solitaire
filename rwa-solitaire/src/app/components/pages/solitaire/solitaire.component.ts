@@ -21,6 +21,9 @@ import { EntityState } from '@ngrx/entity';
 // DODATI UNDO SELEKTOR ZA DOSTUPNOST DUGMETA??
 // GDE IDE GAME END CHECK???
 
+// BUGFIX: KARTE SE NE DODAJU NA ODGOVARAJUĆI FND VEĆ NA PRVI??
+// PRENOS KARTE NA PRAZNO POLJE PREJEBE CEO STACK AKO GA IMA I ZAVRŠI NA FOUNDATION?? THE F
+
 export class SolitaireComponent implements AfterViewInit, OnDestroy {
   difficulty = SolitaireDifficulty;
 
@@ -52,6 +55,7 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
     board$.pipe(takeUntil(this.#destroy$)).subscribe((board) => {
         this.board = board;
+        console.log(this.board);
       });
 
     cards$.pipe(takeUntil(this.#destroy$)).subscribe((cards) => {
@@ -219,13 +223,19 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     if (!this.board) return;
     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
 
-    const lastMove = this.board?.moveNumber;
-    this.store.dispatch(solitaireActions.dropOnFoundation({
+    const lastMove = this.board!.moveNumber;
+
+    let payload = {
       suit: cardSuit,
       src: this.draggedCardsOrigin,
       dest: dropArray,
       srcIndex: this.draggedCardsStartIndex
-    }));
+    }
+
+    this.store.dispatch(solitaireActions.dropOnFoundation(payload));
+    
+    console.log("payload:");
+    console.log(payload);
 
     if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
   }

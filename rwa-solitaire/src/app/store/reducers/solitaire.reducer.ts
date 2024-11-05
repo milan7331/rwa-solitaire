@@ -93,7 +93,10 @@ export const solitaireReducer = createReducer(
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
 
-        let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
+        let newSrc = findArrayInNewBoard(newBoard, currentBoard, src);
+        let newDest = findArrayInNewBoard(newBoard, currentBoard, dest);
+        if (newSrc === undefined || newDest === undefined) return state;
+
         if (!moveCards(newSrc, newDest, srcIndex)) return state;
 
         const updates = updateCardsAfterMove(state.cards, newSrc, newBoard);
@@ -114,7 +117,10 @@ export const solitaireReducer = createReducer(
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
 
-        let [newSrc, newDest] = findArraysInNewBoard(newBoard, src, dest);
+        let newSrc = findArrayInNewBoard(newBoard, currentBoard, src);
+        let newDest = findArrayInNewBoard(newBoard, currentBoard, dest);
+        if (newSrc === undefined || newDest === undefined) return state;
+        
         if (!moveCards(newSrc, newDest, srcIndex)) return state;
 
         const updates = updateCardsAfterMove(state.cards, newSrc, newBoard);
@@ -290,24 +296,19 @@ function findCurrentBoard(state: SolitaireState): SolitaireBoard | undefined {
     return state.boards.entities[currentBoardId];
 }
 
-function findArraysInNewBoard(newBoard: SolitaireBoard, ...oldArrays: number[][]): number[][] {
-    
-    let newArrays: number[][] = [
-        ...newBoard.foundation,
-        ...newBoard.tableau,
-        newBoard.deckStock,
-        newBoard.deckWaste
-    ]
+function findArrayInNewBoard(newBoard: SolitaireBoard, oldBoard: SolitaireBoard, oldArray: number[]): number[] | undefined {
+    if (oldBoard.deckStock === oldArray) return newBoard.deckStock;
+    if (oldBoard.deckWaste === oldArray) return newBoard.deckWaste;
 
-    return oldArrays
-        .map(oldArray => newArrays.find(newArray => checkArraysAreEqual(oldArray, newArray)))
-        .filter(Boolean) as number[][];
+    for (const tabIndex in oldBoard.tableau) {
+        if (oldBoard.tableau[tabIndex] === oldArray) return newBoard.tableau[tabIndex];
+    }
 
-}
+    for (const fndIndex in oldBoard.foundation) {
+        if (oldBoard.foundation[fndIndex] === oldArray) return newBoard.foundation[fndIndex];
+    }
 
-function checkArraysAreEqual(arr1: number[], arr2: number[]): boolean {
-    if (arr1.length !== arr2.length) return false;
-    return arr1.every((el, index) => el === arr2[index]);
+    return undefined;
 }
 
 function updateCardsAfterMove(cardsES: EntityState<Card>, stack: number[], currentBoard: SolitaireBoard): { previousUpdate: PreviousUpdate, cardUpdate: Update<Card> } | undefined {
