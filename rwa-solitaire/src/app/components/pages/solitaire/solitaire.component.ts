@@ -1,6 +1,6 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Subject, takeUntil, filter } from 'rxjs';
+import { combineLatest, Subject, takeUntil, filter, Observable } from 'rxjs';
 
 import { selectBoard, selectCards } from '../../../store/selectors/solitaire.selectors'
 import { AudioService } from '../../../services/audio/audio.service';
@@ -9,7 +9,7 @@ import { SolitaireHints, SolitaireMove } from '../../../models/solitaire/solitai
 import { SolitaireBoard, SolitaireDifficulty } from '../../../models/solitaire/solitaire-board'; 
 import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
-import { EntityState } from '@ngrx/entity';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-solitaire',
@@ -17,26 +17,16 @@ import { EntityState } from '@ngrx/entity';
   styleUrl: './solitaire.component.scss'
 })
 
-
-// DODATI UNDO SELEKTOR ZA DOSTUPNOST DUGMETA??
-// GDE IDE GAME END CHECK???
-
-// BUGFIX: KARTE SE NE DODAJU NA ODGOVARAJUĆI FND VEĆ NA PRVI??
-// PRENOS KARTE NA PRAZNO POLJE PREJEBE CEO STACK AKO GA IMA I ZAVRŠI NA FOUNDATION?? THE F
-
-export class SolitaireComponent implements AfterViewInit, OnDestroy {
+export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
   difficulty = SolitaireDifficulty;
 
   #destroy$: Subject<void> = new Subject<void>();
-  
+  #board$: Observable<SolitaireBoard | undefined>;
+  #cards$: Observable<Card[]>
+
   board: SolitaireBoard | undefined | null;
   cards: Card[] | undefined | null;
   hints: SolitaireHints = { moves: [], cycleDeck: false, hintIndex: -1, hintVisible: false } as SolitaireHints;
-
-  // za prikaz random komponenti nema veze sa ovom komponentom. . . izmeniti nekada
-  gameEndVisible: boolean = false;
-  newGameConfirmationVisible: boolean = false;
-  changeDiffConfirmationVisible: boolean = false;
 
   draggedCards: number[] = [];
   draggedCardsStartIndex: number | null = null;
@@ -49,29 +39,33 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   clickedElementOffsetX: number = 0;
   clickedElementOffsetY: number = 0;
 
-  constructor(private audio: AudioService, private store: Store, private helper: SolitaireHelperService) {
-    const board$ = this.store.select(selectBoard);
-    const cards$ = this.store.select(selectCards);
+  constructor(private audio: AudioService, private store: Store, private helper: SolitaireHelperService, private router: Router) {
+    this.#board$ = this.store.select(selectBoard);
+    this.#cards$ = this.store.select(selectCards);
 
-    board$.pipe(takeUntil(this.#destroy$)).subscribe((board) => {
-        this.board = board;
-        console.log(this.board);
-      });
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras.state as { difficulty: SolitaireDifficulty } | undefined;
+    const value = state?.difficulty;
+    this.start(value);
+  }
 
-    cards$.pipe(takeUntil(this.#destroy$)).subscribe((cards) => {
-        this.cards = cards;
-      });
+  ngOnInit(): void {
+    this.#board$.pipe(takeUntil(this.#destroy$)).subscribe((board) => {
+      this.board = board;
+    });
 
-    combineLatest([board$, cards$])
+    this.#cards$.pipe(takeUntil(this.#destroy$)).subscribe((cards) => {
+      this.cards = cards;
+    });
+
+    combineLatest([this.#board$, this.#cards$])
     .pipe(
         takeUntil(this.#destroy$),
         filter(([board, cards]) => !!board && !!cards)
     )
     .subscribe(([board, cards]) => {
       this.hints = this.helper.getHints(board!, cards!);
-    })
-
-    this.start();
+    });
   }
 
   ngAfterViewInit(): void {
@@ -88,15 +82,10 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.#destroy$.complete();
   }
 
-  public start() {
+  public start(difficulty: SolitaireDifficulty = SolitaireDifficulty.Hard) {
     // ovde treba provera za acc ako je neka igra u toku?? inače start new bez pitanja
     // takođe difficulty pitanje da iskače prozor ili nešto
 
-
-    this.startNewGame(SolitaireDifficulty.Hard);
-  }
-
-  public startNewGame(difficulty: SolitaireDifficulty = SolitaireDifficulty.Hard) {
     this.resetDraggedCards();
 
     this.store.dispatch(solitaireActions.startNewGame({difficulty}));
@@ -107,19 +96,6 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     
     this.resetDraggedCards();
     this.store.dispatch(solitaireActions.restartGame());
-  }
-
-  public changeDifficulty(): void {
-    // fali confirmation provera neka??
-    // ne znam da li to ide ovde ispitati naknadno
-
-    if (!this.board) return;
-
-    const newDifficulty = this.board!.difficulty === SolitaireDifficulty.Hard
-      ? SolitaireDifficulty.Easy
-      : SolitaireDifficulty.Hard
-
-    this.startNewGame(newDifficulty);
   }
 
   private clickOffset = (event: MouseEvent) => {
@@ -138,8 +114,6 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
   }
 
   public drawCards(): void {
-    //this.hideHints();
-
     if (!this.board) return;
     this.audio.play_deckDraw(this.board);
     this.store.dispatch(solitaireActions.drawCards());
@@ -151,8 +125,6 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     if (this.hints.moves.length > 0) {
       this.hints.hintIndex = (this.hints.hintIndex + 1) % this.hints.moves.length;
     }
-
-    console.log(this.hints);
   }
 
   public hideHints(): void {
@@ -225,17 +197,12 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
 
     const lastMove = this.board!.moveNumber;
 
-    let payload = {
+    this.store.dispatch(solitaireActions.dropOnFoundation({
       suit: cardSuit,
       src: this.draggedCardsOrigin,
       dest: dropArray,
       srcIndex: this.draggedCardsStartIndex
-    }
-
-    this.store.dispatch(solitaireActions.dropOnFoundation(payload));
-    
-    console.log("payload:");
-    console.log(payload);
+    }));
 
     if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
   }
@@ -262,16 +229,6 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.dragAndDropCleanUp();
   }
 
-  // private getNewHints(): void {
-  //   this.hints = this.solitaireHelper.getHints(this.board);
-  //   this.hintIndex = -1;
-  // }
-
-  // private gameEndCheck() {
-  //   this.gameEndVisible = this.solitaireHelper.lookForGameEndCondition(this.board);
-  //   if (this.gameEndVisible) this.audio.play_levelComplete();
-  // }
-
   private dragAndDropCleanUp(): void {
     document.removeEventListener('drag', this.followCursor);
 
@@ -291,40 +248,4 @@ export class SolitaireComponent implements AfterViewInit, OnDestroy {
     this.draggedCardsStartIndex = null;
     this.draggedCardsOrigin = null;
   }
-
-  // ostalo je potrebno preneti u bottom bar komponentu i koristiti store za pozivanje prozora i čega već
-
-  public pressed_newGameButton(): void {
-    this.audio.play_buttonPress();
-    this.newGameConfirmationVisible = true;
-  }
-
-  public pressed_changeDifficultyButton(): void {
-    this.audio.play_buttonPress();
-    this.changeDiffConfirmationVisible = true;
-  }
-
-  public pressed_showHintButton(): void {
-    this.audio.play_buttonPress();
-    this.showHints();
-  }
-
-  public pressed_showFakeGameEndButton(): void {
-    this.audio.play_buttonPress();
-    this.gameEndVisible = true;
-  }
-
-  public pressed_logButton(): void {
-    // console.log("--LOG-- Move number: " + board?.moveNumber);
-    console.log("----------");
-    console.log(this.cards);
-    console.log(this.board);
-    console.log("----------");
-  }
-
-  public pressed_undoButton(): void {
-    this.audio.play_buttonPress();
-    this.store.dispatch(solitaireActions.undo());
-  }
-
 }

@@ -4,7 +4,8 @@ import { visibilityActions } from "../actions/visibility.actions"
 
 
 export const initialVisibilityState: VisibilityState = {
-    showAudioControl: false
+    showAudioControl: false,
+    showHint: false
 }
 
 export const visibilityReducer = createReducer(
@@ -20,5 +21,9 @@ export const visibilityReducer = createReducer(
     on(visibilityActions.toggleAudioControls, (state) => ({
         ...state,
         showAudioControl: !state.showAudioControl
+    })),
+    on(visibilityActions.showHint, (state) => ({
+        ...state,
+        showHint: !state.showHint
     }))
 )

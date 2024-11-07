@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AudioService } from '../../../services/audio/audio.service';
+import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-board';
 
 @Component({
   selector: 'app-home',
@@ -20,11 +21,11 @@ export class HomeComponent {
   loadSolitairePage(difficulty: string): void {
     switch (difficulty) {
       case "easy":
-        this.router.navigate(["/solitaire"]);
+        this.router.navigate(["/solitaire"], { state: { difficulty: SolitaireDifficulty.Easy }});
         break;
 
       case "hard":
-        this.router.navigate(["/solitaire"]);  
+        this.router.navigate(["/solitaire"], { state: { difficulty: SolitaireDifficulty.Hard }});
         break;
 
       default:
