@@ -4,10 +4,9 @@
         <app-audio-control></app-audio-control>
     </div>
     <div class="top-bar-group-center flex flex-row flex-nowrap justify-content-center flex-auto">
-        <div class="mr-4">Timer: 00:00</div>
-        <div class="ml-4">Score: 0</div>
+        <div class="mr-4">Time: {{ timeString$ | async }}</div>
     </div>
     <div class="top-bar-group-end">
-        Klondike solitaire: {{gameDifficulty$ | async}}
+        Klondike solitaire: {{ gameDifficulty$ | async }}
     </div>
 </p-toolbar>

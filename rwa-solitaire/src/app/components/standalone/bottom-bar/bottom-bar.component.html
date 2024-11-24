@@ -7,6 +7,11 @@
         <p-button class="mr-2" [outlined]="true" (onClick)="pressed_showHint()">Show hint</p-button>
         <p-button class="mr-2" [outlined]="true" (onClick)="pressed_undo()" [disabled]="!(undoAvailable$ | async)">Undo</p-button>
         <p-button class="mr-2" [outlined]="true" (onClick)="pressed_toggleEndGameDialog()">Fake game end</p-button>
+
+        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerStart()">Start</p-button>
+        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerPause()">Pause</p-button>
+        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerReset()">Reset</p-button>
+        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerShowTime()">Get value</p-button>
     </div>
     <div class="bottom-bar-group-end"></div>
 </p-toolbar>

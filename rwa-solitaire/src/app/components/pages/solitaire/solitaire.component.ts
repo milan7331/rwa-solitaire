@@ -10,6 +10,7 @@ import { SolitaireBoard, SolitaireDifficulty } from '../../../models/solitaire/s
 import { SolitaireHelperService } from '../../../services/solitaire-helper/solitaire-helper.service';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
 import { Router } from '@angular/router';
+import { TimerService } from '../../../services/timer/timer.service';
 
 @Component({
   selector: 'app-solitaire',
@@ -39,7 +40,13 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
   clickedElementOffsetX: number = 0;
   clickedElementOffsetY: number = 0;
 
-  constructor(private audio: AudioService, private store: Store, private helper: SolitaireHelperService, private router: Router) {
+  constructor(
+    private audio: AudioService,
+    private store: Store,
+    private helper: SolitaireHelperService,
+    private router: Router,
+    private timer: TimerService
+  ) {
     this.#board$ = this.store.select(selectBoard);
     this.#cards$ = this.store.select(selectCards);
 

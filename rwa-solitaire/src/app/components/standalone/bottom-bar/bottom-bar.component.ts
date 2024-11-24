@@ -7,6 +7,7 @@ import { selectGameDifficulty, selectGameEndState, selectUndoAvailability } from
 import { Observable, Subject, takeUntil, filter, startWith } from 'rxjs';
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-board';
 import { Router } from '@angular/router';
+import { TimerService } from '../../../services/timer/timer.service';
 
 @Component({
   selector: 'app-bottom-bar',
@@ -29,7 +30,7 @@ export class BottomBarComponent implements OnInit {
 
   // hints??
 
-  constructor(private audio: AudioService, private store: Store, private router: Router) {
+  constructor(private audio: AudioService, private store: Store, private router: Router, private timer: TimerService) {
     this.undoAvailable$ = this.store.select(selectUndoAvailability);
     this.gameEnd$ = this.store.select(selectGameEndState).pipe(startWith(false));
   }
@@ -102,5 +103,33 @@ export class BottomBarComponent implements OnInit {
 
   pressed_navigateHome(): void {
     this.router.navigate(["/home"]);
+  }
+
+
+
+
+
+
+
+
+
+  pressed_timerStart(): void {
+    this.timer.start();
+  }
+
+  pressed_timerPause(): void {
+    this.timer.pause();
+  }
+
+  pressed_timerReset(): void {
+    this.timer.reset();
+  }
+
+  pressed_timerShowTime(): void {
+    let tempSub = this.timer.time$.subscribe(
+      time => console.log(time)
+    );
+    tempSub.unsubscribe();
+
   }
 }

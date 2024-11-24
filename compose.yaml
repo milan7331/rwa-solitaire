@@ -1,0 +1,42 @@
+services:
+
+    solitaire-frontend:
+        container_name: rwa-frontend
+        build: 
+            context: ./rwa-solitaire
+            dockerfile: Dockerfile
+        ports:
+            - "4200:4200"
+        volumes:
+            - type: bind
+              source: ./rwa-solitaire
+              target: /usr/src/app
+              read_only: true
+            # - ./rwa-solitaire:/usr/src/app
+            # - node_modules_cache:/usr/src/app/node_modules
+        depends_on:
+            - solitaire-db
+        restart: always
+        stdin_open: true
+        tty: true
+        command: ng serve --host 0.0.0.0 --port 4200 # --poll 1000
+
+    solitaire-db:
+        container_name: rwa-db
+        image: postgres:17-bookworm
+        restart: always
+        environment:
+            POSTGRES_USER: rwa-user
+            POSTGRES_PASSWORD: rwa-password
+            POSTGRES_DB: rwa-db
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+
+
+
+
+volumes:
+    #node_modules_cache:
+    postgres-data:

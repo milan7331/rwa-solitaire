@@ -1,0 +1,27 @@
+# Node modules
+node_modules
+
+# Build output
+dist/
+
+# Environment-specific files
+.env
+*.local
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Git-related files
+.git
+.gitignore
+
+# Editor-specific files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
