@@ -21,6 +21,25 @@ services:
         tty: true
         command: ng serve --host 0.0.0.0 --port 4200 # --poll 1000
 
+    solitaire-backend:
+        container_name: rwa-backend
+        build:
+            context: ./rwa-solitaire-api
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        volumes:
+            - type: bind
+              source: ./rwa-solitaire-api
+              target: /usr/src/app
+              read_only: true
+        depends_on:
+            - solitaire-db
+        restart: always
+        stdin_open: true
+        tty: true
+        command: nest start --watch 
+
     solitaire-db:
         container_name: rwa-db
         image: postgres:17-bookworm
