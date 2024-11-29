@@ -6,6 +6,7 @@ COPY package.json .
 
 RUN npm config set strict-ssl false
 
+RUN npm install -g @nestjs/cli --verbose
 RUN npm install --verbose
 
 EXPOSE 3000
