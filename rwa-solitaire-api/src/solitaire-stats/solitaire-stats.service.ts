@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSolitaireStatDto } from './dto/create-solitaire-stats.dto';
-import { UpdateSolitaireStatDto } from './dto/update-solitaire-stats.dto';
+import { CreateSolitaireStatsDto } from './dto/create-solitaire-stats.dto';
+import { UpdateSolitaireStatsDto } from './dto/update-solitaire-stats.dto';
 
 @Injectable()
 export class SolitaireStatsService {
-  create(createSolitaireStatDto: CreateSolitaireStatDto) {
-    return 'This action adds a new solitaireStat';
+  create(createSolitaireStatsDto: CreateSolitaireStatsDto) {
+    return 'This action adds a new solitaireStats';
   }
 
   findAll() {
@@ -13,14 +13,14 @@ export class SolitaireStatsService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} solitaireStat`;
+    return `This action returns a #${id} solitaireStats`;
   }
 
-  update(id: number, updateSolitaireStatDto: UpdateSolitaireStatDto) {
-    return `This action updates a #${id} solitaireStat`;
+  update(id: number, updateSolitaireStatsDto: UpdateSolitaireStatsDto) {
+    return `This action updates a #${id} solitaireStats`;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} solitaireStat`;
+    return `This action removes a #${id} solitaireStats`;
   }
 }
