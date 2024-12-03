@@ -14,5 +14,6 @@ import { SolitaireStats } from 'src/solitaire-stats/entities/solitaire-stats.ent
   ],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService]
 })
 export class UserModule {}

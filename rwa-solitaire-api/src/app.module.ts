@@ -13,6 +13,8 @@ import { AppService } from './app.service';
 import { User } from './user/entities/user.entity';
 import { SavedGame } from './saved-game/entities/saved-game.entity';
 import { SolitaireStats } from './solitaire-stats/entities/solitaire-stats.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
@@ -39,6 +41,12 @@ import { SolitaireStats } from './solitaire-stats/entities/solitaire-stats.entit
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    },
+  ],
 })
 export class AppModule {}
