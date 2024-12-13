@@ -15,6 +15,7 @@ import { SavedGame } from './saved-game/entities/saved-game.entity';
 import { SolitaireStats } from './solitaire-stats/entities/solitaire-stats.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuthGuard } from './auth/auth.guard';
     SavedGameModule, 
     SolitaireStatsModule,
     AuthModule,
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
