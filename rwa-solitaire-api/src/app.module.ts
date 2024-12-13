@@ -31,7 +31,7 @@ import { AuthGuard } from './auth/auth.guard';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User, SavedGame, SolitaireStats],
+        autoLoadEntities: true,
         synchronize: true,
       })
     }),
@@ -41,12 +41,6 @@ import { AuthGuard } from './auth/auth.guard';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

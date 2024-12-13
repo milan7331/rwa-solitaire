@@ -8,13 +8,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(private readonly configService: ConfigService) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
             secretOrKey: configService.get<string>('JWT_SECRET')
         });
     }
 
     async validate(payload: any) {
+        // ovde dodati biznis logiku, možda više info o useru,
+        // ovde takođe ide provera za revoked tokene itd. . .
+
         return {
-            userId: payload.sub, username: payload.username  // ŠTA BRE ?????????'
+            userId: payload.sub,
+            username: payload.username
         }
     }
 
