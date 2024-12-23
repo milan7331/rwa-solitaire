@@ -5,26 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 
-// export interface User1 {
-//   userId: number,
-//   username: string,
-//   password: string;
-// }
-
 @Injectable()
 export class UserService {
-  // private readonly users = [
-  //   {
-  //     userId: 1,
-  //     username: 'john',
-  //     password: 'changeme',
-  //   },
-  //   {
-  //     userId: 2,
-  //     username: 'maria',
-  //     password: 'guess',
-  //   },
-  // ];
 
   constructor(
     @InjectRepository(User)
@@ -72,3 +54,22 @@ export class UserService {
     await this.usersRepository.delete(id);
   }
 }
+
+// export interface User1 {
+//   userId: number,
+//   username: string,
+//   password: string;
+// }
+
+// private readonly users = [
+//   {
+//     userId: 1,
+//     username: 'john',
+//     password: 'changeme',
+//   },
+//   {
+//     userId: 2,
+//     username: 'maria',
+//     password: 'guess',
+//   },
+// ];

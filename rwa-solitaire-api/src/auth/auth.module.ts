@@ -11,6 +11,7 @@ import { UserModule } from 'src/resoruces/user/user.module';
 import { Guard } from './auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { HashService } from './hash.service';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtAuthGuard } from './guards/jwt.guard';
   ],
   providers: [
     AuthService,
+    HashService,
     LocalStrategy,
     JwtStrategy,
     {
@@ -43,7 +45,8 @@ import { JwtAuthGuard } from './guards/jwt.guard';
   ],
   exports: [
     AuthService,
-    JwtModule
+    JwtModule,
+    HashService
   ]
 })
 export class AuthModule {}

@@ -1,27 +1,34 @@
-import { SavedGame } from 'src/saved-game/entities/saved-game.entity';
-import { SolitaireStats } from 'src/solitaire-stats/entities/solitaire-stats.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, JoinColumn } from 'typeorm';
+import { SavedGame } from 'src/resoruces/saved-game/entities/saved-game.entity';
+import { SolitaireHistory } from 'src/resoruces/solitaire-history/entities/solitaire-history.entity';
+import { SolitaireStats } from 'src/resoruces/solitaire-stats/entities/solitaire-stats.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ unique: true })
+    @CreateDateColumn({ type: 'timestamptz' })
+    createdAt: Date;
+
+    @UpdateDateColumn({ type: 'timestamptz' })
+    updatedAt: Date;
+
+    @Column({ unique: true, type: 'text' })
     username: string;
 
-    @Column({ unique: true })
+    @Column({ unique: true, type: 'text' })
     email: string;
 
-    @Column()
+    @Column({ type: 'text' })
     passwordHash: string;
-
-    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
-    createdAt: Date;
 
     @OneToOne(() => SolitaireStats, (solitaireStats) => solitaireStats.user, { cascade: true })
     @JoinColumn()
     solitaireStats: SolitaireStats;
+
+    @OneToMany(() => SolitaireHistory, (solitaireHistory) => solitaireHistory.user, { cascade: false })
+    solitaireHistory: SolitaireHistory[];
 
     @OneToOne(() => SavedGame, (savedGame) => savedGame.gameState, { cascade: true })
     @JoinColumn()

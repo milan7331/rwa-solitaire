@@ -1,5 +1,5 @@
-import { User } from "src/user/entities/user.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/resoruces/user/entities/user.entity";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class SavedGame {
@@ -8,11 +8,11 @@ export class SavedGame {
     id: number;
 
     @Column({ type: 'jsonb', nullable: true })
-    gameState: any;
+    gameState: Record<string, any>;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+    @UpdateDateColumn({ type: 'timestamptz' })
     lastUpdated: Date;
 
-    @OneToOne(() => User, (user) => user.solitaireStats)
+    @OneToOne(() => User, (user) => user.savedGame)
     user: User;
 }

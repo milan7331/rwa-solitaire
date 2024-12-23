@@ -1,6 +1,6 @@
 
-import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, EntityOptions } from 'typeorm';
+import { User } from 'src/resoruces/user/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, EntityOptions, UpdateDateColumn } from 'typeorm';
 
 
 @Entity()
@@ -8,19 +8,24 @@ export class SolitaireStats {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ default: 0 })
+    @Column({ type:'number', default: 0 })
     gamesPlayed: number;
   
-    @Column({ default: 0 })
-    totalWins: number;
+    @Column({ type:'number', default: 0 })
+    gamesWon: number;
+
+    @Column({ type: 'interval', default: 0 })
+    totalTimePlayed: string;
   
-    @Column({ type: 'float', default: 0 })
-    averageSolveTime: number;
+    @Column({ type: 'interval', default: 0 })
+    averageSolveTime: string;
   
-    @Column({ type: 'float', nullable: true })
-    fastestSolveTime: number;
+    @Column({ type: 'interval', nullable: true })
+    fastestSolveTime: string;
+
+    @UpdateDateColumn({type: 'timestamptz'})
+    updatedAt: Date;
   
-    // One-to-One relationship with User
     @OneToOne(() => User, (user) => user.solitaireStats)
     user: User;
 }

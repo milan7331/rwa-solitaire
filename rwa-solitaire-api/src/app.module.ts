@@ -2,19 +2,18 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { UserModule } from './user/user.module';
-import { SavedGameModule } from './saved-game/saved-game.module';
-import { SolitaireStatsModule } from './solitaire-stats/solitaire-stats.module';
+import { UserModule } from './resoruces/user/user.module';
+import { SavedGameModule } from './resoruces/saved-game/saved-game.module';
+import { SolitaireStatsModule } from './resoruces/solitaire-stats/solitaire-stats.module';
 import { AuthModule } from './auth/auth.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { User } from './user/entities/user.entity';
-import { SavedGame } from './saved-game/entities/saved-game.entity';
-import { SolitaireStats } from './solitaire-stats/entities/solitaire-stats.entity';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './auth/auth.guard';
+import { User } from './resoruces/user/entities/user.entity';
+import { SavedGame } from './resoruces/saved-game/entities/saved-game.entity';
+import { SolitaireStats } from './resoruces/solitaire-stats/entities/solitaire-stats.entity';
+import { Guard } from './auth/auth.guard'; // ne koristi se kasnije rešiti
 import { DatabaseModule } from './database/database.module';
 
 @Module({
@@ -32,8 +31,8 @@ import { DatabaseModule } from './database/database.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true,
-        synchronize: true,
+        autoLoadEntities: true,  // možda treba dodati entitete manuelno? videćemo kasnije
+        synchronize: true, // prepraviti kasnije!!!
       })
     }),
     UserModule, 
