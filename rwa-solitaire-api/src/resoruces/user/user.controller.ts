@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, HttpException, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,8 +8,30 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @HttpCode(201)
+  async register(@Body() createUserDto: CreateUserDto) {
+    try {
+      await this.userService.create(createUserDto);
+      return {
+        statusCode: HttpStatus.CREATED,
+        message: 'User sucessfuly registered'
+      }
+    } catch(error) {
+      if (error.code === '23505') {
+        throw new HttpException({
+            statusCode: HttpStatus.CONFLICT,
+            message: 'User already exists!'
+          }, HttpStatus.CONFLICT
+        )
+      }
+
+      throw new HttpException({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Something went wrong!'
+        }, HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
+
   }
 
   @Get()

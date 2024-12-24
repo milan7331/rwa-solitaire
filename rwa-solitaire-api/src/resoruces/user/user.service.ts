@@ -1,21 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { HashService } from 'src/auth/hash.service';
 
 @Injectable()
 export class UserService {
 
   constructor(
     @InjectRepository(User)
-    private usersRepository:Repository<User>,
-    private dataSource: DataSource
+    private userRepository:Repository<User>,
+    private dataSource: DataSource,
+    private hashService: HashService
   ) { }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto): Promise<boolean> {
+    const hashedPassword = this.hashService.hashPassword(createUserDto.password);
+    const newDTO = {...createUserDto}
+
+
+    return false;
   }
 
   async createMany(users: User[]) {
@@ -34,16 +41,16 @@ export class UserService {
   }
 
   findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return this.userRepository.find();
   }
   
   async findOne(username: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({username});
+    return this.userRepository.findOneBy({username});
   }
 
   async findOneById(id: number): Promise<User | null> {
     // return this.users.find(user => user.username === username);
-    return this.usersRepository.findOneBy({id});
+    return this.userRepository.findOneBy({id});
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -51,7 +58,7 @@ export class UserService {
   }
 
   async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    await this.userRepository.delete(id);
   }
 }
 

@@ -16,21 +16,4 @@ export class AuthController {
     async login(@Request() req: ExpressRequest) {
         return this.authService.login(req.user);
     }
-
-
-    // ovo bi trebalo da ide u user module??
-    // @HttpCode(HttpStatus.CREATED)
-    // @Public()
-    // @Post('register')
-    // async register(@Request() req: any) {
-    //     // register gg
-    // }
-
-    // @Public()
-    // @Get()
-    // async publicTest() { return 'publicTest' }
-
-    // @Get()
-    // async authTest() { return 'authorizedTest'}
-
 }

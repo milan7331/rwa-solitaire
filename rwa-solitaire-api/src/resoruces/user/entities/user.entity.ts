@@ -2,6 +2,8 @@ import { SavedGame } from 'src/resoruces/saved-game/entities/saved-game.entity';
 import { SolitaireHistory } from 'src/resoruces/solitaire-history/entities/solitaire-history.entity';
 import { SolitaireStats } from 'src/resoruces/solitaire-stats/entities/solitaire-stats.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { HashService } from 'src/auth/hash.service';
 
 @Entity()
 export class User {

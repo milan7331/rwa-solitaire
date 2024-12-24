@@ -6,13 +6,15 @@ import { User } from './entities/user.entity';
 import { SavedGame } from 'src/resoruces/saved-game/entities/saved-game.entity';
 import { SolitaireStats } from 'src/resoruces/solitaire-stats/entities/solitaire-stats.entity';
 import { SolitaireHistory } from '../solitaire-history/entities/solitaire-history.entity';
+import { HashService } from 'src/auth/hash.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     SavedGame,
     SolitaireStats,
-    SolitaireHistory
+    SolitaireHistory,
+    HashService
   ],
   controllers: [UserController],
   providers: [UserService],
