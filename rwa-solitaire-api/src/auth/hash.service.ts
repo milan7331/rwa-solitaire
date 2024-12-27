@@ -12,6 +12,6 @@ export class HashService {
     }
 
     async verifyPassword(storedHash: string, plainPassword: string): Promise<boolean> {
-        return await verify(storedHash, plainPassword);
+        return verify(storedHash, plainPassword);
     }
 }

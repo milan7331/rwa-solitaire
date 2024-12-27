@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
@@ -18,9 +18,23 @@ export class UserService {
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<boolean> {
-    const hashedPassword = this.hashService.hashPassword(createUserDto.password);
-    const newDTO = {...createUserDto}
+    const { email, username, password } = createUserDto;
+    const existingUser = await this.findOne(username, email);
+    if (existingUser) throw new ConflictException('Username or email already exists!');
+    
+    const hashedPassword = await this.hashService.hashPassword(password);
+    const newUser = this.userRepository.create({
+      username,
+      email,
+      passwordHash: hashedPassword,
+    })
 
+    try {
+      const result = await this.userRepository.save(newUser);
+      return true;
+    } catch(error) {
+        console.error('Failed to save user:', error.message);
+    }
 
     return false;
   }
@@ -39,44 +53,25 @@ export class UserService {
       await queryRunner.release();
     }
   }
-
-  findAll(): Promise<User[]> {
-    return this.userRepository.find();
-  }
   
-  async findOne(username: string): Promise<User | null> {
-    return this.userRepository.findOneBy({username});
+  async findOne(username?: string, email?: string): Promise<User | null> {
+    if (!username && !email) return null;
+
+    return this.userRepository.findOneBy({
+      ...(username && { username }),
+      ...(email && { email })
+    });
   }
 
-  async findOneById(id: number): Promise<User | null> {
-    // return this.users.find(user => user.username === username);
-    return this.userRepository.findOneBy({id});
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<boolean> {
+    const result = await this.userRepository.update(id, updateUserDto);
+    if (result.affected > 0) return true;
+    return false;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+
 
   async remove(id: number): Promise<void> {
-    await this.userRepository.delete(id);
+    await this.userRepository.softRemove();
   }
 }
-
-// export interface User1 {
-//   userId: number,
-//   username: string,
-//   password: string;
-// }
-
-// private readonly users = [
-//   {
-//     userId: 1,
-//     username: 'john',
-//     password: 'changeme',
-//   },
-//   {
-//     userId: 2,
-//     username: 'maria',
-//     password: 'guess',
-//   },
-// ];
