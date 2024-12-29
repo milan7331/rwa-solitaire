@@ -36,6 +36,6 @@ export class User {
     @JoinColumn()
     savedGame: SavedGame;
 
-    @DeleteDateColumn()
+    @DeleteDateColumn({ type: 'timestamptz'})
     deletedAt?: Date;
 }

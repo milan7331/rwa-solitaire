@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, DeepPartial, Repository } from 'typeorm';
+import { DataSource, DeepPartial, LessThan, Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -79,5 +79,29 @@ export class UserService {
       console.error('Failed to soft remove the user: ' + error.message);
     }
     return false;
+  }
+
+  private async findUsersForPermanentRemoval(): Promise<User[]> {
+    const ThirtyDaysAgo = new Date();
+    ThirtyDaysAgo.setDate(ThirtyDaysAgo.getDate() - 30);
+
+    const usersToRemove = await this.userRepository.find({
+      withDeleted: true,
+      where: { deletedAt: LessThan(ThirtyDaysAgo)}
+    });
+
+    return usersToRemove;
+  }
+
+  async permanentlyRemoveOldUsers(): Promise<number> {
+    try {
+      const usersToRemove = await this.findUsersForPermanentRemoval();
+      if (usersToRemove.length > 0) {
+        await this.userRepository.remove(usersToRemove);
+      }
+      return usersToRemove.length;
+    } catch(error) {
+      throw new Error('Error during old user cleanup: ' + error.message);
+    }
   }
 }
