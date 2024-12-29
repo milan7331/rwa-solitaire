@@ -15,6 +15,8 @@ import { SavedGame } from './resoruces/saved-game/entities/saved-game.entity';
 import { SolitaireStats } from './resoruces/solitaire-stats/entities/solitaire-stats.entity';
 import { Guard } from './auth/auth.guard'; // ne koristi se kasnije rešiti
 import { DatabaseModule } from './database/database.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { DatabaseModule } from './database/database.module';
     SolitaireStatsModule,
     AuthModule,
     DatabaseModule,
+    LeaderboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
