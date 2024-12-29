@@ -1,7 +1,7 @@
 import { SavedGame } from 'src/resoruces/saved-game/entities/saved-game.entity';
 import { SolitaireHistory } from 'src/resoruces/solitaire-history/entities/solitaire-history.entity';
 import { SolitaireStats } from 'src/resoruces/solitaire-stats/entities/solitaire-stats.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { HashService } from 'src/auth/hash.service';
 
@@ -29,11 +29,13 @@ export class User {
     @JoinColumn()
     solitaireStats: SolitaireStats;
 
-    @OneToMany(() => SolitaireHistory, (solitaireHistory) => solitaireHistory.user, { cascade: false })
+    @OneToMany(() => SolitaireHistory, (solitaireHistory) => solitaireHistory.user, { cascade: ["remove", "soft-remove", "recover"] })
     solitaireHistory: SolitaireHistory[];
 
-    @OneToOne(() => SavedGame, (savedGame) => savedGame.gameState, { cascade: true })
+    @OneToOne(() => SavedGame, (savedGame) => savedGame.gameState, { cascade: ["remove", "soft-remove", "recover"] })
     @JoinColumn()
     savedGame: SavedGame;
 
+    @DeleteDateColumn()
+    deletedAt?: Date;
 }

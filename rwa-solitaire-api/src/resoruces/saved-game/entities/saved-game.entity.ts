@@ -1,5 +1,5 @@
 import { User } from "src/resoruces/user/entities/user.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class SavedGame {
@@ -15,4 +15,7 @@ export class SavedGame {
 
     @OneToOne(() => User, (user) => user.savedGame)
     user: User;
+
+    @DeleteDateColumn()
+    deletedAt?: Date;
 }

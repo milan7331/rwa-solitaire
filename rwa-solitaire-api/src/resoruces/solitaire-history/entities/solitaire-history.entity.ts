@@ -1,5 +1,5 @@
 import { User } from "src/resoruces/user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 export enum SolitaireDifficulty {
     Easy = 0,
@@ -30,5 +30,9 @@ export class SolitaireHistory {
     gameDifficulty: SolitaireDifficulty;
 
     @ManyToOne(() => User, (User) => User.solitaireHistory)
+    @JoinColumn()
     user: User;
+
+    @DeleteDateColumn()
+    deletedAt?: Date;
 }

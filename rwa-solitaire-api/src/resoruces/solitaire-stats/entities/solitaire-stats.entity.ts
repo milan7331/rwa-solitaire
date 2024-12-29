@@ -1,6 +1,6 @@
 
 import { User } from 'src/resoruces/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, EntityOptions, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, EntityOptions, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 
 @Entity()
@@ -17,7 +17,7 @@ export class SolitaireStats {
     @Column({ type: 'interval', default: 0 })
     totalTimePlayed: string;
   
-    @Column({ type: 'interval', default: 0 })
+    @Column({ type: 'interval', nullable: true })
     averageSolveTime: string;
   
     @Column({ type: 'interval', nullable: true })
@@ -28,4 +28,7 @@ export class SolitaireStats {
   
     @OneToOne(() => User, (user) => user.solitaireStats)
     user: User;
+
+    @DeleteDateColumn()
+    deletedAt?: Date;
 }

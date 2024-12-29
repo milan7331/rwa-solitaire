@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, DeepPartial, Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -71,7 +71,13 @@ export class UserService {
 
 
 
-  async remove(id: number): Promise<void> {
-    await this.userRepository.softRemove();
+  async remove(id: number): Promise<boolean> {
+    try {
+      await this.userRepository.softRemove({id: id} as DeepPartial<User>);
+      return true;
+    } catch(error) {
+      console.error('Failed to soft remove the user: ' + error.message);
+    }
+    return false;
   }
 }
