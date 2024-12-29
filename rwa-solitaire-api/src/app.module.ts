@@ -2,20 +2,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { UserModule } from './resoruces/user/user.module';
-import { SavedGameModule } from './resoruces/saved-game/saved-game.module';
-import { SolitaireStatsModule } from './resoruces/solitaire-stats/solitaire-stats.module';
+import { UserModule } from './resources/user/user.module';
+import { SavedGameModule } from './resources/saved-game/saved-game.module';
+import { SolitaireStatsModule } from './resources/solitaire-stats/solitaire-stats.module';
 import { AuthModule } from './auth/auth.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { User } from './resoruces/user/entities/user.entity';
-import { SavedGame } from './resoruces/saved-game/entities/saved-game.entity';
-import { SolitaireStats } from './resoruces/solitaire-stats/entities/solitaire-stats.entity';
-import { Guard } from './auth/auth.guard'; // ne koristi se kasnije rešiti
-import { DatabaseModule } from './database/database.module';
-import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { User } from './resources/user/entities/user.entity';
+import { SavedGame } from './resources/saved-game/entities/saved-game.entity';
+import { SolitaireStats } from './resources/solitaire-stats/entities/solitaire-stats.entity';
 import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
 
 @Module({
@@ -33,7 +30,7 @@ import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true,  // možda treba dodati entitete manuelno? videćemo kasnije
+        autoLoadEntities: true,
         synchronize: true, // prepraviti kasnije!!!
       })
     }),
@@ -41,7 +38,6 @@ import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
     SavedGameModule, 
     SolitaireStatsModule,
     AuthModule,
-    DatabaseModule,
     LeaderboardModule,
   ],
   controllers: [AppController],

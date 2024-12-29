@@ -1,6 +1,6 @@
-import { SavedGame } from 'src/resoruces/saved-game/entities/saved-game.entity';
-import { SolitaireHistory } from 'src/resoruces/solitaire-history/entities/solitaire-history.entity';
-import { SolitaireStats } from 'src/resoruces/solitaire-stats/entities/solitaire-stats.entity';
+import { SavedGame } from 'src/resources/saved-game/entities/saved-game.entity';
+import { SolitaireHistory } from 'src/resources/solitaire-history/entities/solitaire-history.entity';
+import { SolitaireStats } from 'src/resources/solitaire-stats/entities/solitaire-stats.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { HashService } from 'src/auth/hash.service';

@@ -1,4 +1,4 @@
-import { User } from "src/resoruces/user/entities/user.entity";
+import { User } from "src/resources/user/entities/user.entity";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 export enum SolitaireDifficulty {
