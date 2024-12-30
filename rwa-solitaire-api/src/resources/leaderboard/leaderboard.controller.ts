@@ -1,34 +1,41 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { LeaderboardService } from './leaderboard.service';
+
+import { LeaderboardWeeklyService } from './leaderboard.weekly.service';
+import { LeaderboardMonthlyService } from './leaderboard.monthly.service';
+import { LeaderboardYearlyService } from './leaderboard.yearly.service';
 import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
 import { UpdateLeaderboardDto } from './dto/update-leaderboard.dto';
 
 @Controller('leaderboard')
 export class LeaderboardController {
-  constructor(private readonly leaderboardService: LeaderboardService) {}
+  constructor(
+    private readonly weeklyService: LeaderboardWeeklyService,
+    private readonly monthlyService: LeaderboardMonthlyService,
+    private readonly yearlyService: LeaderboardYearlyService
+  ) {}
 
   @Post()
   create(@Body() createLeaderboardDto: CreateLeaderboardDto) {
-    return this.leaderboardService.create(createLeaderboardDto);
+    return this.weeklyService.create(createLeaderboardDto);
   }
 
   @Get()
   findAll() {
-    return this.leaderboardService.findAll();
+    return this.weeklyService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.leaderboardService.findOne(+id);
+    return this.weeklyService.findOne(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateLeaderboardDto: UpdateLeaderboardDto) {
-    return this.leaderboardService.update(+id, updateLeaderboardDto);
+    return this.weeklyService.update(+id, updateLeaderboardDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.leaderboardService.remove(+id);
+    return this.weeklyService.remove(+id);
   }
 }

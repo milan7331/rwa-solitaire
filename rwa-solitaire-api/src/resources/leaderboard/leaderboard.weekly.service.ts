@@ -3,7 +3,7 @@ import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
 import { UpdateLeaderboardDto } from './dto/update-leaderboard.dto';
 
 @Injectable()
-export class LeaderboardService {
+export class LeaderboardWeeklyService {
   create(createLeaderboardDto: CreateLeaderboardDto) {
     return 'This action adds a new leaderboard';
   }
