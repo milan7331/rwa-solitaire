@@ -1,10 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeepPartial, Repository } from "typeorm";
-
+import { Repository } from "typeorm";
 
 import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
-import { UpdateLeaderboardDto } from './dto/update-leaderboard.dto';
 import { WeeklyLeaderboard } from "./entities/leaderboard-weekly.entity";
 import { MonthlyLeaderboard } from "./entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "./entities/leaderboard-yearly.entity";
@@ -12,8 +10,6 @@ import { SolitaireHistory } from "../solitaire-history/entities/solitaire-histor
 import { UserData } from "../leaderboard/entities/userdata";
 import { CronService } from "src/database/cron.service";
 import { SolitaireHistoryService } from "../solitaire-history/solitaire-history.service";
-import { Leaderboard } from "./entities/leaderboard.entity";
-
 
 @Injectable()
 export class LeaderboardService {
