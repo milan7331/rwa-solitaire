@@ -2,18 +2,15 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 import { UserModule } from './resources/user/user.module';
 import { SavedGameModule } from './resources/saved-game/saved-game.module';
 import { SolitaireStatsModule } from './resources/solitaire-stats/solitaire-stats.module';
 import { AuthModule } from './auth/auth.module';
-
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
-import { User } from './resources/user/entities/user.entity';
-import { SavedGame } from './resources/saved-game/entities/saved-game.entity';
-import { SolitaireStats } from './resources/solitaire-stats/entities/solitaire-stats.entity';
 import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -39,6 +36,7 @@ import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
     SolitaireStatsModule,
     AuthModule,
     LeaderboardModule,
+    DatabaseModule
   ],
   controllers: [AppController],
   providers: [AppService],

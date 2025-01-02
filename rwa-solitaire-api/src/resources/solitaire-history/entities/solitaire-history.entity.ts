@@ -11,23 +11,29 @@ export class SolitaireHistory {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @CreateDateColumn({type: 'timestamptz'})
-    gameStartedAt: number;
+    @CreateDateColumn({ type: 'timestamptz' })
+    createdAt: Date;
 
-    @UpdateDateColumn({type: 'timestamptz'})
-    gameLastUpdatedAt: number;
-
-    @Column({type: 'integer', default: 0})
+    @Column({ type: 'integer', default: 0 })
     moves: number;
 
-    @Column({type: 'boolean', default: false})
+    @Column({ type: 'boolean', default: false })
     gameWon: boolean;
 
-    @Column({type: 'boolean', default: false})
+    @Column({ type: 'boolean', default: false })
     gameFinished: boolean;
 
-    @Column({type: 'integer', default: 0})
+    @Column({ type: 'integer', default: 0 })
     gameDifficulty: SolitaireDifficulty;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    startedTime: Date;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    finishedTime: Date;
+
+    @Column({ type: 'integer', nullable: true, default: 0})
+    gameDurationInSeconds: number;
 
     @ManyToOne(() => User, (User) => User.solitaireHistory)
     @JoinColumn()

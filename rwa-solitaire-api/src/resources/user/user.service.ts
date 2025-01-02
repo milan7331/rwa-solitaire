@@ -64,12 +64,14 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<boolean> {
-    const result = await this.userRepository.update(id, updateUserDto);
-    if (result.affected > 0) return true;
+    try {
+      const result = await this.userRepository.update(id, updateUserDto);
+      if (result.affected > 0) return true;
+    } catch(error) {
+      console.error('Failed to update user: ' + error.message);
+    }
     return false;
   }
-
-
 
   async remove(id: number): Promise<boolean> {
     try {

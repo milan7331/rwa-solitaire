@@ -1,7 +1,8 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { UserData } from "../entities/userdata";
 
 @Entity()
-export class Leaderboard {
+export abstract class Leaderboard {
 
     @PrimaryGeneratedColumn()
     id: number;
@@ -12,15 +13,18 @@ export class Leaderboard {
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 
-    @Column()
-    top20_averageTime: Record<string, number>[];
+    @Column({ type: 'timestamptz', unique: true })
+    timePeriod: Date;
 
     @Column()
-    top20_bestTime: Record<string, number>[];
+    top20_averageTime: UserData[];
 
     @Column()
-    top20_numberOfMoves: Record<string, number>[];
+    top20_bestTime: UserData[];
 
     @Column()
-    top20_gamesPlayed: Record<string, number>[];
+    top20_numberOfMoves: UserData[];
+
+    @Column()
+    top20_gamesPlayed: UserData[];
 }
