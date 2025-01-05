@@ -28,7 +28,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<boolean> {
     const { email, username, password } = createUserDto;
-    const existingUser = await this.findUser(username, email, null, false, false);
+    const existingUser = await this.findOne(username, email, null, false, false);
     if (existingUser) throw new ConflictException('Username or email already exists!');
     
     const passwordHash = await this.hashService.hashPassword(password);
@@ -43,7 +43,7 @@ export class UserService {
     }
   }
   
-  async findUser(
+  async findOne(
     username?: string,
     email?: string,
     plainPassword?: string,
@@ -87,7 +87,7 @@ export class UserService {
   }
 
   async remove(username: string, email: string, plainPassword: string): Promise<boolean> {
-    const user = await this.findUser(username, email, plainPassword, false, true);
+    const user = await this.findOne(username, email, plainPassword, false, true);
     if (!user) return false;
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -114,7 +114,7 @@ export class UserService {
   }
 
   async restore(username: string, email: string, plainPassword: string): Promise<boolean> {
-    const user = await this.findUser(username, email, plainPassword, true, true);
+    const user = await this.findOne(username, email, plainPassword, true, true);
     if (!user) return false;
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -141,15 +141,31 @@ export class UserService {
   }
   
   async permanentlyRemoveOldUsers(): Promise<number> {
+    const usersToRemove = await this.findUsersForPermanentRemoval();
+    if (usersToRemove.length <= 0) return 0;
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const usersToRemove = await this.findUsersForPermanentRemoval();
-      if (usersToRemove.length > 0) {
-        await this.userRepository.remove(usersToRemove);
+      for (let i in usersToRemove) {
+        await queryRunner.manager.remove(usersToRemove[i]);
+        await queryRunner.manager.remove(usersToRemove[i].savedGame);
+        await queryRunner.manager.remove(usersToRemove[i].solitaireStats);
+        for (let j in usersToRemove[i].solitaireHistory) {
+          await queryRunner.manager.remove(usersToRemove[i].solitaireHistory[j]);
+        }
       }
+
+      await queryRunner.commitTransaction();
       return usersToRemove.length;
     } catch(error) {
+      await queryRunner.rollbackTransaction();
       console.error(error.message);
       throw new Error('Error during old user cleanup! | user.service.ts');
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -161,14 +177,14 @@ export class UserService {
     try {
       usersToRemove = await this.userRepository.find({
         withDeleted: true,
-        where: { deletedAt: LessThan(ThirtyDaysAgo)}
+        where: { deletedAt: LessThan(ThirtyDaysAgo)},
+        relations: ['solitaireHistory', 'solitaireStats', 'savedGame']
       });
+      
+      return usersToRemove;
     } catch(error) {
-      usersToRemove = [];
       console.error(error.message);
       throw new Error('Error finding soft deleted user accounts! | user.service.ts');
-    } finally {
-      return usersToRemove;
     }
   }
 }
