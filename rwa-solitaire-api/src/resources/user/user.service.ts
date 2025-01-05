@@ -75,8 +75,11 @@ export class UserService {
     return user;
   }
 
-  async update(username:string, updateUserDto: UpdateUserDto): Promise<boolean> {
+  async update(username:string, plainPassword: string, updateUserDto: UpdateUserDto): Promise<boolean> {
     try {
+      const user = await this.findOne(username, null, plainPassword, false, false);
+      if (!user) return false;
+
       const result = await this.userRepository.update(username, updateUserDto);
       if (result.affected > 0) return true;
       return false;

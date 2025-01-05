@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/resources/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { HashService } from './hash.service';
+import { DeepPartial } from 'typeorm';
+import { User } from 'src/resources/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -11,16 +13,12 @@ export class AuthService {
         private hashService: HashService
     ) {}
 
-    async validateUser(username: string, plainPassword: string): Promise<any> {
-        const user = await this.userService.findOne(username);
+    // find one also checks for password matching, no need to call the hashService derictly
+    async validateUser(username: string, plainPassword: string): Promise<DeepPartial<User> | null> {
+        const user = await this.userService.findOne(username, null, plainPassword, false, false);
         if (!user) return null;
-
-        if (this.hashService.verifyPassword(user.passwordHash, plainPassword)) {
-            const { passwordHash, ...result } = user;
-            return result;
-        }
-
-        return null;
+        const { passwordHash, ...result } = user;
+        return result;
     }
 
     async login(user: any): Promise<{ access_token: string }> {
