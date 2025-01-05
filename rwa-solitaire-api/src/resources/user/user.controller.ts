@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from 'src/auth/auth.decorators';
+import { DeleteUserDto } from './dto/delete-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,8 +34,20 @@ export class UserController {
         }, HttpStatus.INTERNAL_SERVER_ERROR
       )
     }
-
   }
+
+  // @Get()
+  // findOne(@Param('id') id: number) {
+  //   try {
+  //     const user = await this.userService.findOne("" , id);
+  //     if (!user) {
+  //       throw new HttpException({ statusCode: HttpStatus.NOT_FOUND, message: 'User not found!' }, HttpStatus.NOT_FOUND);
+  //     }
+
+  //     const { passwordHash, ...safeData } = user;
+  //   }
+  // } 
+
 
   @Get()
   findAll() {
@@ -46,13 +59,54 @@ export class UserController {
   //   return this.userService.findOne(+id);
   // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   return this.userService.update(+id, updateUserDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
+  // @Delete()
+  // deleteAccount(@Body() deleteUser: DeleteUserDto) {
+  //   try {
+  //     const result = await this.userService.remove(deleteUser.username, deleteUser.email, deleteUser.password);
+  //     if (!result) {
+  //       throw new HttpException(
+  //         { statusCode: HttpStatus.NOT_FOUND, message: 'User not found!' },
+  //         HttpStatus.NOT_FOUND
+  //       );
+  //     }
+  //     return {
+  //       statusCode: HttpStatus.OK,
+  //       message: 'User deleted sucessfully'
+  //     }
+  //   } catch(error) {
+  //     console.error(error.message);
+  //     throw new HttpException(
+  //       { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Something went wrong!' },
+  //       HttpStatus.INTERNAL_SERVER_ERROR
+  //     );
+  //   }
+  // }
+
+  // restoreAccount(@Body() restoreUser: DeleteUserDto) {
+  //   try {
+  //     const result = await this.userService.restore(restoreUser.username, restoreUser.email, restoreUser.password);
+  //     if (!result) {
+  //       throw new HttpException(
+  //         { statusCode: HttpStatus.NOT_FOUND, message: 'User not found!' },
+  //         HttpStatus.NOT_FOUND
+  //       );
+  //     }
+  //     return {
+  //       statusCode: HttpStatus.OK,
+  //       message: 'User restored sucessfully'
+  //     }
+  //   } catch(error) {
+  //     console.error(error.message);
+  //     throw new HttpException(
+  //       { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Something went wrong!' },
+  //       HttpStatus.INTERNAL_SERVER_ERROR
+  //     );
+  //   }
+
+  // }
 }
