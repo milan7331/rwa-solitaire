@@ -7,6 +7,9 @@ import { UpdateSolitaireStatsDto } from './dto/update-solitaire-stats.dto';
 export class SolitaireStatsController {
   constructor(private readonly solitaireStatsService: SolitaireStatsService) {}
 
+
+  // PREPRAVITI SVE DTO, koristese u servisu a nisu napisani!
+
   // @Post()
   // create(@Body() createSolitaireStatsDto: CreateSolitaireStatsDto) {
   //   return this.solitaireStatsService.create(createSolitaireStatsDto);

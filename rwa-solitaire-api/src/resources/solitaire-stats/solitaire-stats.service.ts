@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateSolitaireStatsDto } from './dto/create-solitaire-stats.dto';
 import { UpdateSolitaireStatsDto } from './dto/update-solitaire-stats.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,10 +13,6 @@ export class SolitaireStatsService {
   constructor(
     @InjectRepository(SolitaireStats)
     private solitaireStatsRepository: Repository<SolitaireStats>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    private dataSource: DataSource,
-    private hashService: HashService
   ) { }
 
   async create(user?: User): Promise<boolean> {
@@ -30,6 +26,11 @@ export class SolitaireStatsService {
     stats.user = user ? user : null;
 
     try {
+      const existingStats = await this.solitaireStatsRepository.findOne({
+        where: { user: user }
+      });
+      if (existingStats) throw new ConflictException('Solitaire-Stats already exists for this user!');
+
       await this.solitaireStatsRepository.save(stats);
       return true;
     } catch (error) {
