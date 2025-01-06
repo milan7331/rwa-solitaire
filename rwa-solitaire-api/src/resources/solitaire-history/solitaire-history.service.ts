@@ -169,7 +169,6 @@ export class SolitaireHistoryService {
 
     try {
       await this.historyRepository.softRemove(game);
-      
       return true;
     } catch(error) {
       console.error(error.message);
@@ -182,8 +181,9 @@ export class SolitaireHistoryService {
     if (!game) throw new Error('No game to restore found! | solitaire-history.service.ts');
 
     try {
-      await this.historyRepository.restore(game);
-      return true;
+      const result = await this.historyRepository.restore(game);
+      if (result.affected > 0) return true;
+      return false;
     } catch(error) {
       console.error(error.message);
       throw new Error('Error restoring solitaire-game! | solitaire-history.service.ts');
