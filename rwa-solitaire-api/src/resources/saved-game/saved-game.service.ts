@@ -37,7 +37,10 @@ export class SavedGameService {
     newSave.user = createSavedGameDto.user;
 
     try {
-      this.savedGameRepository.save(newSave);
+      const existingSave = await this.findOne(null, newSave.user, false);
+      if (existingSave) throw new Error('Error creating game save, user already has a saved game! | saved-game.service.ts');
+
+      await this.savedGameRepository.save(newSave);
       return true;
     } catch(error) {
       console.error(error.message);

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UserData } from "../entities/userdata";
 
 @Entity()
@@ -27,4 +27,7 @@ export abstract class Leaderboard {
 
     @Column()
     top20_gamesPlayed: UserData[];
+
+    @DeleteDateColumn({ type: 'timestamptz' })
+    deletedAt: Date;
 }

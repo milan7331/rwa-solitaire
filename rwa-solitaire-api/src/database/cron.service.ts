@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { MonthlyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-monthly.entity";
+import { WeeklyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-weekly.entity";
+import { YearlyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-yearly.entity";
 import { LeaderboardService } from "src/resources/leaderboard/leaderboard.service";
 import { UserService } from "src/resources/user/user.service";
 
@@ -20,7 +23,7 @@ export class CronService {
     private async updateWeeklyLeaderboard(): Promise<void> {
         const retries = 10;
         for (let i = 0; i < retries; i++) {
-            const result = await this.leaderboardService.WeeklyLeaderboardRefresh();
+            const result = await this.leaderboardService.leaderboardRefresh(WeeklyLeaderboard);
             if (result) return;
             console.warn('Weekly leaderboard update failed!');
             this.sleep(3000);
@@ -31,7 +34,7 @@ export class CronService {
     private async updateMonthlyLeaderboard(): Promise<void> {
         const retries = 10;
         for (let i = 0; i < retries; i++) {
-            const result = await this.leaderboardService.MonthlyLeaderboardRefresh();
+            const result = await this.leaderboardService.leaderboardRefresh(MonthlyLeaderboard);
             if (result) return;
             console.warn('Weekly leaderboard update failed!');
             this.sleep(3000);
@@ -42,7 +45,7 @@ export class CronService {
     private async updateYearlyLeaderboard(): Promise<void> {
         const retries = 10;
         for (let i = 0; i < retries; i++) {
-            const result = await this.leaderboardService.YearlyLeaderboardRefresh();
+            const result = await this.leaderboardService.leaderboardRefresh(YearlyLeaderboard);
             if (result) return;
             console.warn('Weekly leaderboard update failed!');
             this.sleep(3000);
