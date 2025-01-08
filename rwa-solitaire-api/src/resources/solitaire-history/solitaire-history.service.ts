@@ -35,7 +35,10 @@ export class SolitaireHistoryService {
   }
 
 
-  private async getAllGamesFromTimeSpan(startDate: Date, endDate: Date): Promise<SolitaireHistory[]> {
+  private async getAllGamesFromTimeSpan(
+    startDate: Date,
+    endDate: Date
+  ): Promise<SolitaireHistory[]> {
     let results = [];
     try {
       results = await this.historyRepository.find({
@@ -44,15 +47,19 @@ export class SolitaireHistoryService {
         }
       })
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding solitaire games from said timespan | solitaire-history.service.ts');
     }
 
     return results;
   }
   
-  async startGame(user: User, startedTime: Date, difficulty: SolitaireDifficulty): Promise<boolean> {
-    let newGame = await this.create(user, 0, false, false, difficulty, startedTime, null, 0);
+  async startGame(
+    user: User,
+    startedTime: Date,
+    gameDifficulty: SolitaireDifficulty
+  ): Promise<boolean> {
+    let newGame = await this.create({user, startedTime, gameDifficulty} as CreateSolitaireHistoryDto);
     if (!newGame) throw new Error('Error starting game! | solitaire-history.service.ts');
 
     return true;
@@ -81,36 +88,21 @@ export class SolitaireHistoryService {
     return true;
   }
 
-  async create(
-    user: User,
-    moves?: number,
-    gameWon?: boolean,
-    gameFinished?: boolean,
-    gameDifficulty?: SolitaireDifficulty,
-    startedTime?: Date,
-    finishedTime?: Date,
-    gameDurationInSeconds?: number,
-  ): Promise<boolean> {
-    let newGame = new SolitaireHistory();
-    newGame.user = user;
-    newGame.moves = moves ?? 0;
-    newGame.gameWon = gameWon ?? false;
-    newGame.gameFinished = gameFinished ?? false;
-    newGame.gameDifficulty = gameDifficulty ?? SolitaireDifficulty.Hard;
-    newGame.startedTime = startedTime ?? null;
-    newGame.finishedTime = finishedTime ?? null;
-    newGame.gameDurationInSeconds = gameDurationInSeconds ?? 0;
-
+  async create(createUserDto: CreateSolitaireHistoryDto): Promise<boolean> {
+    const existingGame = await this.historyRepository.findOne({
+      where: {
+        user: createUserDto.user,
+        startedTime: createUserDto.startedTime
+      }
+    });
+    if (existingGame) throw new ConflictException('This game already exists for this user!');
+    
     try {
-      const existingGame = await this.historyRepository.findOne({
-        where: { user: user, startedTime: startedTime }
-      });
-      if (existingGame) throw new ConflictException('This game already exists for this user!');
+      await this.historyRepository.save(createUserDto);
 
-      await this.historyRepository.save(newGame);
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error creating solitaire-game | solitaire-history.service.ts');
     }
   }
@@ -122,34 +114,43 @@ export class SolitaireHistoryService {
         where: { user: user }
       });
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding users solitaire history | solitaire-history.service.ts');
     }
 
     return games;
   }
 
-  findOne(id?: number, user?: User, startedTime?: Date, withDeleted?: boolean): Promise<SolitaireHistory | null> {
+  findOne(
+    id: number | null = null,
+    user: User | null = null,
+    startedTime: Date | null = null,
+    withDeleted: boolean
+  ): Promise<SolitaireHistory | null> {
     if (!id && (!user || !startedTime)) return null;
+
+    const where: any = { };
+    if (id) where.id = id;
+    if (user) where.user = user;
+    if (startedTime) where.startedTime = startedTime;
 
     try {
       const game = this.historyRepository.findOne({
-        where: {
-          ...(id && { id }),
-          ...(user && { user }),
-          ...(startedTime && { startedTime }),
-        },
-        withDeleted: withDeleted,
+        where,
+        withDeleted,
       });
 
       return game;
       } catch(error) {
-        console.error(error.message);
+        console.error('Error: ' + error);
         throw new Error('Error finding solitaire-game! | solitaire-history.service.ts');
     }
   }
 
-  async update(id: number, updateDto: UpdateSolitaireHistoryDto): Promise<boolean> {
+  async update(
+    id: number,
+    updateDto: UpdateSolitaireHistoryDto
+  ): Promise<boolean> {
     const game = await this.findOne(id, null, null, false);
     if (!game) throw new Error('No game to update found! | solitaire-history.service.ts');
 
@@ -158,12 +159,16 @@ export class SolitaireHistoryService {
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error updating solitaire-game! | solitaire-history.service.ts');
     }
   }
 
-  async remove(id?: number, user?: User, startedTime?: Date): Promise<boolean> {
+  async remove(
+    id: number | null,
+    user: User | null,
+    startedTime: Date | null
+  ): Promise<boolean> {
     const game = await this.findOne(id, user, startedTime, false);
     if (!game) throw new Error('No game to remove found! | solitaire-history.service.ts');
 
@@ -171,12 +176,16 @@ export class SolitaireHistoryService {
       await this.historyRepository.softRemove(game);
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error softRemoving solitaire-game! | solitaire-history.service.ts');
     }
   }
 
-  async restore(id?: number, user?: User, startedTime?: Date): Promise<boolean> {
+  async restore(
+    id: number | null = null,
+    user: User | null = null,
+    startedTime: Date | null = null
+  ): Promise<boolean> {
     const game = await this.findOne(id, user, startedTime, true);
     if (!game) throw new Error('No game to restore found! | solitaire-history.service.ts');
 
@@ -185,7 +194,7 @@ export class SolitaireHistoryService {
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error restoring solitaire-game! | solitaire-history.service.ts');
     }
   }

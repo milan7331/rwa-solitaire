@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -8,16 +8,16 @@ import { MonthlyLeaderboard } from "./entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "./entities/leaderboard-yearly.entity";
 import { SolitaireHistory } from "../solitaire-history/entities/solitaire-history.entity";
 import { UserData } from "../leaderboard/entities/userdata";
-import { CronService } from "src/database/cron.service";
 import { SolitaireHistoryService } from "../solitaire-history/solitaire-history.service";
 import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
+import { CronService } from "src/database/cron.service";
 
 @Injectable()
 export class LeaderboardService {
   
   constructor(
-    private readonly cronService: CronService,
     private readonly historyService: SolitaireHistoryService,
+    private readonly cron: CronService,
 
     @InjectRepository(WeeklyLeaderboard)
     private readonly weeklyRepository: Repository<WeeklyLeaderboard>,
@@ -41,26 +41,14 @@ export class LeaderboardService {
       if (allGames.length <= 0) return false;
 
     const userData = this.prepareUserData(allGames);
-    const leaderboardDto = {
-      top20_averageTime: this.getTop20_averageTime(userData),
-      top20_bestTime: this.getTop20_bestTime(userData),
-      top20_gamesPlayed: this.getTop20_gamesPlayed(userData),
-      top20_numberOfMoves: this.getTop20_moveCount(userData),
-      timePeriod: timePeriod
-    } as UpdateLeaderboardDto;
+    const leaderboardDto = this.prepareUpsertDto(userData, timePeriod);
 
-    try {
-      await this.upsert(leaderboardDto, type);
-      return true;
-    } catch(error) {
-      console.error(error.message);
-    }
-
+    return this.upsert(leaderboardDto, type);
   }
 
   async create(
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
-    createLeaderboardDto: CreateLeaderboardDto
+    createLeaderboardDto: CreateLeaderboardDto,
+    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
   ): Promise<boolean> {
     const leaderboard = new type();
     leaderboard.timePeriod = createLeaderboardDto.timePeriod;
@@ -69,44 +57,39 @@ export class LeaderboardService {
     leaderboard.top20_gamesPlayed = createLeaderboardDto.top20_gamesPlayed;
     leaderboard.top20_numberOfMoves = createLeaderboardDto.top20_numberOfMoves;
     try {
-      const existingLeaderboard = await this.findOne(type, false, null, createLeaderboardDto.timePeriod);
-      if (existingLeaderboard) throw new Error('Leaderboard already exists for this time period! | leaderboard.service.ts');
+      const existingLeaderboard = await this.findOne(null, createLeaderboardDto.timePeriod, type, false);
+      if (existingLeaderboard) throw new ConflictException('Leaderboard already exists for this time period! | leaderboard.service.ts');
 
       await this.weeklyRepository.save(leaderboard);
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error creating leaderboard! | leaderboard.service.ts');
     }
   }
 
   async findOne(
+    id: number | null = null,
+    timePeriod: Date | null = null,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
-    withDeleted: boolean,
-    id?: number,
-    timePeriod?: Date
+    withDeleted: boolean
   ): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
-    if (!id && !timePeriod) throw new Error('Error finding leaderboard! | leaderboard.service.ts');
+    if (!id && !timePeriod) return null;
 
-    const repository =
-      type === WeeklyLeaderboard ? this.weeklyRepository :
-      type === MonthlyLeaderboard ? this.monthlyRepository :
-      type === YearlyLeaderboard ? this.yearlyRepository : null;
-
-    if (!repository) throw new Error('Error finding leaderboard! | leaderboard.service.ts');
+    const where: any = { }
+    if (id) where.id = id;
+    if (timePeriod) where.timePeriod = timePeriod;
 
     try {
+      const repository = this.getRepository(type);
       const leaderboard = await repository.findOne({
-        where: {
-          ...(id && { id: id }),
-          ...(timePeriod && { timePeriod: timePeriod })
-        },
+        where,
         withDeleted: withDeleted
       })
       
       return leaderboard;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding leaderboard! | leaderboard.service.ts');
     }
   }
@@ -115,21 +98,16 @@ export class LeaderboardService {
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
     withDeleted: boolean
   ): Promise<WeeklyLeaderboard[] | MonthlyLeaderboard[] | YearlyLeaderboard[]> {
-    const repository =
-      type === WeeklyLeaderboard ? this.weeklyRepository :
-      type === MonthlyLeaderboard ? this.monthlyRepository :
-      type === YearlyLeaderboard ? this.yearlyRepository : null;
-
-    if (!repository) throw new Error('Error finding leaderboards! | leaderboard.service.ts');
-
+    
     try {
+      const repository = this.getRepository(type);
       const leaderboards = await repository.find({
         withDeleted: withDeleted
       })
       
       return leaderboards;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding leaderboards! | leaderboard.service.ts');
     }
   }
@@ -138,81 +116,82 @@ export class LeaderboardService {
     data: UpdateLeaderboardDto,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
   ): Promise<boolean> {
-
-    const repository =
-      type === WeeklyLeaderboard ? this.weeklyRepository :
-      type === MonthlyLeaderboard ? this.monthlyRepository :
-      type === YearlyLeaderboard ? this.yearlyRepository : null;
-    if (!repository) throw new Error('Error finding repository for upserting a leaderboard! | leaderboard.service.ts');
+    if (!data.timePeriod) return false;
 
     try {
+      const repository = this.getRepository(type);
       await repository.upsert(data, { conflictPaths: ['timePeriod'] });
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error upserting leaderboard! | leaderboard.service.ts');
     }
   }
 
   async update(
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
+    id: number | null = null,
     updateDto: UpdateLeaderboardDto,
-    id?: number,
+    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
   ): Promise<boolean> {
-    if (!id && !updateDto.timePeriod) throw new Error('Error finding leaderboard to update! | leaderboard.service.ts');
+    if (!id && !updateDto.timePeriod) return false;
 
-    const repository =
-      type === WeeklyLeaderboard ? this.weeklyRepository :
-      type === MonthlyLeaderboard ? this.monthlyRepository :
-      type === YearlyLeaderboard ? this.yearlyRepository : null;
-    if (!repository) throw new Error('Error finding repository for updating a leaderboard! | leaderboard.service.ts');
-
+    const leaderboard = await this.findOne(id, updateDto.timePeriod, type, false);
+    if (!leaderboard) return false;
+    
     try {
-      const leaderboard = await this.findOne(type, false, id, updateDto.timePeriod);
-      if (!leaderboard) throw new Error('No leaderboard to update found! | leaderboard.service.ts');
-
+      const repository = this.getRepository(type);
       await repository.update(leaderboard.id, updateDto);
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error updating leaderboard! | leaderboard.service.ts');
     }
   }
 
-  async remove(id?: number, timePeriod?: Date): Promise<boolean> {
-    if (!id && !timePeriod) throw new Error('Error finding leaderboard to delete! | leaderboard.service.ts');
-
+  async remove(
+    id: number | null = null,
+    timePeriod: Date | null = null,
+    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
+  ): Promise<boolean> {
+    if (!id && !timePeriod) return false;
+    
+    const leaderboard = await this.findOne(id, timePeriod, type, false);
+    if (!leaderboard) return false;
+    
     try {
-      const weeklyLeaderboard = await this.findOne(WeeklyLeaderboard, false, id, timePeriod);
-      if (!weeklyLeaderboard) throw new Error('No leaderboard to remove found! | leaderboard.service.ts');
-
-      await this.weeklyRepository.softRemove(weeklyLeaderboard);
+      const repository = this.getRepository(type);
+      await repository.softRemove(leaderboard);
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error removing leaderboard! | leaderboard.service.ts');
     }
 
   }
 
-  async restore(id?: number, timePeriod?: Date): Promise<boolean> {
-    if (!id && !timePeriod) throw new Error('Error finding leaderboard to restore! | leaderboard.service.ts');
+  async restore(
+    id: number | null = null,
+    timePeriod: Date | null = null,
+    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
+  ): Promise<boolean> {
+    if (!id && !timePeriod) return false;
+    
+    const leaderboard = await this.findOne(id, timePeriod, type, true);
+    if (!leaderboard) return false;
 
     try {
-      const weeklyLeaderboard = await this.findOne(WeeklyLeaderboard, true, id, timePeriod);
-      if (!weeklyLeaderboard) throw new Error('No leaderboard to restore found! | leaderboard.service.ts');
-
-      await this.weeklyRepository.restore(weeklyLeaderboard);
+      const repository = this.getRepository(type);
+      await repository.restore(leaderboard);
       return true;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error restoring leaderboard! | leaderboard.service.ts');
     }
     
   }
 
   private prepareUserData(games: SolitaireHistory[]): UserData[] {    
-    const userData: Record<string, UserData> = {};
+    const userData = new Map<string, UserData>();
     
     games.forEach(game => {
       const username = game.user.username;
@@ -221,45 +200,92 @@ export class LeaderboardService {
         userData[username] = {
           username,
           totalGames: 0,
-          leastMoves: Infinity,
+          leastMoves: Number.MAX_SAFE_INTEGER,
           totalDuration: 0,
-          bestTime: Infinity,
+          bestTime: Number.MAX_SAFE_INTEGER,
           gamesWon: 0,
         };
       }
 
-      const userStats = userData[username];
+      const userStats = userData.get(username);
       userStats.totalGames++;
       if (game.gameWon) userStats.gamesWon++;
-      if (game.moves < userStats.leastMoves) userStats.leastMoves = game.moves;
+      userStats.leastMoves = Math.min(userStats.leastMoves, game.moves);
       userStats.totalDuration += game.gameDurationInSeconds;
-      if (game.gameDurationInSeconds < userStats.bestTime) userStats.bestTime = game.gameDurationInSeconds;
+      userStats.bestTime = Math.min(userStats.bestTime, game.gameDurationInSeconds);
     });
     
-    return Object.values(userData);
-  }
-  
-  private getTop20_bestTime(userData: UserData[]): UserData[] {
-    return userData
-      .sort((a, b) => a.bestTime - b.bestTime)
-      .slice(0, 20);
-  }
-  
-  private getTop20_averageTime(userData: UserData[]): UserData[] {
-    return userData
-      .sort((a, b) => (a.totalDuration / a.totalGames) - (b.totalDuration / b.totalGames))
-      .slice(0, 20);
+    return Array.from(userData.values());
   }
 
-  private getTop20_moveCount(userData: UserData[]): UserData[] {
-    return userData
-      .sort((a, b) => a.leastMoves - b.leastMoves)
-      .slice(0, 20);
+  private prepareUpsertDto(
+    userData: UserData[], 
+    timePeriod: Date
+  ): UpdateLeaderboardDto {
+
+    const top20_bestTime = [];
+    const top20_averageTime = [];
+    const top20_numberOfMoves = [];
+    const top20_gamesPlayed = [];
+
+    userData.forEach(user => {
+      // Insert into bestTime ranking
+      this.insertIntoTop20(top20_bestTime, user, (a, b) => a.bestTime - b.bestTime);
+  
+      // Insert into averageTime ranking
+      this.insertIntoTop20(top20_averageTime, user, (a, b) => (a.totalDuration / a.totalGames) - (b.totalDuration / b.totalGames));
+  
+      // Insert into moveCount ranking
+      this.insertIntoTop20(top20_numberOfMoves, user, (a, b) => a.leastMoves - b.leastMoves);
+  
+      // Insert into gamesPlayed ranking
+      this.insertIntoTop20(top20_gamesPlayed, user, (a, b) => b.totalGames - a.totalGames);
+    });
+
+    return {
+      top20_bestTime,
+      top20_averageTime,
+      top20_numberOfMoves,
+      top20_gamesPlayed,
+      timePeriod
+    };
   }
 
-  private getTop20_gamesPlayed(userData: UserData[]): UserData[] {
-    return userData
-      .sort((a, b) => b.totalGames - a.totalGames)
-      .slice(0, 20);
+  private insertIntoTop20(
+    ranking: UserData[],
+    user: UserData,
+    comparator: (a: UserData, b: UserData) => number
+  ): void {
+    // Find the correct position for the current user in the ranking
+    let inserted = false;
+    for (let i = 0; i < ranking.length; i++) {
+      if (comparator(user, ranking[i]) < 0) {
+        ranking.splice(i, 0, user);
+        inserted = true;
+        break;
+      }
+    }
+  
+    // If user is not inserted and ranking has space, push to the end
+    if (!inserted && ranking.length < 20) {
+      ranking.push(user);
+    }
+  
+    // Ensure ranking does not exceed 20 entries
+    if (ranking.length > 20) {
+      ranking.pop();
+    }
+  }
+
+  private getRepository(
+    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
+  ): Repository<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard> | null {
+    const repo = 
+      type === WeeklyLeaderboard ? this.weeklyRepository :
+      type === MonthlyLeaderboard ? this.monthlyRepository :
+      type === YearlyLeaderboard ? this.yearlyRepository : null;
+
+    if (!repo) throw new Error('Error finding repository! | leaderboard.service.ts');
+    return repo;
   }
 }

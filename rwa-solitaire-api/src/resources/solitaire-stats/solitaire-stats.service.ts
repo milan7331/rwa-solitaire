@@ -15,76 +15,97 @@ export class SolitaireStatsService {
     private solitaireStatsRepository: Repository<SolitaireStats>,
   ) { }
 
-  async create(user?: User): Promise<boolean> {
-    let stats = new SolitaireStats();
-
-    stats.gamesPlayed = 0;
-    stats.gamesWon = 0;
-    stats.totalTimePlayed = 0;
-    stats.averageSolveTime = null;
-    stats.fastestSolveTime = null;
-    stats.user = user ? user : null;
+  async create(createStatsDto: CreateSolitaireStatsDto): Promise<boolean> {
+    const existingStats = await this.solitaireStatsRepository.findOne({
+      where: { user: createStatsDto.user }
+    });
+    if (existingStats) throw new ConflictException('Solitaire-Stats already exists for this user!');
 
     try {
-      const existingStats = await this.solitaireStatsRepository.findOne({
-        where: { user: user }
-      });
-      if (existingStats) throw new ConflictException('Solitaire-Stats already exists for this user!');
-
-      await this.solitaireStatsRepository.save(stats);
+      await this.solitaireStatsRepository.save(createStatsDto);
       return true;
     } catch (error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error creating solitaire-stats! | solitaire-stats.service.ts');
     }
   }
 
-  async findOne(id: number, withDeleted: boolean, withRelations: boolean): Promise<SolitaireStats | null> {
+  async findOne(
+    id: number | null = null,
+    user: User | null = null,
+    withDeleted: boolean,
+    withRelations: boolean
+  ): Promise<SolitaireStats | null> {
+    if (!id && !user) return null;
+
+    const where: any = { };
+    if (id) where.id = id;
+    if (user) where.user = user;
+
     try {
       let stats = await this.solitaireStatsRepository.findOne({
-        where: { id },
-        withDeleted: withDeleted,
+        where,
+        withDeleted,
         relations: withRelations ? ['user'] : []
       });
       return stats;
     } catch (error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding solitaire-stats! | solitaire-stats.service.ts');
     }
   }
 
-  async update(id: number, updateSolitaireStatsDto: UpdateSolitaireStatsDto): Promise<boolean> {
+  async update(
+    id: number | null = null,
+    user: User | null = null,
+    updateSolitaireStatsDto: UpdateSolitaireStatsDto
+  ): Promise<boolean> {
+    if (!id && !user) return false;
+
+    const stats = this.findOne(id, user, false, false);
+    if (!stats) throw new Error('No stats to update found! | solitaire-stats.service.ts');
+
     try {
       await this.solitaireStatsRepository.update(id, updateSolitaireStatsDto);
       return true;
     } catch (error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error updating solitaire-stats! | solitaire-stats.service.ts');
     }
   }
 
-  async remove(id: number): Promise<boolean> {
+  async remove(
+    id: number | null = null,
+    user: User | null = null
+  ): Promise<boolean> {
+    if (!id && !user) return false;
+    
+    const stats = await this.findOne(id, user, false, false);
+    if (!stats) return false;
+    
     try {
-      const stats = await this.findOne(id, false, false);
-      if (!stats) return false;
-
       await this.solitaireStatsRepository.softRemove(stats);
       return true;
     } catch (error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error softRemoving solitaire-stats! | solitaire-stats.service');
     }
   }
 
-  async restore(id: number): Promise<boolean> {
+  async restore(
+    id: number | null = null,
+    user: User | null = null
+  ): Promise<boolean> {
+    if (!id && !user) return false;
+    
+    const stats = await this.findOne(id, user, true, false);
+    if (!stats) return false;
+    
     try {
-      const stats = await this.findOne(id, true, false);
-      if (!stats) return false;
-
       await this.solitaireStatsRepository.restore(stats);
       return true;
     } catch (error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error restoring solitaire-stats! | solitaire-stats.service.ts');
     }
   }

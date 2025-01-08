@@ -35,47 +35,51 @@ export class UserService {
     const newUser = this.userRepository.create({ username, email, passwordHash });
 
     try {
-      const result = await this.userRepository.save(newUser);
+      await this.userRepository.save(newUser);
       return true;
     } catch(error) {
-        console.error(error.message);
+        console.error('Error: ' + error);
         throw new Error('Error creating user! | user.service.ts');
     }
   }
   
   async findOne(
-    username?: string,
-    email?: string,
-    plainPassword?: string,
-    deleted: boolean = false,
+    username: string | null = null,
+    email: string | null = null,
+    plainPassword: string | null = null,
+    withDeleted: boolean = false,
     withRelations: boolean = false
   ): Promise<User | null> {
-    let user: User | null = null;
-    if (!username && !email) return user;
+    if (!username && !email) return null;
+
+    const where: any = { };
+    if (username) where.username = username;
+    if (email) where.email = email;
 
     try {
-      user = await this.userRepository.findOne({
-        withDeleted: deleted,
+      const user = await this.userRepository.findOne({
+        withDeleted,
+        where,
         relations: withRelations ? ['solitaireHistory', 'solitaireStats', 'savedGame'] : [],
-        where: {
-          ...(username && { username }), 
-          ...(email && { email })
-        },
       });
+      
+      // if plainPassword was provided, verify it before returning
+      // works like a "secure" version this way
+      if (!plainPassword) return user;
+      if (await this.hashService.verifyPassword(plainPassword, user.passwordHash)) return user;
+      return null;
+
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding one user! | user.service.ts');
     }
-
-    if (plainPassword) {
-      const validPassword = await this.hashService.verifyPassword(plainPassword, user.passwordHash);
-      if (!validPassword) return null;
-    }
-
-    return user;
   }
 
-  async update(username:string, plainPassword: string, updateUserDto: UpdateUserDto): Promise<boolean> {
+  async update(
+    username:string,
+    plainPassword: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<boolean> {
     try {
       const user = await this.findOne(username, null, plainPassword, false, false);
       if (!user) return false;
@@ -84,12 +88,16 @@ export class UserService {
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Failed to update user! | user.service.ts');
     }
   }
 
-  async remove(username: string, email: string, plainPassword: string): Promise<boolean> {
+  async remove(
+    username: string,
+    email: string,
+    plainPassword: string
+  ): Promise<boolean> {
     const user = await this.findOne(username, email, plainPassword, false, true);
     if (!user) return false;
 
@@ -109,14 +117,18 @@ export class UserService {
       return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error trying to soft remove user! | user.service.ts');
     } finally {
       await queryRunner.release();
     }
   }
 
-  async restore(username: string, email: string, plainPassword: string): Promise<boolean> {
+  async restore(
+    username: string,
+    email: string,
+    plainPassword: string
+  ): Promise<boolean> {
     const user = await this.findOne(username, email, plainPassword, true, true);
     if (!user) return false;
 
@@ -136,7 +148,7 @@ export class UserService {
       return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error trying to restore user and related entities! | user.service.ts');
     } finally {
       await queryRunner.release();
@@ -165,7 +177,7 @@ export class UserService {
       return usersToRemove.length;
     } catch(error) {
       await queryRunner.rollbackTransaction();
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error during old user cleanup! | user.service.ts');
     } finally {
       await queryRunner.release();
@@ -186,7 +198,7 @@ export class UserService {
       
       return usersToRemove;
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new Error('Error finding soft deleted user accounts! | user.service.ts');
     }
   }

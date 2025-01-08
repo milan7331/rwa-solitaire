@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UserData } from "../entities/userdata";
 
 @Entity()
+@Index('timePeriod', { unique: true })
 export abstract class Leaderboard {
 
     @PrimaryGeneratedColumn()

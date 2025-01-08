@@ -32,7 +32,7 @@ export class SolitaireStats {
     @UpdateDateColumn({type: 'timestamptz'})
     updatedAt: Date;
   
-    @OneToOne(() => User, (user) => user.solitaireStats, { nullable: true})
+    @OneToOne(() => User, (user) => user.solitaireStats)
     user: User;
 
     @DeleteDateColumn()
