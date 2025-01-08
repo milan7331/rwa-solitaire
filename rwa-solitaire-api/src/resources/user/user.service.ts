@@ -4,8 +4,8 @@ import { DataSource, DeepPartial, LessThan, Repository } from 'typeorm';
 
 import { HashService } from 'src/auth/hash.service';
 import { SavedGame } from '../saved-game/entities/saved-game.entity';
-import { SolitaireStats } from '../solitaire-stats/entities/solitaire-stats.entity';
-import { SolitaireHistory } from '../solitaire-history/entities/solitaire-history.entity';
+import { UserStats } from '../user-stats/entities/user-stats.entity';
+import { GameHistory } from '../game-history/entities/game-history.entity';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -18,10 +18,10 @@ export class UserService {
     private userRepository:Repository<User>,
     @InjectRepository(SavedGame)
     private savedGameRepository:Repository<SavedGame>,
-    @InjectRepository(SolitaireStats)
-    private statsRepository:Repository<SolitaireStats>,
-    @InjectRepository(SolitaireHistory)
-    private historyRepository:Repository<SolitaireHistory>,
+    @InjectRepository(UserStats)
+    private statsRepository:Repository<UserStats>,
+    @InjectRepository(GameHistory)
+    private historyRepository:Repository<GameHistory>,
     private dataSource: DataSource,
     private hashService: HashService
   ) { }
@@ -60,7 +60,7 @@ export class UserService {
       const user = await this.userRepository.findOne({
         withDeleted,
         where,
-        relations: withRelations ? ['solitaireHistory', 'solitaireStats', 'savedGame'] : [],
+        relations: withRelations ? ['GameHistory', 'UserStats', 'savedGame'] : [],
       });
       
       // if plainPassword was provided, verify it before returning
@@ -108,9 +108,9 @@ export class UserService {
     try {
       await queryRunner.manager.softRemove(user);
       await queryRunner.manager.softRemove(user.savedGame);
-      await queryRunner.manager.softRemove(user.solitaireStats);
-      for (let i in user.solitaireHistory) {
-        await queryRunner.manager.softRemove(user.solitaireHistory[i]);
+      await queryRunner.manager.softRemove(user.UserStats);
+      for (let i in user.GameHistory) {
+        await queryRunner.manager.softRemove(user.GameHistory[i]);
       }
 
       await queryRunner.commitTransaction();
@@ -138,10 +138,10 @@ export class UserService {
     
     try {
       await queryRunner.manager.restore(User, user.id);
-      await queryRunner.manager.restore(SolitaireStats, user.solitaireStats.id);
+      await queryRunner.manager.restore(UserStats, user.UserStats.id);
       await queryRunner.manager.restore(SavedGame, user.savedGame.id);
-      for (let i in user.solitaireHistory) {
-        await queryRunner.manager.restore(SolitaireHistory, user.solitaireHistory[i].id);
+      for (let i in user.GameHistory) {
+        await queryRunner.manager.restore(GameHistory, user.GameHistory[i].id);
       }
 
       await queryRunner.commitTransaction();
@@ -167,9 +167,9 @@ export class UserService {
       for (let i in usersToRemove) {
         await queryRunner.manager.remove(usersToRemove[i]);
         await queryRunner.manager.remove(usersToRemove[i].savedGame);
-        await queryRunner.manager.remove(usersToRemove[i].solitaireStats);
-        for (let j in usersToRemove[i].solitaireHistory) {
-          await queryRunner.manager.remove(usersToRemove[i].solitaireHistory[j]);
+        await queryRunner.manager.remove(usersToRemove[i].UserStats);
+        for (let j in usersToRemove[i].GameHistory) {
+          await queryRunner.manager.remove(usersToRemove[i].GameHistory[j]);
         }
       }
 
@@ -193,7 +193,7 @@ export class UserService {
       usersToRemove = await this.userRepository.find({
         withDeleted: true,
         where: { deletedAt: LessThan(ThirtyDaysAgo)},
-        relations: ['solitaireHistory', 'solitaireStats', 'savedGame']
+        relations: ['GameHistory', 'UserStats', 'savedGame']
       });
       
       return usersToRemove;

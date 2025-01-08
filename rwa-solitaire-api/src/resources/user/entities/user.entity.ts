@@ -1,6 +1,6 @@
 import { SavedGame } from 'src/resources/saved-game/entities/saved-game.entity';
-import { SolitaireHistory } from 'src/resources/solitaire-history/entities/solitaire-history.entity';
-import { SolitaireStats } from 'src/resources/solitaire-stats/entities/solitaire-stats.entity';
+import { GameHistory } from 'src/resources/game-history/entities/game-history.entity';
+import { UserStats } from 'src/resources/user-stats/entities/user-stats.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { HashService } from 'src/auth/hash.service';
@@ -25,12 +25,12 @@ export class User {
     @Column({ type: 'text' })
     passwordHash: string;
 
-    @OneToOne(() => SolitaireStats, (solitaireStats) => solitaireStats.user, { cascade: true })
+    @OneToOne(() => UserStats, (UserStats) => UserStats.user, { cascade: true })
     @JoinColumn()
-    solitaireStats: SolitaireStats;
+    UserStats: UserStats;
 
-    @OneToMany(() => SolitaireHistory, (solitaireHistory) => solitaireHistory.user, { cascade: ["remove", "soft-remove", "recover"] })
-    solitaireHistory: SolitaireHistory[];
+    @OneToMany(() => GameHistory, (GameHistory) => GameHistory.user, { cascade: ["remove", "soft-remove", "recover"] })
+    GameHistory: GameHistory[];
 
     @OneToOne(() => SavedGame, (savedGame) => savedGame.gameState, { cascade: ["remove", "soft-remove", "recover"] })
     @JoinColumn()

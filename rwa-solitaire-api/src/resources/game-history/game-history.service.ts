@@ -3,34 +3,34 @@ import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '../user/entities/user.entity';
-import { SolitaireDifficulty, SolitaireHistory } from './entities/solitaire-history.entity';
-import { CreateSolitaireHistoryDto } from './dto/create-solitaire-history.dto';
-import { UpdateSolitaireHistoryDto } from './dto/update-solitaire-history.dto';
+import { SolitaireDifficulty, GameHistory } from './entities/game-history.entity';
+import { CreateGameHistoryDto } from './dto/create-game-history.dto';
+import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { CronService } from 'src/database/cron.service';
-import { SolitaireStatsService } from '../solitaire-stats/solitaire-stats.service';
+import { UserStatsService } from '../user-stats/user-stats.service';
 
 @Injectable()
-export class SolitaireHistoryService {
+export class GameHistoryService {
   constructor(
-    @InjectRepository(SolitaireHistory)
-    private readonly historyRepository: Repository<SolitaireHistory>,
+    @InjectRepository(GameHistory)
+    private readonly historyRepository: Repository<GameHistory>,
     private readonly cronService: CronService,
-    private readonly statsService: SolitaireStatsService
+    private readonly statsService: UserStatsService
   ) {}
 
-  async getAllGamesFromThisWeek(): Promise<[SolitaireHistory[], Date]> {
+  async getAllGamesFromThisWeek(): Promise<[GameHistory[], Date]> {
     const [weekStartDate, weekEndDate] = this.cronService.getCleanDateSpan_CurrentWeek();
     const games = await this.getAllGamesFromTimeSpan(weekStartDate, weekEndDate);
     return [games, weekStartDate];
   }
   
-  async getAllGamesFromThisMonth(): Promise<[SolitaireHistory[], Date]> {
+  async getAllGamesFromThisMonth(): Promise<[GameHistory[], Date]> {
     const [monthStartDate, monthEndDate] = this.cronService.getCleanDateSpan_CurrentMonth();
     const games = await this.getAllGamesFromTimeSpan(monthStartDate, monthEndDate);
     return [games, monthStartDate];
   }
   
-  async getAllGamesFromThisYear(): Promise<[SolitaireHistory[], Date]> {
+  async getAllGamesFromThisYear(): Promise<[GameHistory[], Date]> {
     const [yearStartDate, yearEndDate] = this.cronService.getCleanDateSpan_CurrentYear();
     const games = await this.getAllGamesFromTimeSpan(yearStartDate, yearEndDate);
     return [games, yearStartDate];
@@ -40,7 +40,7 @@ export class SolitaireHistoryService {
   private async getAllGamesFromTimeSpan(
     startDate: Date,
     endDate: Date
-  ): Promise<SolitaireHistory[]> {
+  ): Promise<GameHistory[]> {
     let results = [];
     try {
       results = await this.historyRepository.find({
@@ -51,7 +51,7 @@ export class SolitaireHistoryService {
       })
     } catch(error) {
       console.error('Error: ' + error);
-      throw new Error('Error finding solitaire games from said timespan | solitaire-history.service.ts');
+      throw new Error('Error finding solitaire games from said timespan | game-history.service.ts');
     }
 
     return results;
@@ -62,20 +62,20 @@ export class SolitaireHistoryService {
     startedTime: Date,
     gameDifficulty: SolitaireDifficulty
   ): Promise<boolean> {
-    let newGame = await this.create({user, startedTime, gameDifficulty} as CreateSolitaireHistoryDto);
-    if (!newGame) throw new Error('Error starting game! | solitaire-history.service.ts');
+    let newGame = await this.create({user, startedTime, gameDifficulty} as CreateGameHistoryDto);
+    if (!newGame) throw new Error('Error starting game! | game-history.service.ts');
 
     return true;
   }
   
   async endGame(
-    updateDto: UpdateSolitaireHistoryDto,
+    updateDto: UpdateGameHistoryDto,
   ): Promise<boolean> {
     if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) return false;
 
     let gameInProgress = await this.findOne(updateDto.id, updateDto.user, updateDto.startedTime, false);
-    if (!gameInProgress) throw new Error('No game in progress found! | solitaire-history.service.ts');
-    if (gameInProgress.gameFinished) throw new Error('Game is already finished! | solitaire-history.service.ts');
+    if (!gameInProgress) throw new Error('No game in progress found! | game-history.service.ts');
+    if (gameInProgress.gameFinished) throw new Error('Game is already finished! | game-history.service.ts');
 
     gameInProgress.moves = updateDto.moves;
     gameInProgress.gameWon = updateDto.gameWon;
@@ -84,18 +84,18 @@ export class SolitaireHistoryService {
     gameInProgress.gameDurationInSeconds = Math.floor((updateDto.finishedTime.getTime() - updateDto.startedTime.getTime()) / 1000);
 
     const updated = await this.update(gameInProgress.id, gameInProgress);
-    if (!updated) throw new Error('Error ending (updating) game! | solitaire-history.service.ts');
+    if (!updated) throw new Error('Error ending (updating) game! | game-history.service.ts');
 
     const statsUpdated = await this.updateUserStats(gameInProgress);
-    if (!statsUpdated) throw new Error('Error updating user stats after game end! | solitaire-history.service.ts');
+    if (!statsUpdated) throw new Error('Error updating user stats after game end! | game-history.service.ts');
 
     return true;
   }
   
-  async updateUserStats(finishedGame: SolitaireHistory): Promise<boolean> {
+  async updateUserStats(finishedGame: GameHistory): Promise<boolean> {
     if (!finishedGame.gameFinished) return false;
     const userStats = await this.statsService.findOne(null, finishedGame.user, false, false);
-    if (!userStats) throw new Error('Error finding user stats | solitaire-history.service.ts');
+    if (!userStats) throw new Error('Error finding user stats | game-history.service.ts');
 
     userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + finishedGame.gameDurationInSeconds) / userStats.gamesPlayed + 1;
     userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, finishedGame.gameDurationInSeconds);
@@ -106,7 +106,7 @@ export class SolitaireHistoryService {
     return this.statsService.update(userStats.id, finishedGame.user, userStats);
   }
 
-  async create(createUserDto: CreateSolitaireHistoryDto): Promise<boolean> {
+  async create(createUserDto: CreateGameHistoryDto): Promise<boolean> {
     const existingGame = await this.historyRepository.findOne({
       where: {
         user: createUserDto.user,
@@ -121,11 +121,11 @@ export class SolitaireHistoryService {
       return true;
     } catch(error) {
       console.error('Error: ' + error);
-      throw new Error('Error creating solitaire-game | solitaire-history.service.ts');
+      throw new Error('Error creating solitaire-game | game-history.service.ts');
     }
   }
 
-  async findAll(user: User): Promise<SolitaireHistory[]> {
+  async findAll(user: User): Promise<GameHistory[]> {
     let games = [];
     try {
       games = await this.historyRepository.find({
@@ -133,7 +133,7 @@ export class SolitaireHistoryService {
       });
     } catch(error) {
       console.error('Error: ' + error);
-      throw new Error('Error finding users solitaire history | solitaire-history.service.ts');
+      throw new Error('Error finding users solitaire history | game-history.service.ts');
     }
 
     return games;
@@ -144,7 +144,7 @@ export class SolitaireHistoryService {
     user: User | null = null,
     startedTime: Date | null = null,
     withDeleted: boolean
-  ): Promise<SolitaireHistory | null> {
+  ): Promise<GameHistory | null> {
     if (!id && (!user || !startedTime)) return null;
 
     const where: any = { };
@@ -161,16 +161,16 @@ export class SolitaireHistoryService {
       return game;
       } catch(error) {
         console.error('Error: ' + error);
-        throw new Error('Error finding solitaire-game! | solitaire-history.service.ts');
+        throw new Error('Error finding solitaire-game! | game-history.service.ts');
     }
   }
 
   async update(
     id: number,
-    updateDto: UpdateSolitaireHistoryDto
+    updateDto: UpdateGameHistoryDto
   ): Promise<boolean> {
     const game = await this.findOne(id, null, null, false);
-    if (!game) throw new Error('No game to update found! | solitaire-history.service.ts');
+    if (!game) throw new Error('No game to update found! | game-history.service.ts');
 
     try {
       const result = await this.historyRepository.update(id, updateDto);
@@ -178,7 +178,7 @@ export class SolitaireHistoryService {
       return false;
     } catch(error) {
       console.error('Error: ' + error);
-      throw new Error('Error updating solitaire-game! | solitaire-history.service.ts');
+      throw new Error('Error updating solitaire-game! | game-history.service.ts');
     }
   }
 
@@ -188,14 +188,14 @@ export class SolitaireHistoryService {
     startedTime: Date | null
   ): Promise<boolean> {
     const game = await this.findOne(id, user, startedTime, false);
-    if (!game) throw new Error('No game to remove found! | solitaire-history.service.ts');
+    if (!game) throw new Error('No game to remove found! | game-history.service.ts');
 
     try {
       await this.historyRepository.softRemove(game);
       return true;
     } catch(error) {
       console.error('Error: ' + error);
-      throw new Error('Error softRemoving solitaire-game! | solitaire-history.service.ts');
+      throw new Error('Error softRemoving solitaire-game! | game-history.service.ts');
     }
   }
 
@@ -205,7 +205,7 @@ export class SolitaireHistoryService {
     startedTime: Date | null = null
   ): Promise<boolean> {
     const game = await this.findOne(id, user, startedTime, true);
-    if (!game) throw new Error('No game to restore found! | solitaire-history.service.ts');
+    if (!game) throw new Error('No game to restore found! | game-history.service.ts');
 
     try {
       const result = await this.historyRepository.restore(game);
@@ -213,7 +213,7 @@ export class SolitaireHistoryService {
       return false;
     } catch(error) {
       console.error('Error: ' + error);
-      throw new Error('Error restoring solitaire-game! | solitaire-history.service.ts');
+      throw new Error('Error restoring solitaire-game! | game-history.service.ts');
     }
   }
 }

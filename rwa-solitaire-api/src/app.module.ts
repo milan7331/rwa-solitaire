@@ -7,7 +7,7 @@ import { AppService } from './app.service';
 
 import { UserModule } from './resources/user/user.module';
 import { SavedGameModule } from './resources/saved-game/saved-game.module';
-import { SolitaireStatsModule } from './resources/solitaire-stats/solitaire-stats.module';
+import { UserStatsModule } from './resources/user-stats/user-stats.module';
 import { AuthModule } from './auth/auth.module';
 import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
 import { DatabaseModule } from './database/database.module';
@@ -33,7 +33,7 @@ import { DatabaseModule } from './database/database.module';
     }),
     UserModule, 
     SavedGameModule, 
-    SolitaireStatsModule,
+    UserStatsModule,
     AuthModule,
     LeaderboardModule,
     DatabaseModule

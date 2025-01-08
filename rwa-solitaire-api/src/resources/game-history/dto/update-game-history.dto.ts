@@ -1,10 +1,10 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateSolitaireHistoryDto } from './create-solitaire-history.dto';
-import { SolitaireDifficulty } from '../entities/solitaire-history.entity';
+import { CreateGameHistoryDto } from './create-game-history.dto';
+import { SolitaireDifficulty } from '../entities/game-history.entity';
 import { User } from 'src/resources/user/entities/user.entity';
 import { IsBoolean, IsDate, IsNumber, IsOptional } from 'class-validator';
 
-export class UpdateSolitaireHistoryDto {
+export class UpdateGameHistoryDto {
 
     @IsOptional()
     @IsNumber()

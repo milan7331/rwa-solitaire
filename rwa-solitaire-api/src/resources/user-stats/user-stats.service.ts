@@ -1,32 +1,32 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateSolitaireStatsDto } from './dto/create-solitaire-stats.dto';
-import { UpdateSolitaireStatsDto } from './dto/update-solitaire-stats.dto';
+import { CreateUserStatsDto } from './dto/create-user-stats.dto';
+import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { SolitaireStats } from './entities/solitaire-stats.entity';
+import { UserStats } from './entities/user-stats.entity';
 import { User } from '../user/entities/user.entity';
 import { HashService } from 'src/auth/hash.service';
 
 @Injectable()
-export class SolitaireStatsService {
+export class UserStatsService {
   constructor(
-    @InjectRepository(SolitaireStats)
-    private solitaireStatsRepository: Repository<SolitaireStats>,
+    @InjectRepository(UserStats)
+    private userStatsRepository: Repository<UserStats>,
   ) { }
 
-  async create(createStatsDto: CreateSolitaireStatsDto): Promise<boolean> {
-    const existingStats = await this.solitaireStatsRepository.findOne({
+  async create(createStatsDto: CreateUserStatsDto): Promise<boolean> {
+    const existingStats = await this.userStatsRepository.findOne({
       where: { user: createStatsDto.user }
     });
-    if (existingStats) throw new ConflictException('Solitaire-Stats already exists for this user!');
+    if (existingStats) throw new ConflictException('user-stats already exists for this user!');
 
     try {
-      await this.solitaireStatsRepository.save(createStatsDto);
+      await this.userStatsRepository.save(createStatsDto);
       return true;
     } catch (error) {
       console.error('Error: ' + error);
-      throw new Error('Error creating solitaire-stats! | solitaire-stats.service.ts');
+      throw new Error('Error creating user-stats! | user-stats.service.ts');
     }
   }
 
@@ -35,7 +35,7 @@ export class SolitaireStatsService {
     user: User | null = null,
     withDeleted: boolean,
     withRelations: boolean
-  ): Promise<SolitaireStats | null> {
+  ): Promise<UserStats | null> {
     if (!id && !user) return null;
 
     const where: any = { };
@@ -43,7 +43,7 @@ export class SolitaireStatsService {
     if (user) where.user = user;
 
     try {
-      let stats = await this.solitaireStatsRepository.findOne({
+      let stats = await this.userStatsRepository.findOne({
         where,
         withDeleted,
         relations: withRelations ? ['user'] : []
@@ -51,27 +51,27 @@ export class SolitaireStatsService {
       return stats;
     } catch (error) {
       console.error('Error: ' + error);
-      throw new Error('Error finding solitaire-stats! | solitaire-stats.service.ts');
+      throw new Error('Error finding user-stats! | user-stats.service.ts');
     }
   }
 
   async update(
     id: number | null = null,
     user: User | null = null,
-    updateSolitaireStatsDto: UpdateSolitaireStatsDto
+    updateUserStatsDto: UpdateUserStatsDto
   ): Promise<boolean> {
     if (!id && !user) return false;
 
     const stats = this.findOne(id, user, false, false);
-    if (!stats) throw new Error('No stats to update found! | solitaire-stats.service.ts');
+    if (!stats) throw new Error('No stats to update found! | user-stats.service.ts');
 
     try {
-      const result = await this.solitaireStatsRepository.update(id, updateSolitaireStatsDto);
+      const result = await this.userStatsRepository.update(id, updateUserStatsDto);
       if (result.affected > 0) return true;
       return false;
     } catch (error) {
       console.error('Error: ' + error);
-      throw new Error('Error updating solitaire-stats! | solitaire-stats.service.ts');
+      throw new Error('Error updating user-stats! | user-stats.service.ts');
     }
   }
 
@@ -85,11 +85,11 @@ export class SolitaireStatsService {
     if (!stats) return false;
     
     try {
-      await this.solitaireStatsRepository.softRemove(stats);
+      await this.userStatsRepository.softRemove(stats);
       return true;
     } catch (error) {
       console.error('Error: ' + error);
-      throw new Error('Error softRemoving solitaire-stats! | solitaire-stats.service');
+      throw new Error('Error softRemoving user-stats! | user-stats.service');
     }
   }
 
@@ -103,11 +103,11 @@ export class SolitaireStatsService {
     if (!stats) return false;
     
     try {
-      await this.solitaireStatsRepository.restore(stats);
+      await this.userStatsRepository.restore(stats);
       return true;
     } catch (error) {
       console.error('Error: ' + error);
-      throw new Error('Error restoring solitaire-stats! | solitaire-stats.service.ts');
+      throw new Error('Error restoring user-stats! | user-stats.service.ts');
     }
   }
 }

@@ -7,7 +7,7 @@ export enum SolitaireDifficulty {
 }
 
 @Entity()
-export class SolitaireHistory {
+export class GameHistory {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -35,7 +35,7 @@ export class SolitaireHistory {
     @Column({ type: 'integer', nullable: true, default: 0})
     gameDurationInSeconds: number;
 
-    @ManyToOne(() => User, (User) => User.solitaireHistory)
+    @ManyToOne(() => User, (User) => User.GameHistory)
     @JoinColumn()
     user: User;
 

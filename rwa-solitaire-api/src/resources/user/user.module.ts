@@ -4,16 +4,16 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { SavedGame } from 'src/resources/saved-game/entities/saved-game.entity';
-import { SolitaireStats } from 'src/resources/solitaire-stats/entities/solitaire-stats.entity';
-import { SolitaireHistory } from '../solitaire-history/entities/solitaire-history.entity';
+import { UserStats } from 'src/resources/user-stats/entities/user-stats.entity';
+import { GameHistory } from '../game-history/entities/game-history.entity';
 import { HashService } from 'src/auth/hash.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     SavedGame,
-    SolitaireStats,
-    SolitaireHistory,
+    UserStats,
+    GameHistory,
     HashService
   ],
   controllers: [UserController],

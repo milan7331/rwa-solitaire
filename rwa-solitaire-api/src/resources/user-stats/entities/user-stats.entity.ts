@@ -4,7 +4,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, Entity
 
 
 @Entity()
-export class SolitaireStats {
+export class UserStats {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -32,7 +32,7 @@ export class SolitaireStats {
     @UpdateDateColumn({type: 'timestamptz'})
     updatedAt: Date;
   
-    @OneToOne(() => User, (user) => user.solitaireStats)
+    @OneToOne(() => User, (user) => user.UserStats)
     user: User;
 
     @DeleteDateColumn()

@@ -6,9 +6,9 @@ import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
 import { WeeklyLeaderboard } from "./entities/leaderboard-weekly.entity";
 import { MonthlyLeaderboard } from "./entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "./entities/leaderboard-yearly.entity";
-import { SolitaireHistory } from "../solitaire-history/entities/solitaire-history.entity";
+import { GameHistory } from "../game-history/entities/game-history.entity";
 import { UserData } from "../leaderboard/entities/userdata";
-import { SolitaireHistoryService } from "../solitaire-history/solitaire-history.service";
+import { GameHistoryService } from "../game-history/game-history.service";
 import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
 import { CronService } from "src/database/cron.service";
 
@@ -16,7 +16,7 @@ import { CronService } from "src/database/cron.service";
 export class LeaderboardService {
   
   constructor(
-    private readonly historyService: SolitaireHistoryService,
+    private readonly historyService: GameHistoryService,
     private readonly cron: CronService,
 
     @InjectRepository(WeeklyLeaderboard)
@@ -191,7 +191,7 @@ export class LeaderboardService {
     
   }
 
-  private prepareUserData(games: SolitaireHistory[]): UserData[] {    
+  private prepareUserData(games: GameHistory[]): UserData[] {    
     const userData = new Map<string, UserData>();
     
     games.forEach(game => {
