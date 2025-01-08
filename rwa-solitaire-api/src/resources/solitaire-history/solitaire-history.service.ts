@@ -45,7 +45,8 @@ export class SolitaireHistoryService {
     try {
       results = await this.historyRepository.find({
         where: {
-          createdAt: Between(startDate, endDate)
+          createdAt: Between(startDate, endDate),
+          gameFinished: true
         }
       })
     } catch(error) {
