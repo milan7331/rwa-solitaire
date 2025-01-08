@@ -83,7 +83,7 @@ export class SavedGameService {
     if (!id && !updateDto.user) throw new Error('Error preparing to upsert game save! | saved-game.service.ts');
 
     try {
-      const result = await this.savedGameRepository.upsert(updateDto, {
+      await this.savedGameRepository.upsert(updateDto, {
         conflictPaths: ['user'],
       });
       return true;

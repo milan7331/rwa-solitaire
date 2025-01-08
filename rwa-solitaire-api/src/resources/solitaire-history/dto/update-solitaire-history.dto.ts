@@ -5,6 +5,11 @@ import { User } from 'src/resources/user/entities/user.entity';
 import { IsBoolean, IsDate, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateSolitaireHistoryDto {
+
+    @IsOptional()
+    @IsNumber()
+    id?: number;
+
     @IsOptional()
     @IsNumber()
     moves?: number;

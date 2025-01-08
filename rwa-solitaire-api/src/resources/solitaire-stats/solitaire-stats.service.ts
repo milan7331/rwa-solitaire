@@ -66,8 +66,9 @@ export class SolitaireStatsService {
     if (!stats) throw new Error('No stats to update found! | solitaire-stats.service.ts');
 
     try {
-      await this.solitaireStatsRepository.update(id, updateSolitaireStatsDto);
-      return true;
+      const result = await this.solitaireStatsRepository.update(id, updateSolitaireStatsDto);
+      if (result.affected > 0) return true;
+      return false;
     } catch (error) {
       console.error('Error: ' + error);
       throw new Error('Error updating solitaire-stats! | solitaire-stats.service.ts');

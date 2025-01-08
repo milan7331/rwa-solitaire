@@ -140,8 +140,9 @@ export class LeaderboardService {
     
     try {
       const repository = this.getRepository(type);
-      await repository.update(leaderboard.id, updateDto);
-      return true;
+      const result = await repository.update(leaderboard.id, updateDto);
+      if (result.affected > 0) return true;
+      return false;
     } catch(error) {
       console.error('Error: ' + error);
       throw new Error('Error updating leaderboard! | leaderboard.service.ts');

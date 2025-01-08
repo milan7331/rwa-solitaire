@@ -7,13 +7,15 @@ import { SolitaireDifficulty, SolitaireHistory } from './entities/solitaire-hist
 import { CreateSolitaireHistoryDto } from './dto/create-solitaire-history.dto';
 import { UpdateSolitaireHistoryDto } from './dto/update-solitaire-history.dto';
 import { CronService } from 'src/database/cron.service';
+import { SolitaireStatsService } from '../solitaire-stats/solitaire-stats.service';
 
 @Injectable()
 export class SolitaireHistoryService {
   constructor(
     @InjectRepository(SolitaireHistory)
     private readonly historyRepository: Repository<SolitaireHistory>,
-    private readonly cronService: CronService
+    private readonly cronService: CronService,
+    private readonly statsService: SolitaireStatsService
   ) {}
 
   async getAllGamesFromThisWeek(): Promise<[SolitaireHistory[], Date]> {
@@ -66,26 +68,41 @@ export class SolitaireHistoryService {
   }
   
   async endGame(
-    user: User,
-    startedTime: Date,
-    moves: number,
-    gameWon: boolean,
-    finishedTime: Date
+    updateDto: UpdateSolitaireHistoryDto,
   ): Promise<boolean> {
-    let gameInProgress = await this.findOne(null, user, startedTime, false);
+    if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) return false;
+
+    let gameInProgress = await this.findOne(updateDto.id, updateDto.user, updateDto.startedTime, false);
     if (!gameInProgress) throw new Error('No game in progress found! | solitaire-history.service.ts');
     if (gameInProgress.gameFinished) throw new Error('Game is already finished! | solitaire-history.service.ts');
 
-    gameInProgress.moves = moves;
-    gameInProgress.gameWon = gameWon;
+    gameInProgress.moves = updateDto.moves;
+    gameInProgress.gameWon = updateDto.gameWon;
     gameInProgress.gameFinished = true;
-    gameInProgress.finishedTime = finishedTime;
-    gameInProgress.gameDurationInSeconds = Math.floor((finishedTime.getTime() - startedTime.getTime()) / 1000);
+    gameInProgress.finishedTime = updateDto.finishedTime;
+    gameInProgress.gameDurationInSeconds = Math.floor((updateDto.finishedTime.getTime() - updateDto.startedTime.getTime()) / 1000);
 
-    let updated = await this.update(gameInProgress.id, gameInProgress);
-    if (!updated) throw new Error('Error ending game! | solitaire-history.service.ts');
+    const updated = await this.update(gameInProgress.id, gameInProgress);
+    if (!updated) throw new Error('Error ending (updating) game! | solitaire-history.service.ts');
+
+    const statsUpdated = await this.updateUserStats(gameInProgress);
+    if (!statsUpdated) throw new Error('Error updating user stats after game end! | solitaire-history.service.ts');
 
     return true;
+  }
+  
+  async updateUserStats(finishedGame: SolitaireHistory): Promise<boolean> {
+    if (!finishedGame.gameFinished) return false;
+    const userStats = await this.statsService.findOne(null, finishedGame.user, false, false);
+    if (!userStats) throw new Error('Error finding user stats | solitaire-history.service.ts');
+
+    userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + finishedGame.gameDurationInSeconds) / userStats.gamesPlayed + 1;
+    userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, finishedGame.gameDurationInSeconds);
+    userStats.gamesPlayed++;
+    if (finishedGame.gameWon) userStats.gamesWon++;
+    userStats.totalTimePlayed += finishedGame.gameDurationInSeconds;
+  
+    return this.statsService.update(userStats.id, finishedGame.user, userStats);
   }
 
   async create(createUserDto: CreateSolitaireHistoryDto): Promise<boolean> {
