@@ -15,15 +15,15 @@ export class UserService {
 
   constructor(
     @InjectRepository(User)
-    private userRepository:Repository<User>,
+    private readonly userRepository:Repository<User>,
     @InjectRepository(SavedGame)
-    private savedGameRepository:Repository<SavedGame>,
+    private readonly savedGameRepository:Repository<SavedGame>,
     @InjectRepository(UserStats)
-    private statsRepository:Repository<UserStats>,
+    private readonly statsRepository:Repository<UserStats>,
     @InjectRepository(GameHistory)
-    private historyRepository:Repository<GameHistory>,
-    private dataSource: DataSource,
-    private hashService: HashService
+    private readonly historyRepository:Repository<GameHistory>,
+    private readonly dataSource: DataSource,
+    private readonly hashService: HashService
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<boolean> {

@@ -8,9 +8,9 @@ import { User } from 'src/resources/user/entities/user.entity';
 @Injectable()
 export class AuthService {
     constructor(
-        private userService: UserService,
-        private jwtService: JwtService,
-        private hashService: HashService
+        private readonly userService: UserService,
+        private readonly jwtService: JwtService,
+        private readonly hashService: HashService
     ) {}
 
     // find one also checks for password matching, no need to call the hashService derictly

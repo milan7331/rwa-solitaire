@@ -6,9 +6,7 @@ import { UpdateLeaderboardDto } from './dto/update-leaderboard.dto';
 
 @Controller('leaderboard')
 export class LeaderboardController {
-  constructor(
-    private readonly weeklyService: LeaderboardService
-  ) {}
+  constructor(private readonly weeklyService: LeaderboardService) {}
 
   // @Post()
   // create(@Body() createLeaderboardDto: CreateLeaderboardDto) {

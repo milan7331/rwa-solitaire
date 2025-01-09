@@ -12,7 +12,7 @@ import { HashService } from 'src/auth/hash.service';
 export class UserStatsService {
   constructor(
     @InjectRepository(UserStats)
-    private userStatsRepository: Repository<UserStats>,
+    private readonly userStatsRepository: Repository<UserStats>,
   ) { }
 
   async create(createStatsDto: CreateUserStatsDto): Promise<boolean> {
