@@ -10,8 +10,8 @@ import { GameHistory } from "../game-history/entities/game-history.entity";
 import { UserData } from "../leaderboard/entities/userdata";
 import { GameHistoryService } from "../game-history/game-history.service";
 import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
-import { CronService } from "src/database/cron.service";
-import { handlePostgresError } from "src/database/postgres-error-handler";
+import { CronService } from "src/util/cron.service";
+import { handlePostgresError } from "src/util/postgres-error-handler";
 
 @Injectable()
 export class LeaderboardService {

@@ -5,7 +5,7 @@ import { SavedGame } from './entities/saved-game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { handlePostgresError } from 'src/database/postgres-error-handler';
+import { handlePostgresError } from 'src/util/postgres-error-handler';
 
 @Injectable()
 export class SavedGameService {

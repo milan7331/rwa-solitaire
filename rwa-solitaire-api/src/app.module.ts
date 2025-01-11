@@ -10,7 +10,7 @@ import { SavedGameModule } from './resources/saved-game/saved-game.module';
 import { UserStatsModule } from './resources/user-stats/user-stats.module';
 import { AuthModule } from './auth/auth.module';
 import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
-import { DatabaseModule } from './database/database.module';
+import { UtilModule } from './util/util.module';
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { DatabaseModule } from './database/database.module';
     UserStatsModule,
     AuthModule,
     LeaderboardModule,
-    DatabaseModule
+    UtilModule
   ],
   controllers: [AppController],
   providers: [AppService],

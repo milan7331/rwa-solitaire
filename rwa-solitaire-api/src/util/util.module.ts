@@ -5,4 +5,4 @@ import { CronService } from "./cron.service";
     providers: [CronService],
     exports: [CronService]
 })
-export class DatabaseModule {}
+export class UtilModule {}

@@ -7,7 +7,7 @@ import { DataSource, Repository } from 'typeorm';
 import { UserStats } from './entities/user-stats.entity';
 import { User } from '../user/entities/user.entity';
 import { HashService } from 'src/auth/hash.service';
-import { handlePostgresError } from 'src/database/postgres-error-handler';
+import { handlePostgresError } from 'src/util/postgres-error-handler';
 
 @Injectable()
 export class UserStatsService {

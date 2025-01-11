@@ -9,7 +9,7 @@ import { GameHistory } from '../game-history/entities/game-history.entity';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { handlePostgresError } from 'src/database/postgres-error-handler';
+import { handlePostgresError } from 'src/util/postgres-error-handler';
 
 @Injectable()
 export class UserService {

@@ -6,9 +6,9 @@ import { User } from '../user/entities/user.entity';
 import { SolitaireDifficulty, GameHistory } from './entities/game-history.entity';
 import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
-import { CronService } from 'src/database/cron.service';
+import { CronService } from 'src/util/cron.service';
 import { UserStatsService } from '../user-stats/user-stats.service';
-import { handlePostgresError } from 'src/database/postgres-error-handler';
+import { handlePostgresError } from 'src/util/postgres-error-handler';
 
 @Injectable()
 export class GameHistoryService {
