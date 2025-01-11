@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, LessThan, Repository } from 'typeorm';
 
@@ -9,6 +9,7 @@ import { GameHistory } from '../game-history/entities/game-history.entity';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { handlePostgresError } from 'src/database/postgres-error-handler';
 
 @Injectable()
 export class UserService {
@@ -38,8 +39,7 @@ export class UserService {
       await this.userRepository.save(newUser);
       return true;
     } catch(error) {
-        console.error('Error: ' + error);
-        throw new Error('Error creating user! | user.service.ts');
+      handlePostgresError(error);
     }
   }
   
@@ -50,7 +50,7 @@ export class UserService {
     withDeleted: boolean = false,
     withRelations: boolean = false
   ): Promise<User | null> {
-    if (!username && !email) return null;
+    if (!username && !email) throw new BadRequestException('Invalid parameters!');
 
     const where: any = { };
     if (username) where.username = username;
@@ -67,11 +67,10 @@ export class UserService {
       // works like a "secure" version this way
       if (!plainPassword) return user;
       if (await this.hashService.verifyPassword(plainPassword, user.passwordHash)) return user;
-      return null;
+      throw new UnauthorizedException('User password doesnt match!');
 
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding one user! | user.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -82,14 +81,13 @@ export class UserService {
   ): Promise<boolean> {
     try {
       const user = await this.findOne(username, null, plainPassword, false, false);
-      if (!user) return false;
+      if (!user)  throw new NotFoundException('User to update not found!');;
 
       const result = await this.userRepository.update(username, updateUserDto);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Failed to update user! | user.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -99,7 +97,7 @@ export class UserService {
     plainPassword: string
   ): Promise<boolean> {
     const user = await this.findOne(username, email, plainPassword, false, true);
-    if (!user) return false;
+    if (!user)  throw new NotFoundException('User to remove not found!');
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -117,8 +115,7 @@ export class UserService {
       return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
-      console.error('Error: ' + error);
-      throw new Error('Error trying to soft remove user! | user.service.ts');
+      handlePostgresError(error);
     } finally {
       await queryRunner.release();
     }
@@ -130,7 +127,7 @@ export class UserService {
     plainPassword: string
   ): Promise<boolean> {
     const user = await this.findOne(username, email, plainPassword, true, true);
-    if (!user) return false;
+    if (!user) throw new NotFoundException('User to restore not found!');
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -148,8 +145,7 @@ export class UserService {
       return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
-      console.error('Error: ' + error);
-      throw new Error('Error trying to restore user and related entities! | user.service.ts');
+      handlePostgresError(error);
     } finally {
       await queryRunner.release();
     }
@@ -177,20 +173,18 @@ export class UserService {
       return usersToRemove.length;
     } catch(error) {
       await queryRunner.rollbackTransaction();
-      console.error('Error: ' + error);
-      throw new Error('Error during old user cleanup! | user.service.ts');
+      handlePostgresError(error);
     } finally {
       await queryRunner.release();
     }
   }
 
   private async findUsersForPermanentRemoval(): Promise<User[]> {
-    let usersToRemove: User[] = [];
     const ThirtyDaysAgo = new Date();
     ThirtyDaysAgo.setDate(ThirtyDaysAgo.getDate() - 30);
 
     try {
-      usersToRemove = await this.userRepository.find({
+      const usersToRemove = await this.userRepository.find({
         withDeleted: true,
         where: { deletedAt: LessThan(ThirtyDaysAgo)},
         relations: ['GameHistory', 'UserStats', 'savedGame']
@@ -198,8 +192,7 @@ export class UserService {
       
       return usersToRemove;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding soft deleted user accounts! | user.service.ts');
+      handlePostgresError(error);
     }
   }
 }

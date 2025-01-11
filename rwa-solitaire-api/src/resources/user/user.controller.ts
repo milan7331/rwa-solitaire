@@ -10,9 +10,8 @@ import { DeleteUserDto } from './dto/delete-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
+  @Post('register')
   @Public()
-  @HttpCode(201)
   async register(@Body() createUserDto: CreateUserDto) {
     try {
       const result = await this.userService.create(createUserDto);
@@ -20,10 +19,10 @@ export class UserController {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: 'User sucessfuly registered'
+        message: 'User sucessfuly registered.'
       };
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       if (error.code === '23505') {
         throw new HttpException('User already exists!', HttpStatus.CONFLICT);
       } else {
@@ -45,7 +44,7 @@ export class UserController {
         data: user
       };
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   } 
@@ -61,7 +60,7 @@ export class UserController {
         message: 'User updated sucessfully'
       };
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -79,7 +78,7 @@ export class UserController {
         message: 'User deleted sucessfully'
       }
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -97,7 +96,7 @@ export class UserController {
         message: 'User restored sucessfully'
       }
     } catch(error) {
-      console.error(error.message);
+      console.error('Error: ' + error);
       throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

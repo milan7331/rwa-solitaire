@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -11,6 +11,7 @@ import { UserData } from "../leaderboard/entities/userdata";
 import { GameHistoryService } from "../game-history/game-history.service";
 import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
 import { CronService } from "src/database/cron.service";
+import { handlePostgresError } from "src/database/postgres-error-handler";
 
 @Injectable()
 export class LeaderboardService {
@@ -50,21 +51,15 @@ export class LeaderboardService {
     createLeaderboardDto: CreateLeaderboardDto,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
   ): Promise<boolean> {
-    const leaderboard = new type();
-    leaderboard.timePeriod = createLeaderboardDto.timePeriod;
-    leaderboard.top20_averageTime = createLeaderboardDto.top20_averageTime;
-    leaderboard.top20_bestTime = createLeaderboardDto.top20_bestTime;
-    leaderboard.top20_gamesPlayed = createLeaderboardDto.top20_gamesPlayed;
-    leaderboard.top20_numberOfMoves = createLeaderboardDto.top20_numberOfMoves;
     try {
       const existingLeaderboard = await this.findOne(null, createLeaderboardDto.timePeriod, type, false);
-      if (existingLeaderboard) throw new ConflictException('Leaderboard already exists for this time period! | leaderboard.service.ts');
+      if (existingLeaderboard) throw new ConflictException('Leaderboard already exists for this time period!');
 
-      await this.weeklyRepository.save(leaderboard);
+      const repository = this.getRepository(type);
+      await repository.save(createLeaderboardDto);
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error creating leaderboard! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -74,7 +69,7 @@ export class LeaderboardService {
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
     withDeleted: boolean
   ): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
-    if (!id && !timePeriod) return null;
+    if (!id && !timePeriod) throw new BadRequestException('Invalid parameters');
 
     const where: any = { }
     if (id) where.id = id;
@@ -89,8 +84,7 @@ export class LeaderboardService {
       
       return leaderboard;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding leaderboard! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -107,8 +101,7 @@ export class LeaderboardService {
       
       return leaderboards;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding leaderboards! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -116,15 +109,14 @@ export class LeaderboardService {
     data: UpdateLeaderboardDto,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
   ): Promise<boolean> {
-    if (!data.timePeriod) return false;
+    if (!data.timePeriod) throw new BadRequestException('Invalid parameters!');
 
     try {
       const repository = this.getRepository(type);
       await repository.upsert(data, { conflictPaths: ['timePeriod'] });
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error upserting leaderboard! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -133,10 +125,10 @@ export class LeaderboardService {
     updateDto: UpdateLeaderboardDto,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
   ): Promise<boolean> {
-    if (!id && !updateDto.timePeriod) return false;
+    if (!id && !updateDto.timePeriod) throw new BadRequestException('Invalid parameters!');
 
     const leaderboard = await this.findOne(id, updateDto.timePeriod, type, false);
-    if (!leaderboard) return false;
+    if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
     
     try {
       const repository = this.getRepository(type);
@@ -144,8 +136,7 @@ export class LeaderboardService {
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error updating leaderboard! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -154,18 +145,17 @@ export class LeaderboardService {
     timePeriod: Date | null = null,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
   ): Promise<boolean> {
-    if (!id && !timePeriod) return false;
+    if (!id && !timePeriod) throw new BadRequestException('Invalid parameters!');
     
     const leaderboard = await this.findOne(id, timePeriod, type, false);
-    if (!leaderboard) return false;
+    if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
     
     try {
       const repository = this.getRepository(type);
       await repository.softRemove(leaderboard);
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error removing leaderboard! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
 
   }
@@ -175,18 +165,17 @@ export class LeaderboardService {
     timePeriod: Date | null = null,
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
   ): Promise<boolean> {
-    if (!id && !timePeriod) return false;
+    if (!id && !timePeriod) throw new BadRequestException('Invalid parameters!');
     
     const leaderboard = await this.findOne(id, timePeriod, type, true);
-    if (!leaderboard) return false;
+    if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
 
     try {
       const repository = this.getRepository(type);
       await repository.restore(leaderboard);
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error restoring leaderboard! | leaderboard.service.ts');
+      handlePostgresError(error);
     }
     
   }
@@ -280,13 +269,14 @@ export class LeaderboardService {
 
   private getRepository(
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
-  ): Repository<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard> | null {
+  ): Repository<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard> {
     const repo = 
       type === WeeklyLeaderboard ? this.weeklyRepository :
       type === MonthlyLeaderboard ? this.monthlyRepository :
       type === YearlyLeaderboard ? this.yearlyRepository : null;
 
-    if (!repo) throw new Error('Error finding repository! | leaderboard.service.ts');
+    if (!repo) throw new NotFoundException('Repository not found!');
+
     return repo;
   }
 }

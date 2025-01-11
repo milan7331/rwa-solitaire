@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -8,6 +8,7 @@ import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { CronService } from 'src/database/cron.service';
 import { UserStatsService } from '../user-stats/user-stats.service';
+import { handlePostgresError } from 'src/database/postgres-error-handler';
 
 @Injectable()
 export class GameHistoryService {
@@ -50,8 +51,7 @@ export class GameHistoryService {
         }
       })
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding solitaire games from said timespan | game-history.service.ts');
+      handlePostgresError(error);
     }
 
     return results;
@@ -63,7 +63,7 @@ export class GameHistoryService {
     gameDifficulty: SolitaireDifficulty
   ): Promise<boolean> {
     let newGame = await this.create({user, startedTime, gameDifficulty} as CreateGameHistoryDto);
-    if (!newGame) throw new Error('Error starting game! | game-history.service.ts');
+    if (!newGame) throw new InternalServerErrorException('Error starting game!');
 
     return true;
   }
@@ -71,11 +71,11 @@ export class GameHistoryService {
   async endGame(
     updateDto: UpdateGameHistoryDto,
   ): Promise<boolean> {
-    if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) return false;
+    if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) throw new BadRequestException('Invalid parameters!');
 
     let gameInProgress = await this.findOne(updateDto.id, updateDto.user, updateDto.startedTime, false);
-    if (!gameInProgress) throw new Error('No game in progress found! | game-history.service.ts');
-    if (gameInProgress.gameFinished) throw new Error('Game is already finished! | game-history.service.ts');
+    if (!gameInProgress) throw new NotFoundException('No game in progress found!');
+    if (gameInProgress.gameFinished) throw new BadRequestException('Game is already finished!');
 
     gameInProgress.moves = updateDto.moves;
     gameInProgress.gameWon = updateDto.gameWon;
@@ -84,10 +84,10 @@ export class GameHistoryService {
     gameInProgress.gameDurationInSeconds = Math.floor((updateDto.finishedTime.getTime() - updateDto.startedTime.getTime()) / 1000);
 
     const updated = await this.update(gameInProgress.id, gameInProgress);
-    if (!updated) throw new Error('Error ending (updating) game! | game-history.service.ts');
+    if (!updated) throw new InternalServerErrorException('Error ending game!');
 
     const statsUpdated = await this.updateUserStats(gameInProgress);
-    if (!statsUpdated) throw new Error('Error updating user stats after game end! | game-history.service.ts');
+    if (!statsUpdated) throw new InternalServerErrorException('Error updating user stats after game end!');
 
     return true;
   }
@@ -95,7 +95,7 @@ export class GameHistoryService {
   async updateUserStats(finishedGame: GameHistory): Promise<boolean> {
     if (!finishedGame.gameFinished) return false;
     const userStats = await this.statsService.findOne(null, finishedGame.user, false, false);
-    if (!userStats) throw new Error('Error finding user stats | game-history.service.ts');
+    if (!userStats) throw new Error('Error finding user stats');
 
     userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + finishedGame.gameDurationInSeconds) / userStats.gamesPlayed + 1;
     userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, finishedGame.gameDurationInSeconds);
@@ -107,36 +107,43 @@ export class GameHistoryService {
   }
 
   async create(createUserDto: CreateGameHistoryDto): Promise<boolean> {
+    if (!createUserDto.user || !createUserDto.startedTime) return false;
+
     const existingGame = await this.historyRepository.findOne({
       where: {
         user: createUserDto.user,
         startedTime: createUserDto.startedTime
       }
     });
-    if (existingGame) throw new ConflictException('This game already exists for this user!');
+    if (existingGame) throw new ConflictException('This game already exists!');
     
     try {
       await this.historyRepository.save(createUserDto);
 
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error creating solitaire-game | game-history.service.ts');
+      handlePostgresError(error);
     }
   }
 
-  async findAll(user: User): Promise<GameHistory[]> {
-    let games = [];
+  async findAllForUser(user: User): Promise<GameHistory[]> {
     try {
-      games = await this.historyRepository.find({
+      const games = await this.historyRepository.find({
         where: { user: user }
       });
+      return games;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding users solitaire history | game-history.service.ts');
+      handlePostgresError(error);
     }
+  }
 
-    return games;
+  async findAll(): Promise<GameHistory[]> {
+    try {
+      const games = await this.historyRepository.find({});
+      return games;
+    } catch(error) {
+      handlePostgresError(error);
+    }
   }
 
   findOne(
@@ -145,7 +152,7 @@ export class GameHistoryService {
     startedTime: Date | null = null,
     withDeleted: boolean
   ): Promise<GameHistory | null> {
-    if (!id && (!user || !startedTime)) return null;
+    if (!id && (!user || !startedTime)) throw new BadRequestException('Invalid parameters');
 
     const where: any = { };
     if (id) where.id = id;
@@ -159,9 +166,8 @@ export class GameHistoryService {
       });
 
       return game;
-      } catch(error) {
-        console.error('Error: ' + error);
-        throw new Error('Error finding solitaire-game! | game-history.service.ts');
+    } catch(error) {
+      handlePostgresError(error);
     }
   }
 
@@ -170,15 +176,14 @@ export class GameHistoryService {
     updateDto: UpdateGameHistoryDto
   ): Promise<boolean> {
     const game = await this.findOne(id, null, null, false);
-    if (!game) throw new Error('No game to update found! | game-history.service.ts');
+    if (!game) throw new NotFoundException('No game to update found!');
 
     try {
       const result = await this.historyRepository.update(id, updateDto);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error updating solitaire-game! | game-history.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -188,14 +193,13 @@ export class GameHistoryService {
     startedTime: Date | null
   ): Promise<boolean> {
     const game = await this.findOne(id, user, startedTime, false);
-    if (!game) throw new Error('No game to remove found! | game-history.service.ts');
+    if (!game) throw new NotFoundException('No game to remove found!');
 
     try {
       await this.historyRepository.softRemove(game);
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error softRemoving solitaire-game! | game-history.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -205,15 +209,14 @@ export class GameHistoryService {
     startedTime: Date | null = null
   ): Promise<boolean> {
     const game = await this.findOne(id, user, startedTime, true);
-    if (!game) throw new Error('No game to restore found! | game-history.service.ts');
+    if (!game) throw new NotFoundException('No game to restore found!');
 
     try {
       const result = await this.historyRepository.restore(game);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error restoring solitaire-game! | game-history.service.ts');
+      handlePostgresError(error);
     }
   }
 }

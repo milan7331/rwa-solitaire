@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
 import { SavedGame } from './entities/saved-game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
+import { handlePostgresError } from 'src/database/postgres-error-handler';
 
 @Injectable()
 export class SavedGameService {
@@ -14,7 +15,7 @@ export class SavedGameService {
   ) { }
 
   async saveGame(saveDto: UpdateSavedGameDto): Promise<boolean> {
-    if (!saveDto.gameState || !saveDto.user) throw new Error('Error saving game! | saved-game.service.ts');
+    if (!saveDto.gameState || !saveDto.user) throw new BadRequestException('Invalid parameters!');
   
     return this.update(null, saveDto.user, saveDto); 
   }
@@ -23,7 +24,7 @@ export class SavedGameService {
     id: number | null = null, 
     user: User | null = null
   ): Promise<SavedGame | null> {
-    if (!id && !user) throw new Error('Error loading game! | saved-game.service.ts');
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
     return this.findOne(id, user, false);
   }
@@ -32,7 +33,7 @@ export class SavedGameService {
     id: number | null = null, 
     user: User | null = null
   ): Promise<boolean> {
-    if (!id && !user) throw new Error('Error deleting users saved game! | saved-game.service.ts');
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
     return this.remove(id, user);    
   }
@@ -42,13 +43,12 @@ export class SavedGameService {
 
     try {
       const existingSave = await this.findOne(null, createSavedGameDto.user, false);
-      if (existingSave) throw new Error('Error creating game save, user already has a saved game! | saved-game.service.ts');
+      if (existingSave) throw new ConflictException('Error creating game save, user already has a saved game!');
 
       await this.savedGameRepository.save(createSavedGameDto);
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error creating game save! | saved-game.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -57,7 +57,7 @@ export class SavedGameService {
     user: User | null = null,
     withDeleted: boolean = false
   ): Promise<SavedGame | null> {
-    if (!id && !user) throw new Error('Error finding saved game! | saved-game.service.ts');
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
     const where: any = { }
     if (id) where.id = id;
@@ -71,8 +71,7 @@ export class SavedGameService {
   
       return game;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error finding saved game! | saved-game.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -80,7 +79,7 @@ export class SavedGameService {
     id: number | null = null,
     updateDto: UpdateSavedGameDto
   ): Promise<boolean> {
-    if (!id && !updateDto.user) throw new Error('Error preparing to upsert game save! | saved-game.service.ts');
+    if (!id && !updateDto.user) throw new BadRequestException('Invalid parameters!');
 
     try {
       await this.savedGameRepository.upsert(updateDto, {
@@ -88,8 +87,7 @@ export class SavedGameService {
       });
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error upserting game save! | saved-game.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -98,18 +96,17 @@ export class SavedGameService {
     user: User | null = null,
     updateSavedGameDto: UpdateSavedGameDto
   ): Promise<boolean> {
-    if (!id && !user) throw new Error('Error finding saved game to update! | saved-game.service.ts');
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
     const game = await this.findOne(id, user, false);
-    if (!game) throw new Error('No game to update found! | saved-game.service.ts');
+    if (!game) throw new NotFoundException('No game to update found!');
 
     try {
       const result = await this.savedGameRepository.update(id, updateSavedGameDto);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error updating saved game! | saved-game.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -117,17 +114,16 @@ export class SavedGameService {
     id: number | null = null, 
     user: User | null = null
   ): Promise<boolean> {
-    if (!id && !user) throw new Error('Error finding saved game to delete! | saved-game.service.ts');
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
     const game = await this.findOne(id, user, false);
-    if (!game) throw new Error('No saved game to remove found! | saved-game.service.ts');
+    if (!game) throw new NotFoundException('No saved game to remove found!');
 
     try {
       await this.savedGameRepository.softRemove(game);
       return true;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error removing saved game! | saved-game.service.ts');
+      handlePostgresError(error);
     }
   }
 
@@ -135,18 +131,17 @@ export class SavedGameService {
     id: number | null = null,
     user: User | null = null
   ): Promise<boolean> {
-    if (!id && !user) throw new Error('Error finding saved game to restore! | saved-game.service.ts');
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
     const game = await this.findOne(id, user, false);
-    if (!game) throw new Error('No saved game to restore found! | saved-game.service.ts');
+    if (!game) throw new NotFoundException('No saved game to restore found!');
 
     try {
       const result = await this.savedGameRepository.restore(id);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
-      console.error('Error: ' + error);
-      throw new Error('Error restoring saved game! | saved-game.service.ts');
+      handlePostgresError(error);
     }
   }
 }
