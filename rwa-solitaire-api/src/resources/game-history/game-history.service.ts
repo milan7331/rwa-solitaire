@@ -9,6 +9,8 @@ import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { CronService } from 'src/util/cron.service';
 import { UserStatsService } from '../user-stats/user-stats.service';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
+import { FindGameHistoryDto } from './dto/find-game-history.dto';
+import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 
 @Injectable()
 export class GameHistoryService {
@@ -57,23 +59,25 @@ export class GameHistoryService {
     return results;
   }
   
-  async startGame(
-    user: User,
-    startedTime: Date,
-    gameDifficulty: SolitaireDifficulty
-  ): Promise<boolean> {
-    let newGame = await this.create({user, startedTime, gameDifficulty} as CreateGameHistoryDto);
+  async startGame(startDto: CreateGameHistoryDto): Promise<boolean> {
+    let newGame = await this.create(startDto);
     if (!newGame) throw new InternalServerErrorException('Error starting game!');
 
     return true;
   }
   
-  async endGame(
-    updateDto: UpdateGameHistoryDto,
-  ): Promise<boolean> {
+  async endGame(updateDto: UpdateGameHistoryDto): Promise<boolean> {
     if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) throw new BadRequestException('Invalid parameters!');
 
-    let gameInProgress = await this.findOne(updateDto.id, updateDto.user, updateDto.startedTime, false);
+    const findDto: FindGameHistoryDto = {
+      id: updateDto.id,
+      user: updateDto.user,
+      startedTime: updateDto.startedTime,
+      withDeleted: false
+    }
+
+
+    let gameInProgress = await this.findOne(findDto);
     if (!gameInProgress) throw new NotFoundException('No game in progress found!');
     if (gameInProgress.gameFinished) throw new BadRequestException('Game is already finished!');
 
@@ -83,7 +87,7 @@ export class GameHistoryService {
     gameInProgress.finishedTime = updateDto.finishedTime;
     gameInProgress.gameDurationInSeconds = Math.floor((updateDto.finishedTime.getTime() - updateDto.startedTime.getTime()) / 1000);
 
-    const updated = await this.update(gameInProgress.id, gameInProgress);
+    const updated = await this.update(gameInProgress);
     if (!updated) throw new InternalServerErrorException('Error ending game!');
 
     const statsUpdated = await this.updateUserStats(gameInProgress);
@@ -107,7 +111,7 @@ export class GameHistoryService {
   }
 
   async create(createUserDto: CreateGameHistoryDto): Promise<boolean> {
-    if (!createUserDto.user || !createUserDto.startedTime) return false;
+    if (!createUserDto.user || !createUserDto.startedTime) throw new BadRequestException('Invalid parameters!');
 
     const existingGame = await this.historyRepository.findOne({
       where: {
@@ -146,12 +150,9 @@ export class GameHistoryService {
     }
   }
 
-  findOne(
-    id: number | null = null,
-    user: User | null = null,
-    startedTime: Date | null = null,
-    withDeleted: boolean
-  ): Promise<GameHistory | null> {
+  findOne(findDto: FindGameHistoryDto): Promise<GameHistory | null> {
+    const { id, user, startedTime, withDeleted } = findDto;
+
     if (!id && (!user || !startedTime)) throw new BadRequestException('Invalid parameters');
 
     const where: any = { };
@@ -171,15 +172,22 @@ export class GameHistoryService {
     }
   }
 
-  async update(
-    id: number,
-    updateDto: UpdateGameHistoryDto
-  ): Promise<boolean> {
-    const game = await this.findOne(id, null, null, false);
+  async update(updateDto: UpdateGameHistoryDto): Promise<boolean> {
+    const { id, user, startedTime, ...rest } = updateDto;
+    if (!id && (!startedTime || user)) throw new BadRequestException('Invalid parameters');
+
+    const findDto: FindGameHistoryDto = {
+      id,
+      user,
+      startedTime,
+      withDeleted: false
+    }
+
+    const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to update found!');
 
     try {
-      const result = await this.historyRepository.update(id, updateDto);
+      const result = await this.historyRepository.update(game.id, updateDto);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
@@ -187,12 +195,15 @@ export class GameHistoryService {
     }
   }
 
-  async remove(
-    id: number | null,
-    user: User | null,
-    startedTime: Date | null
-  ): Promise<boolean> {
-    const game = await this.findOne(id, user, startedTime, false);
+  async remove(removeDto: RemoveGameHistoryDto): Promise<boolean> {
+    const findDto: FindGameHistoryDto = {
+      id: removeDto.id,
+      user: removeDto.user,
+      startedTime: removeDto.startedTime,
+      withDeleted: false
+    }
+
+    const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to remove found!');
 
     try {
@@ -203,12 +214,14 @@ export class GameHistoryService {
     }
   }
 
-  async restore(
-    id: number | null = null,
-    user: User | null = null,
-    startedTime: Date | null = null
-  ): Promise<boolean> {
-    const game = await this.findOne(id, user, startedTime, true);
+  async restore(restoreDto: RemoveGameHistoryDto): Promise<boolean> {
+    const findDto: FindGameHistoryDto = {
+      id: restoreDto.id,
+      user: restoreDto.user,
+      startedTime: restoreDto.startedTime,
+      withDeleted: true
+    }
+    const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to restore found!');
 
     try {
