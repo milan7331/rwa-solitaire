@@ -12,13 +12,14 @@ import { GameHistoryService } from "../game-history/game-history.service";
 import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
 import { CronService } from "src/util/cron.service";
 import { handlePostgresError } from "src/util/postgres-error-handler";
+import { FindLeaderboardDto } from "./dto/find-leaderboard.dto";
+import { RemoveLeaderboardDto } from "./dto/remove-leaderboard.dto";
 
 @Injectable()
 export class LeaderboardService {
   
   constructor(
     private readonly historyService: GameHistoryService,
-    private readonly cron: CronService,
 
     @InjectRepository(WeeklyLeaderboard)
     private readonly weeklyRepository: Repository<WeeklyLeaderboard>,
@@ -30,11 +31,8 @@ export class LeaderboardService {
     private readonly yearlyRepository: Repository<YearlyLeaderboard>
   ) { }
 
-  // method inserts new weekly row or updates ongoing one
-  // used in the cron service so theres no error bubbling
-  async leaderboardRefresh(
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
-  ): Promise<boolean> {
+  // method inserts new weekly row or updates ongoing one used in the cron service
+  async leaderboardRefresh(type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard): Promise<boolean> {
     const [allGames, timePeriod] =
       type === WeeklyLeaderboard ? await this.historyService.getAllGamesFromThisWeek() :
       type === MonthlyLeaderboard ? await this.historyService.getAllGamesFromThisMonth() :
@@ -42,46 +40,48 @@ export class LeaderboardService {
       if (allGames.length <= 0) return false;
 
     const userData = this.prepareUserData(allGames);
-    const leaderboardDto = this.prepareUpsertDto(userData, timePeriod);
+    const leaderboardDto = this.prepareUpsertDto(userData, timePeriod, type);
 
-    return this.upsert(leaderboardDto, type);
+    return this.upsert(leaderboardDto);
   }
 
-  async create(
-    createLeaderboardDto: CreateLeaderboardDto,
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
-  ): Promise<boolean> {
-    try {
-      const existingLeaderboard = await this.findOne(null, createLeaderboardDto.timePeriod, type, false);
-      if (existingLeaderboard) throw new ConflictException('Leaderboard already exists for this time period!');
+  async create(createDto: CreateLeaderboardDto): Promise<boolean> {
+    const { type, timePeriod, ...rest } = createDto;
+    if (!type || !timePeriod) throw new BadRequestException('Invalid parameters!');
 
-      const repository = this.getRepository(type);
-      await repository.save(createLeaderboardDto);
+    const findDto: FindLeaderboardDto = {
+      timePeriod,
+      type,
+      withDeleted: false
+    }
+    const repository = this.getRepository(createDto.type);
+    const existingLeaderboard = await this.findOne(findDto);
+    if (existingLeaderboard) throw new ConflictException('Leaderboard already exists for this time period!');
+    
+    try {
+      await repository.save(createDto);
+
       return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async findOne(
-    id: number | null = null,
-    timePeriod: Date | null = null,
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
-    withDeleted: boolean
-  ): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
-    if (!id && !timePeriod) throw new BadRequestException('Invalid parameters');
+  async findOne(findDto: FindLeaderboardDto): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
+    const {id, timePeriod, type, withDeleted } = findDto;
+    if (!type || (!id && !timePeriod)) throw new BadRequestException('Invalid parameters');
 
     const where: any = { }
     if (id) where.id = id;
     if (timePeriod) where.timePeriod = timePeriod;
+    const repository = this.getRepository(type);
 
     try {
-      const repository = this.getRepository(type);
       const leaderboard = await repository.findOne({
         where,
-        withDeleted: withDeleted
-      })
-      
+        withDeleted
+      });
+
       return leaderboard;
     } catch(error) {
       handlePostgresError(error);
@@ -105,34 +105,34 @@ export class LeaderboardService {
     }
   }
 
-  async upsert(
-    data: UpdateLeaderboardDto,
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
-  ): Promise<boolean> {
-    if (!data.timePeriod) throw new BadRequestException('Invalid parameters!');
+  async upsert(updateDto: UpdateLeaderboardDto): Promise<boolean> {
+    if (!updateDto.timePeriod || !updateDto.type) throw new BadRequestException('Invalid parameters!');
+    const repository = this.getRepository(updateDto.type);
 
     try {
-      const repository = this.getRepository(type);
-      await repository.upsert(data, { conflictPaths: ['timePeriod'] });
+      await repository.upsert(updateDto, { conflictPaths: ['timePeriod'] });
       return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async update(
-    id: number | null = null,
-    updateDto: UpdateLeaderboardDto,
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
-  ): Promise<boolean> {
-    if (!id && !updateDto.timePeriod) throw new BadRequestException('Invalid parameters!');
+  async update(updateDto: UpdateLeaderboardDto): Promise<boolean> {
+    if (!updateDto.timePeriod || !updateDto.type) throw new BadRequestException('Invalid parameters!');
 
-    const leaderboard = await this.findOne(id, updateDto.timePeriod, type, false);
+    const findDto: FindLeaderboardDto = {
+      id: updateDto.id,
+      timePeriod: updateDto.timePeriod,
+      type: updateDto.type,
+      withDeleted: false
+    }
+    const leaderboard = await this.findOne(findDto);
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
+    const repository = this.getRepository(updateDto.type);
     
     try {
-      const repository = this.getRepository(type);
       const result = await repository.update(leaderboard.id, updateDto);
+
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
@@ -140,19 +140,23 @@ export class LeaderboardService {
     }
   }
 
-  async remove(
-    id: number | null = null,
-    timePeriod: Date | null = null,
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
-  ): Promise<boolean> {
-    if (!id && !timePeriod) throw new BadRequestException('Invalid parameters!');
-    
-    const leaderboard = await this.findOne(id, timePeriod, type, false);
+  async remove(removeDto: RemoveLeaderboardDto): Promise<boolean> {
+    const { id, timePeriod, type} = removeDto;
+    if (!type || (!id && !timePeriod)) throw new BadRequestException('Invalid parameters!');
+
+    const findDto: FindLeaderboardDto = {
+      id,
+      timePeriod,
+      type,
+      withDeleted: false
+    }
+    const leaderboard = await this.findOne(findDto);
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
-    
+    const repository = this.getRepository(type);
+
     try {
-      const repository = this.getRepository(type);
       await repository.softRemove(leaderboard);
+
       return true;
     } catch(error) {
       handlePostgresError(error);
@@ -160,24 +164,28 @@ export class LeaderboardService {
 
   }
 
-  async restore(
-    id: number | null = null,
-    timePeriod: Date | null = null,
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard
-  ): Promise<boolean> {
-    if (!id && !timePeriod) throw new BadRequestException('Invalid parameters!');
+  async restore(restoreDto: RemoveLeaderboardDto): Promise<boolean> {
+    const { id, timePeriod, type } = restoreDto;
+    if (!type || (!id && !timePeriod)) throw new BadRequestException('Invalid parameters!');
+
+    const findDto: FindLeaderboardDto = {
+      id,
+      timePeriod,
+      type,
+      withDeleted: true
+    }
     
-    const leaderboard = await this.findOne(id, timePeriod, type, true);
+    const leaderboard = await this.findOne(findDto);
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
+    const repository = this.getRepository(type);
 
     try {
-      const repository = this.getRepository(type);
       await repository.restore(leaderboard);
+
       return true;
     } catch(error) {
       handlePostgresError(error);
     }
-    
   }
 
   private prepareUserData(games: GameHistory[]): UserData[] {    
@@ -210,7 +218,8 @@ export class LeaderboardService {
 
   private prepareUpsertDto(
     userData: UserData[], 
-    timePeriod: Date
+    timePeriod: Date,
+    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard,
   ): UpdateLeaderboardDto {
 
     const top20_bestTime = [];
@@ -237,7 +246,8 @@ export class LeaderboardService {
       top20_averageTime,
       top20_numberOfMoves,
       top20_gamesPlayed,
-      timePeriod
+      timePeriod,
+      type
     };
   }
 

@@ -95,7 +95,7 @@ export class GameHistoryController {
 
     if (result) return {
       statusCode: HttpStatus.OK,
-      message: 'Game updated'
+      message: 'Game updated!'
     }
 
     return {

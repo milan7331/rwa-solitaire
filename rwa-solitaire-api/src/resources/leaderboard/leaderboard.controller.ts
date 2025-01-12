@@ -1,35 +1,124 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Put } from '@nestjs/common';
 
 import { LeaderboardService } from './leaderboard.service';
 import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
 import { UpdateLeaderboardDto } from './dto/update-leaderboard.dto';
+import { WeeklyLeaderboard } from './entities/leaderboard-weekly.entity';
+import { MonthlyLeaderboard } from './entities/leaderboard-monthly.entity';
+import { YearlyLeaderboard } from './entities/leaderboard-yearly.entity';
+import { FindLeaderboardDto } from './dto/find-leaderboard.dto';
+import { RemoveLeaderboardDto } from './dto/remove-leaderboard.dto';
 
 @Controller('leaderboard')
 export class LeaderboardController {
-  constructor(private readonly weeklyService: LeaderboardService) {}
+  constructor(private readonly leaderboardService: LeaderboardService) { }
 
-  // @Post()
-  // create(@Body() createLeaderboardDto: CreateLeaderboardDto) {
-  //   return this.weeklyService.create(createLeaderboardDto);
-  // }
+  @Post('refresh')
+  async leaderboardRefresh(type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
+    const result = await this.leaderboardService.leaderboardRefresh(type);
+    
+    if (result) return {
+      statusCode: HttpStatus.OK,
+      message: type + ' refreshed!'
+    }
 
-  // @Get()
-  // findAll() {
-  //   return this.weeklyService.findAll();
-  // }
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: 'No leaderboards were refreshed'
+    }
+  }
+  
+  @Post('create')
+  async create(@Body() createLeaderboardDto: CreateLeaderboardDto) {
+    await this.leaderboardService.create(createLeaderboardDto);
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.weeklyService.findOne(+id);
-  // }
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Leaderboard created!'
+    }
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateLeaderboardDto: UpdateLeaderboardDto) {
-  //   return this.weeklyService.update(+id, updateLeaderboardDto);
-  // }
+  @Get('find-all')
+  async findAll(@Body() type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
+    const result = await this.leaderboardService.findAll(type, false);
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.weeklyService.remove(+id);
-  // }
+    if (result.length > 0) return {
+      statusCode: HttpStatus.OK,
+      message: 'All leaderboards found',
+      data: result
+    }
+
+    return {
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'No leaderboards found!'
+    }
+
+  }
+
+  @Get('find-one')
+  async findOne(@Body() findDto: FindLeaderboardDto) {
+    const result = await this.leaderboardService.findOne(findDto);
+
+    if (result !== null) return {
+      statusCode: HttpStatus.OK,
+      message: 'Leaderboard found!',
+      data: result
+    }
+
+    return {
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'Leaderboard not found!'
+    }
+
+  }
+
+  @Put('upsert')
+  async upsert(@Body() updateDto: UpdateLeaderboardDto) {
+    await this.leaderboardService.upsert(updateDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Leaderboard upsert successful!'
+    }
+  }
+
+  @Patch('update')
+  async update(@Body() updateDto: UpdateLeaderboardDto) {
+    const result = await this.leaderboardService.update(updateDto);
+
+    if (result) return {
+      statusCode: HttpStatus.OK,
+      message: 'Leaderboard updated!'
+    }
+
+    return {
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'Error updating leaderboard!'
+    }
+  }
+
+  @Delete('remove')
+  async remove(@Body() removeDto: RemoveLeaderboardDto) {
+    await this.leaderboardService.remove(removeDto);
+
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: 'Leaderboard deleted!'
+    }
+  }
+
+  @Patch('restore')
+  async restore(@Body() restoreDto: RemoveLeaderboardDto) {
+    const result = await this.leaderboardService.restore(restoreDto);
+
+    if (result) return {
+      statusCode: HttpStatus.OK,
+      message: 'Leaderboard restored!'
+    }
+
+    return {
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'Error restoring leaderboard!'
+    }
+  }
 }
