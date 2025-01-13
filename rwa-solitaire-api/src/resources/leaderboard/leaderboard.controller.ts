@@ -52,7 +52,6 @@ export class LeaderboardController {
       statusCode: HttpStatus.NOT_FOUND,
       message: 'No leaderboards found!'
     }
-
   }
 
   @Get('find-one')
@@ -69,7 +68,6 @@ export class LeaderboardController {
       statusCode: HttpStatus.NOT_FOUND,
       message: 'Leaderboard not found!'
     }
-
   }
 
   @Put('upsert')

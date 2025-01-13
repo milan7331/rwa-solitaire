@@ -143,7 +143,7 @@ export class GameHistoryService {
 
   async findAll(): Promise<GameHistory[]> {
     try {
-      const games = await this.historyRepository.find({});
+      const games = await this.historyRepository.find({ withDeleted: false });
       return games;
     } catch(error) {
       handlePostgresError(error);

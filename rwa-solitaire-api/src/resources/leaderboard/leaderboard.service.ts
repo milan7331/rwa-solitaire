@@ -95,9 +95,7 @@ export class LeaderboardService {
     
     try {
       const repository = this.getRepository(type);
-      const leaderboards = await repository.find({
-        withDeleted: withDeleted
-      })
+      const leaderboards = await repository.find({ withDeleted: withDeleted });
       
       return leaderboards;
     } catch(error) {
