@@ -7,11 +7,12 @@ import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 
-@Controller('game-history')
+@Controller(['game-history', 'game_history', 'history'])
 export class GameHistoryController {
   constructor(private readonly gameHistoryService: GameHistoryService) {}
 
   @Post('start-game')
+  @Post('start_game')
   @Post('start')
   async startGame(@Body() startDto: CreateGameHistoryDto) {
     const result = await this.gameHistoryService.startGame(startDto);
@@ -23,6 +24,7 @@ export class GameHistoryController {
   }
 
   @Patch('end-game')
+  @Patch('end_game')
   @Patch('end')
   async endGame(@Body() updateDto: UpdateGameHistoryDto) {
     const result = await this.gameHistoryService.endGame(updateDto);
@@ -34,6 +36,7 @@ export class GameHistoryController {
   }
 
   @Get('get-all-games-user')
+  @Get('get_all_games_user')
   async getAllGames(@Body() user: User) {
     const result = await this.gameHistoryService.findAllForUser(user);
     
@@ -60,6 +63,7 @@ export class GameHistoryController {
   }
 
   @Get('find-all')
+  @Get('find_all')
   async findAll() {
     const result = await this.gameHistoryService.findAll();
 
@@ -76,6 +80,7 @@ export class GameHistoryController {
   }
 
   @Get('find-one')
+  @Get('find_one')
   @Get('find')
   async findOne(@Body() findDto: FindGameHistoryDto) {
     const result = await this.gameHistoryService.findOne(findDto);

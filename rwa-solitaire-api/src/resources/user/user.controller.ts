@@ -24,6 +24,7 @@ export class UserController {
   }
 
   @Get('find-one')
+  @Get('find_one')
   @Get('find')
   async findOne(@Body() findDto: FindUserDto) {
     const result = await this.userService.findOne(findDto);
@@ -78,6 +79,7 @@ export class UserController {
   }
 
   @Patch('remove-old-users')
+  @Patch('remove_old_users')
   async removeOldUsers() {
     const result = await this.userService.permanentlyRemoveOldUsers();
 

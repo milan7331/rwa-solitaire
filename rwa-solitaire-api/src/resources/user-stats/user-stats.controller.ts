@@ -5,10 +5,11 @@ import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
 import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
 
-@Controller('user-stats')
+@Controller(['user-stats', 'user_stats', 'stats'])
 export class UserStatsController {
   constructor(private readonly userStatsService: UserStatsService) {}
 
+  @Post('create')
   async create(createDto: CreateUserStatsDto) {
     await this.userStatsService.create(createDto);
 
@@ -18,6 +19,9 @@ export class UserStatsController {
     };
   }
 
+  @Get('find-one')
+  @Get('find_one')
+  @Get('find')
   async findOne(findDto: FindUserStatsDto) {
     const result = await this.userStatsService.findOne(findDto);
 
@@ -33,6 +37,7 @@ export class UserStatsController {
     }
   }
 
+  @Patch('update')
   async update(updateDto: UpdateUserStatsDto) {
     const result = await this.userStatsService.update(updateDto);
 
@@ -47,6 +52,8 @@ export class UserStatsController {
     }
   }
 
+  @Delete('remove')
+  @Delete('delete')
   async remove(removeDto: RemoveUserStatsDto) {
     await this.userStatsService.remove(removeDto);
 
@@ -56,6 +63,7 @@ export class UserStatsController {
     }
   }
 
+  @Patch('restore')
   async restore(restoreDto: RemoveUserStatsDto) {
     const result = await this.userStatsService.restore(restoreDto);
 

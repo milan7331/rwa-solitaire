@@ -14,6 +14,8 @@ export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) { }
 
   @Post('refresh')
+  @Post('refresh-leaderboard')
+  @Post('refresh_leaderboard')
   async leaderboardRefresh(type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
     const result = await this.leaderboardService.leaderboardRefresh(type);
     
@@ -39,6 +41,7 @@ export class LeaderboardController {
   }
 
   @Get('find-all')
+  @Get('find_all')
   async findAll(@Body() type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
     const result = await this.leaderboardService.findAll(type, false);
 
@@ -55,6 +58,7 @@ export class LeaderboardController {
   }
 
   @Get('find-one')
+  @Get('find_one')
   @Get('find')
   async findOne(@Body() findDto: FindLeaderboardDto) {
     const result = await this.leaderboardService.findOne(findDto);

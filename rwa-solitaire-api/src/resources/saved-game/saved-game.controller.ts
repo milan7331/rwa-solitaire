@@ -6,7 +6,7 @@ import { FindGameHistoryDto } from '../game-history/dto/find-game-history.dto';
 import { RemoveSavedGameDto } from './dto/remove-saved-game.dto';
 import { FindSavedGameDto } from './dto/find-saved-game.dto';
 
-@Controller('saved-game')
+@Controller(['saved-game', 'saved_game', 'savegame', 'saved'])
 export class SavedGameController {
   constructor(private readonly savedGameService: SavedGameService) {}
 
@@ -21,6 +21,7 @@ export class SavedGameController {
   }
 
   @Get('find-all')
+  @Get('find_all')
   async findAll() {
     const result = await this.savedGameService.findAll();
 
@@ -37,6 +38,7 @@ export class SavedGameController {
   }
 
   @Get('find-one')
+  @Get('find_one')
   @Get('find')
   @Get('load')
   async findOne(@Body() findDto: FindGameHistoryDto) {
