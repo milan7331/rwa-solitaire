@@ -55,6 +55,7 @@ export class LeaderboardController {
   }
 
   @Get('find-one')
+  @Get('find')
   async findOne(@Body() findDto: FindLeaderboardDto) {
     const result = await this.leaderboardService.findOne(findDto);
 
@@ -96,6 +97,7 @@ export class LeaderboardController {
   }
 
   @Delete('remove')
+  @Delete('delete')
   async remove(@Body() removeDto: RemoveLeaderboardDto) {
     await this.leaderboardService.remove(removeDto);
 

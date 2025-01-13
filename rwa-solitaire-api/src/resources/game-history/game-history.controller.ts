@@ -12,6 +12,7 @@ export class GameHistoryController {
   constructor(private readonly gameHistoryService: GameHistoryService) {}
 
   @Post('start-game')
+  @Post('start')
   async startGame(@Body() startDto: CreateGameHistoryDto) {
     const result = await this.gameHistoryService.startGame(startDto);
 
@@ -22,6 +23,7 @@ export class GameHistoryController {
   }
 
   @Patch('end-game')
+  @Patch('end')
   async endGame(@Body() updateDto: UpdateGameHistoryDto) {
     const result = await this.gameHistoryService.endGame(updateDto);
     
@@ -74,6 +76,7 @@ export class GameHistoryController {
   }
 
   @Get('find-one')
+  @Get('find')
   async findOne(@Body() findDto: FindGameHistoryDto) {
     const result = await this.gameHistoryService.findOne(findDto);
 
@@ -105,6 +108,7 @@ export class GameHistoryController {
   }
 
   @Delete('remove')
+  @Delete('delete')
   async remove(@Body() removeDto: RemoveGameHistoryDto) {
     await this.gameHistoryService.remove(removeDto);
 

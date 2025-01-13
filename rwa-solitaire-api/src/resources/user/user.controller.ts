@@ -4,100 +4,86 @@ import { UserService } from './user.service';
 import { Public } from 'src/auth/auth.decorators';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { DeleteUserDto } from './dto/delete-user.dto';
+import { RemoveUserDto } from './dto/remove-user.dto';
+import { FindUserDto } from './dto/find-user.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
+  @Post('create')
   @Public()
-  async register(@Body() createUserDto: CreateUserDto) {
-    try {
-      const result = await this.userService.create(createUserDto);
-      if (!result) throw new HttpException('User not created!', HttpStatus.INTERNAL_SERVER_ERROR);
+  async create(@Body() createDto: CreateUserDto) {
+    await this.userService.create(createDto);
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: 'User sucessfuly registered.'
-      };
-    } catch(error) {
-      console.error('Error: ' + error);
-      if (error.code === '23505') {
-        throw new HttpException('User already exists!', HttpStatus.CONFLICT);
-      } else {
-        throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR)
-      }
-    }
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'User account created.'
+    };
   }
 
-  @Get(':username')
-  async findOne(@Param('username') username: string) {
-    try {
-      const user = await this.userService.findOne(username, null, null, false, false);
-      if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+  @Get('find-one')
+  @Get('find')
+  async findOne(@Body() findDto: FindUserDto) {
+    const result = await this.userService.findOne(findDto);
+    if (result) result.passwordHash = '';
 
-      user.passwordHash = '';
-      return {
-        HttpStatus: HttpStatus.OK,
-        message: 'User found!',
-        data: user
-      };
-    } catch(error) {
-      console.error('Error: ' + error);
-      throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
+    if (result !== null) return {
+      statusCode: HttpStatus.OK,
+      message: 'User found!',
+      data: result
+    }
+
+    return {
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'User not found!'
     }
   } 
 
   @Patch('update')
-  async update(@Body() username: string, @Body() plainPassword: string, @Body() updateUserDto: UpdateUserDto) {
-    try {
-      const result = await this.userService.update(username, plainPassword, updateUserDto);
-      if (!result) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+  async update(@Body() updateDto: UpdateUserDto) {
+    const result = await this.userService.update(updateDto);
 
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'User updated sucessfully'
-      };
-    } catch(error) {
-      console.error('Error: ' + error);
-      throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
+    if (result) return {
+      statusCode: HttpStatus.OK,
+      message: 'User updated!'
+    }
+
+    return {
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'Error updating user!'
     }
   }
 
+  @Delete('remove')
   @Delete('delete')
-  async deleteAccount(@Body() deleteUser: DeleteUserDto) {
-    try {
-      const result = await this.userService.remove(deleteUser.username, deleteUser.email, deleteUser.password);
-      if (!result) {
-        throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
-      }
+  async remove(@Body() removeDto: RemoveUserDto) {
+    const result = await this.userService.remove(removeDto);
 
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'User deleted sucessfully'
-      }
-    } catch(error) {
-      console.error('Error: ' + error);
-      throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: 'User deleted!'
     }
   }
 
   @Patch('restore')
-  async restoreAccount(@Body() restoreUser: DeleteUserDto) {
-    try {
-      const result = await this.userService.restore(restoreUser.username, restoreUser.email, restoreUser.password);
-      if (!result) {
-        throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
-      }
+  async restore(@Body() restoreDto: RemoveUserDto) {
+    const result = await this.userService.restore(restoreDto);
+    
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User restored!'
+    }
+  }
 
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'User restored sucessfully'
-      }
-    } catch(error) {
-      console.error('Error: ' + error);
-      throw new HttpException('Something went wrong!', HttpStatus.INTERNAL_SERVER_ERROR);
+  @Patch('remove-old-users')
+  async removeOldUsers() {
+    const result = await this.userService.permanentlyRemoveOldUsers();
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Number of old accounts permanently removed: ' + result
     }
   }
 }

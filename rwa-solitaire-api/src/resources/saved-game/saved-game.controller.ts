@@ -4,14 +4,11 @@ import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
 import { FindGameHistoryDto } from '../game-history/dto/find-game-history.dto';
 import { RemoveSavedGameDto } from './dto/remove-saved-game.dto';
+import { FindSavedGameDto } from './dto/find-saved-game.dto';
 
 @Controller('saved-game')
 export class SavedGameController {
   constructor(private readonly savedGameService: SavedGameService) {}
-
-  async saveGame() {}
-  async loadGame() {}
-  async deleteSave() {}
 
   @Post('create')
   async create(@Body() createSavedGameDto: CreateSavedGameDto) {
@@ -40,6 +37,8 @@ export class SavedGameController {
   }
 
   @Get('find-one')
+  @Get('find')
+  @Get('load')
   async findOne(@Body() findDto: FindGameHistoryDto) {
     const result = await this.savedGameService.findOne(findDto);
 
@@ -56,6 +55,7 @@ export class SavedGameController {
   }
 
   @Patch('upsert')
+  @Patch('save')
   async upsert(@Body() updateDto: UpdateSavedGameDto) {
     await this.savedGameService.update(updateDto);
 
@@ -81,6 +81,7 @@ export class SavedGameController {
   }
 
   @Delete('remove')
+  @Delete('delete')
   async remove(@Body() removeDto: RemoveSavedGameDto) {
     await this.savedGameService.remove(removeDto);
 
@@ -90,7 +91,7 @@ export class SavedGameController {
     }
   }
   
-  @Delete('restore')
+  @Patch('restore')
   async restore(@Body() restoreDto: RemoveSavedGameDto) {
     const result = await this.savedGameService.restore(restoreDto);
 

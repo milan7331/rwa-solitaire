@@ -10,6 +10,8 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
+import { FindUserDto } from './dto/find-user.dto';
+import { RemoveUserDto } from './dto/remove-user.dto';
 
 @Injectable()
 export class UserService {
@@ -29,7 +31,15 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<boolean> {
     const { email, username, password } = createUserDto;
-    const existingUser = await this.findOne(username, email, null, false, false);
+
+    const findDto: FindUserDto = {
+      email,
+      username,
+      plainPassword: password,
+      withDeleted: false,
+      withRelations: false
+    }
+    const existingUser = await this.findOne(findDto);
     if (existingUser) throw new ConflictException('Username or email already exists!');
     
     const passwordHash = await this.hashService.hashPassword(password);
@@ -37,53 +47,62 @@ export class UserService {
 
     try {
       await this.userRepository.save(newUser);
+
       return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
   
-  async findOne(
-    username: string | null = null,
-    email: string | null = null,
-    plainPassword: string | null = null,
-    withDeleted: boolean = false,
-    withRelations: boolean = false
-  ): Promise<User | null> {
-    if (!username && !email) throw new BadRequestException('Invalid parameters!');
+  async findOne(findDto: FindUserDto): Promise<User | null> {
+    const { username, email, id, withDeleted, withRelations, plainPassword } = findDto;
+    if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
 
     const where: any = { };
+    if (id) where.id = id;
     if (username) where.username = username;
     if (email) where.email = email;
 
     try {
       const user = await this.userRepository.findOne({
-        withDeleted,
         where,
-        relations: withRelations ? ['GameHistory', 'UserStats', 'savedGame'] : [],
+        withDeleted,
+        relations: withRelations ? ['GameHistory', 'UserStats', 'SavedGame'] : [],
       });
       
       // if plainPassword was provided, verify it before returning
-      // works like a "secure" version this way
-      if (!plainPassword) return user;
-      if (await this.hashService.verifyPassword(plainPassword, user.passwordHash)) return user;
-      throw new UnauthorizedException('User password doesnt match!');
-
+      // works like a "more secure" version this way
+      if (plainPassword) {
+        const check = await this.hashService.verifyPassword(user.passwordHash, plainPassword);
+        if (!check) throw new UnauthorizedException('User password doesnt match!');
+      };
+      
+      user.passwordHash = '';
+      return user;
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async update(
-    username:string,
-    plainPassword: string,
-    updateUserDto: UpdateUserDto
-  ): Promise<boolean> {
-    try {
-      const user = await this.findOne(username, null, plainPassword, false, false);
-      if (!user)  throw new NotFoundException('User to update not found!');;
+  async update(updateDto: UpdateUserDto): Promise<boolean> {
+    const {id, email, username, plainPassword, newPlainPassword} = updateDto;
+    if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
 
-      const result = await this.userRepository.update(username, updateUserDto);
+    const findDto: FindUserDto = {
+      id,
+      username,
+      email,
+      plainPassword,
+      withDeleted: false,
+      withRelations: false
+    }
+    
+    const user = await this.findOne(findDto);
+    if (!user)  throw new NotFoundException('User to update not found!');;
+
+    try {
+      const result = await this.userRepository.update(username, updateDto);
+
       if (result.affected > 0) return true;
       return false;
     } catch(error) {
@@ -91,12 +110,19 @@ export class UserService {
     }
   }
 
-  async remove(
-    username: string,
-    email: string,
-    plainPassword: string
-  ): Promise<boolean> {
-    const user = await this.findOne(username, email, plainPassword, false, true);
+  async remove(removeDto: RemoveUserDto): Promise<boolean> {
+    const { id, username, email, plainPassword} = removeDto;
+    if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
+
+    const findDto: FindUserDto = {
+      id,
+      username,
+      email,
+      plainPassword,
+      withDeleted: false,
+      withRelations: true
+    }
+    const user = await this.findOne(findDto);
     if (!user)  throw new NotFoundException('User to remove not found!');
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -110,8 +136,8 @@ export class UserService {
       for (let i in user.GameHistory) {
         await queryRunner.manager.softRemove(user.GameHistory[i]);
       }
-
       await queryRunner.commitTransaction();
+
       return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
@@ -121,12 +147,19 @@ export class UserService {
     }
   }
 
-  async restore(
-    username: string,
-    email: string,
-    plainPassword: string
-  ): Promise<boolean> {
-    const user = await this.findOne(username, email, plainPassword, true, true);
+  async restore(restoreDto: RemoveUserDto): Promise<boolean> {
+    const { id, username, email, plainPassword } = restoreDto;
+    if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
+
+    const findDto: FindUserDto = {
+      id,
+      username,
+      email,
+      plainPassword,
+      withRelations: true,
+      withDeleted: true
+    }
+    const user = await this.findOne(findDto);
     if (!user) throw new NotFoundException('User to restore not found!');
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -140,8 +173,8 @@ export class UserService {
       for (let i in user.GameHistory) {
         await queryRunner.manager.restore(GameHistory, user.GameHistory[i].id);
       }
-
       await queryRunner.commitTransaction();
+
       return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
@@ -168,8 +201,8 @@ export class UserService {
           await queryRunner.manager.remove(usersToRemove[i].GameHistory[j]);
         }
       }
-
       await queryRunner.commitTransaction();
+
       return usersToRemove.length;
     } catch(error) {
       await queryRunner.rollbackTransaction();
