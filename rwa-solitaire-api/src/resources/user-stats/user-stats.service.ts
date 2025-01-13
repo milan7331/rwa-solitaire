@@ -8,6 +8,8 @@ import { UserStats } from './entities/user-stats.entity';
 import { User } from '../user/entities/user.entity';
 import { HashService } from 'src/auth/hash.service';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
+import { FindUserStatsDto } from './dto/find-user-stats.dto';
+import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
 
 @Injectable()
 export class UserStatsService {
@@ -16,26 +18,23 @@ export class UserStatsService {
     private readonly userStatsRepository: Repository<UserStats>,
   ) { }
 
-  async create(createStatsDto: CreateUserStatsDto): Promise<boolean> {
+  async create(createDto: CreateUserStatsDto): Promise<boolean> {
     const existingStats = await this.userStatsRepository.findOne({
-      where: { user: createStatsDto.user }
+      where: { user: createDto.user }
     });
     if (existingStats) throw new ConflictException('user-stats already exists for this user!');
 
     try {
-      await this.userStatsRepository.save(createStatsDto);
+      await this.userStatsRepository.save(createDto);
+
       return true;
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
-  async findOne(
-    id: number | null = null,
-    user: User | null = null,
-    withDeleted: boolean,
-    withRelations: boolean
-  ): Promise<UserStats | null> {
+  async findOne(findDto: FindUserStatsDto): Promise<UserStats | null> {
+    const { id, user, withDeleted } = findDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
     const where: any = { };
@@ -45,27 +44,30 @@ export class UserStatsService {
     try {
       let stats = await this.userStatsRepository.findOne({
         where,
-        withDeleted,
-        relations: withRelations ? ['user'] : []
+        withDeleted
       });
+
       return stats;
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
-  async update(
-    id: number | null = null,
-    user: User | null = null,
-    updateUserStatsDto: UpdateUserStatsDto
-  ): Promise<boolean> {
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');;
+  async update(updateDto: UpdateUserStatsDto): Promise<boolean> {
+    const { user } = updateDto;
+    if (!user) throw new BadRequestException('Invalid parameters!');;
 
-    const stats = this.findOne(id, user, false, false);
+    const findDto: FindUserStatsDto = {
+      user,
+      withDeleted: false
+    }
+
+    const stats = await this.findOne(findDto);
     if (!stats) throw new NotFoundException('No stats to update found!');
 
     try {
-      const result = await this.userStatsRepository.update(id, updateUserStatsDto);
+      const result = await this.userStatsRepository.update(stats.id, updateDto);
+      
       if (result.affected > 0) return true;
       return false;
     } catch (error) {
@@ -73,35 +75,46 @@ export class UserStatsService {
     }
   }
 
-  async remove(
-    id: number | null = null,
-    user: User | null = null
-  ): Promise<boolean> {
+  async remove(removeDto: RemoveUserStatsDto): Promise<boolean> {
+    const { id, user } = removeDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
-    const stats = await this.findOne(id, user, false, false);
+    const findDto: FindUserStatsDto = {
+      id,
+      user,
+      withDeleted: false
+    }
+
+    const stats = await this.findOne(findDto);
     if (!stats) throw new NotFoundException('No user-stats to remove found!');
     
     try {
       await this.userStatsRepository.softRemove(stats);
+
       return true;
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
-  async restore(
-    id: number | null = null,
-    user: User | null = null
-  ): Promise<boolean> {
+  async restore(restoreDto: RemoveUserStatsDto): Promise<boolean> {
+    const { id, user } = restoreDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
-    
-    const stats = await this.findOne(id, user, true, false);
+
+    const findDto: FindUserStatsDto = {
+      id,
+      user,
+      withDeleted: false
+    }
+
+    const stats = await this.findOne(findDto);
     if (!stats) throw new NotFoundException('No user-stats to restore found!');
     
     try {
-      await this.userStatsRepository.restore(stats);
-      return true;
+      const result = await this.userStatsRepository.restore(stats);
+
+      if (result.affected > 0) return true;
+      return false;
     } catch (error) {
       handlePostgresError(error);
     }

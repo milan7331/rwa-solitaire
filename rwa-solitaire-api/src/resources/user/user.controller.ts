@@ -59,7 +59,7 @@ export class UserController {
   @Delete('remove')
   @Delete('delete')
   async remove(@Body() removeDto: RemoveUserDto) {
-    const result = await this.userService.remove(removeDto);
+    await this.userService.remove(removeDto);
 
     return {
       statusCode: HttpStatus.NO_CONTENT,
@@ -69,7 +69,7 @@ export class UserController {
 
   @Patch('restore')
   async restore(@Body() restoreDto: RemoveUserDto) {
-    const result = await this.userService.restore(restoreDto);
+    await this.userService.restore(restoreDto);
     
     return {
       statusCode: HttpStatus.OK,
