@@ -25,14 +25,14 @@ export class User {
     @Column({ type: 'text' })
     passwordHash: string;
 
-    @OneToOne(() => UserStats, (UserStats) => UserStats.user, { cascade: true })
+    @OneToOne(() => UserStats, (UserStats) => UserStats.user, { cascade: true, onDelete: 'CASCADE'})
     @JoinColumn()
-    UserStats: UserStats;
+    userStats: UserStats;
 
-    @OneToMany(() => GameHistory, (GameHistory) => GameHistory.user, { cascade: ["remove", "soft-remove", "recover"] })
-    GameHistory: GameHistory[];
+    @OneToMany(() => GameHistory, (GameHistory) => GameHistory.user, { cascade: true, onDelete: 'CASCADE' })
+    gameHistory: GameHistory[];
 
-    @OneToOne(() => SavedGame, (savedGame) => savedGame.gameState, { cascade: ["remove", "soft-remove", "recover"] })
+    @OneToOne(() => SavedGame, (savedGame) => savedGame.gameState, { cascade: true, onDelete: 'CASCADE' })
     @JoinColumn()
     savedGame: SavedGame;
 

@@ -11,10 +11,10 @@ export class UserStats {
     @CreateDateColumn({type: 'timestamptz'})
     createdAt: Date;
 
-    @Column({ type:'number', default: 0 })
+    @Column({ type:'integer', default: 0 })
     gamesPlayed: number;
   
-    @Column({ type:'number', default: 0 })
+    @Column({ type:'integer', default: 0 })
     gamesWon: number;
 
     // time is stored in seconds
@@ -32,7 +32,7 @@ export class UserStats {
     @UpdateDateColumn({type: 'timestamptz'})
     updatedAt: Date;
   
-    @OneToOne(() => User, (user) => user.UserStats)
+    @OneToOne(() => User, (user) => user.userStats)
     user: User;
 
     @DeleteDateColumn()

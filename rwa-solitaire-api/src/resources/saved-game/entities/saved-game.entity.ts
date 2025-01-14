@@ -10,7 +10,7 @@ export class SavedGame {
     @CreateDateColumn()
     createdAt: Date;
 
-    @Column({ type: 'jsonb', nullable: true })
+    @Column({ type: 'jsonb', nullable: true, default: {} })
     gameState: Record<string, any>;
 
     @UpdateDateColumn({ type: 'timestamptz' })

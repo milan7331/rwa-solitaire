@@ -4,7 +4,6 @@ import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
 import { FindGameHistoryDto } from '../game-history/dto/find-game-history.dto';
 import { RemoveSavedGameDto } from './dto/remove-saved-game.dto';
-import { FindSavedGameDto } from './dto/find-saved-game.dto';
 
 @Controller(['saved-game', 'saved_game', 'savegame', 'saved'])
 export class SavedGameController {

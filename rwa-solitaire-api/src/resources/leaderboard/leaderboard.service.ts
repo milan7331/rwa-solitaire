@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -10,7 +10,6 @@ import { GameHistory } from "../game-history/entities/game-history.entity";
 import { UserData } from "../leaderboard/entities/userdata";
 import { GameHistoryService } from "../game-history/game-history.service";
 import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
-import { CronService } from "src/util/cron.service";
 import { handlePostgresError } from "src/util/postgres-error-handler";
 import { FindLeaderboardDto } from "./dto/find-leaderboard.dto";
 import { RemoveLeaderboardDto } from "./dto/remove-leaderboard.dto";
@@ -19,7 +18,7 @@ import { RemoveLeaderboardDto } from "./dto/remove-leaderboard.dto";
 export class LeaderboardService {
   
   constructor(
-    private readonly historyService: GameHistoryService,
+    @Inject(forwardRef(() => GameHistoryService)) private readonly historyService: GameHistoryService,
 
     @InjectRepository(WeeklyLeaderboard)
     private readonly weeklyRepository: Repository<WeeklyLeaderboard>,

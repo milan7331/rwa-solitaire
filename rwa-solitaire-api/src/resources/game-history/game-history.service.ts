@@ -1,9 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '../user/entities/user.entity';
-import { SolitaireDifficulty, GameHistory } from './entities/game-history.entity';
+import { GameHistory } from './entities/game-history.entity';
 import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { CronService } from 'src/util/cron.service';
@@ -11,13 +11,14 @@ import { UserStatsService } from '../user-stats/user-stats.service';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
+import { FindUserStatsDto } from '../user-stats/dto/find-user-stats.dto';
 
 @Injectable()
 export class GameHistoryService {
   constructor(
     @InjectRepository(GameHistory)
     private readonly historyRepository: Repository<GameHistory>,
-    private readonly cronService: CronService,
+    @Inject(forwardRef(() => CronService)) private readonly cronService: CronService,
     private readonly statsService: UserStatsService
   ) {}
 
@@ -97,8 +98,14 @@ export class GameHistoryService {
   }
   
   async updateUserStats(finishedGame: GameHistory): Promise<boolean> {
-    if (!finishedGame.gameFinished) return false;
-    const userStats = await this.statsService.findOne(null, finishedGame.user, false, false);
+    const { user, gameFinished } = finishedGame;
+    if (!gameFinished) return false;
+    
+    const findUserStatsDto: FindUserStatsDto = {
+      user,
+      withDeleted: false
+    }
+    const userStats = await this.statsService.findOne(findUserStatsDto);
     if (!userStats) throw new Error('Error finding user stats');
 
     userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + finishedGame.gameDurationInSeconds) / userStats.gamesPlayed + 1;
@@ -107,7 +114,7 @@ export class GameHistoryService {
     if (finishedGame.gameWon) userStats.gamesWon++;
     userStats.totalTimePlayed += finishedGame.gameDurationInSeconds;
   
-    return this.statsService.update(userStats.id, finishedGame.user, userStats);
+    return this.statsService.update(userStats);
   }
 
   async create(createUserDto: CreateGameHistoryDto): Promise<boolean> {

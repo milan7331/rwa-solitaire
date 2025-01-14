@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { MonthlyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-monthly.entity";
 import { WeeklyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-weekly.entity";
@@ -10,7 +10,7 @@ import { UserService } from "src/resources/user/user.service";
 export class CronService {
     constructor(
         private readonly userService: UserService,
-        private readonly leaderboardService: LeaderboardService
+        @Inject(forwardRef(() => LeaderboardService)) private readonly leaderboardService: LeaderboardService
     ) {}
 
     // This method runs once a day to clean up old soft removed/deleted user accounts and all related rows.

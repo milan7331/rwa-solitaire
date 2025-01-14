@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus } from '@nestjs/common';
 
 import { User } from '../user/entities/user.entity';
 import { GameHistoryService } from './game-history.service';

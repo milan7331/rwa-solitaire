@@ -35,7 +35,7 @@ export class GameHistory {
     @Column({ type: 'integer', nullable: true, default: 0})
     gameDurationInSeconds: number;
 
-    @ManyToOne(() => User, (User) => User.GameHistory)
+    @ManyToOne(() => User, (User) => User.gameHistory)
     @JoinColumn()
     user: User;
 

@@ -4,7 +4,6 @@ import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
 import { SavedGame } from './entities/saved-game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindSavedGameDto } from './dto/find-saved-game.dto';
 import { RemoveSavedGameDto } from './dto/remove-saved-game.dto';

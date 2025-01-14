@@ -11,6 +11,8 @@ import { UserStatsModule } from './resources/user-stats/user-stats.module';
 import { AuthModule } from './auth/auth.module';
 import { LeaderboardModule } from './resources/leaderboard/leaderboard.module';
 import { UtilModule } from './util/util.module';
+import { GameHistoryModule } from './resources/game-history/game-history.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -27,15 +29,18 @@ import { UtilModule } from './util/util.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
+        logging: false,
         autoLoadEntities: true,
         synchronize: true, // prepraviti kasnije!!!
       })
     }),
-    UserModule, 
-    SavedGameModule, 
-    UserStatsModule,
+    ScheduleModule.forRoot(),
     AuthModule,
+    GameHistoryModule,
     LeaderboardModule,
+    SavedGameModule, 
+    UserModule, 
+    UserStatsModule,
     UtilModule
   ],
   controllers: [AppController],

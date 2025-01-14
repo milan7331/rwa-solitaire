@@ -1,20 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { SavedGame } from 'src/resources/saved-game/entities/saved-game.entity';
-import { UserStats } from 'src/resources/user-stats/entities/user-stats.entity';
-import { GameHistory } from '../game-history/entities/game-history.entity';
-import { HashService } from 'src/auth/hash.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    SavedGame,
-    UserStats,
-    GameHistory,
-    HashService
+    forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
   providers: [UserService],

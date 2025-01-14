@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, DeepPartial, LessThan, Repository } from 'typeorm';
+import { DataSource, LessThan, Repository } from 'typeorm';
 
 import { HashService } from 'src/auth/hash.service';
 import { SavedGame } from '../saved-game/entities/saved-game.entity';
@@ -13,24 +13,21 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserDto } from './dto/find-user.dto';
 import { RemoveUserDto } from './dto/remove-user.dto';
 
+// fix remove/restore to use proper cascades + entity fix
+
 @Injectable()
 export class UserService {
 
   constructor(
     @InjectRepository(User)
     private readonly userRepository:Repository<User>,
-    @InjectRepository(SavedGame)
-    private readonly savedGameRepository:Repository<SavedGame>,
-    @InjectRepository(UserStats)
-    private readonly statsRepository:Repository<UserStats>,
-    @InjectRepository(GameHistory)
-    private readonly historyRepository:Repository<GameHistory>,
+
     private readonly dataSource: DataSource,
     private readonly hashService: HashService
   ) { }
 
-  async create(createUserDto: CreateUserDto): Promise<boolean> {
-    const { email, username, password } = createUserDto;
+  async create(createDto: CreateUserDto): Promise<boolean> {
+    const { email, username, password } = createDto;
 
     const findDto: FindUserDto = {
       email,
@@ -44,6 +41,22 @@ export class UserService {
     
     const passwordHash = await this.hashService.hashPassword(password);
     const newUser = this.userRepository.create({ username, email, passwordHash });
+
+    const newStats = new UserStats();
+    newStats.gamesPlayed = 0;
+    newStats.gamesWon = 0;
+    newStats.totalTimePlayed = 0;
+    newStats.averageSolveTime = Number.MAX_SAFE_INTEGER;
+    newStats.fastestSolveTime = Number.MAX_SAFE_INTEGER;
+
+    const newGameHistory: GameHistory[] = [];
+
+    const newSavedGame = new SavedGame();
+    newSavedGame.gameState = {};
+
+    newUser.userStats = newStats;
+    newUser.gameHistory = newGameHistory;
+    newUser.savedGame = newSavedGame;
 
     try {
       await this.userRepository.save(newUser);
@@ -132,9 +145,9 @@ export class UserService {
     try {
       await queryRunner.manager.softRemove(user);
       await queryRunner.manager.softRemove(user.savedGame);
-      await queryRunner.manager.softRemove(user.UserStats);
-      for (let i in user.GameHistory) {
-        await queryRunner.manager.softRemove(user.GameHistory[i]);
+      await queryRunner.manager.softRemove(user.userStats);
+      for (let i in user.gameHistory) {
+        await queryRunner.manager.softRemove(user.gameHistory[i]);
       }
       await queryRunner.commitTransaction();
 
@@ -168,10 +181,10 @@ export class UserService {
     
     try {
       await queryRunner.manager.restore(User, user.id);
-      await queryRunner.manager.restore(UserStats, user.UserStats.id);
+      await queryRunner.manager.restore(UserStats, user.userStats.id);
       await queryRunner.manager.restore(SavedGame, user.savedGame.id);
-      for (let i in user.GameHistory) {
-        await queryRunner.manager.restore(GameHistory, user.GameHistory[i].id);
+      for (let i in user.gameHistory) {
+        await queryRunner.manager.restore(GameHistory, user.gameHistory[i].id);
       }
       await queryRunner.commitTransaction();
 
@@ -196,9 +209,9 @@ export class UserService {
       for (let i in usersToRemove) {
         await queryRunner.manager.remove(usersToRemove[i]);
         await queryRunner.manager.remove(usersToRemove[i].savedGame);
-        await queryRunner.manager.remove(usersToRemove[i].UserStats);
-        for (let j in usersToRemove[i].GameHistory) {
-          await queryRunner.manager.remove(usersToRemove[i].GameHistory[j]);
+        await queryRunner.manager.remove(usersToRemove[i].userStats);
+        for (let j in usersToRemove[i].gameHistory) {
+          await queryRunner.manager.remove(usersToRemove[i].gameHistory[j]);
         }
       }
       await queryRunner.commitTransaction();

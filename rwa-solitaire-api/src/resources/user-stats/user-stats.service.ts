@@ -2,11 +2,9 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { CreateUserStatsDto } from './dto/create-user-stats.dto';
 import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { UserStats } from './entities/user-stats.entity';
-import { User } from '../user/entities/user.entity';
-import { HashService } from 'src/auth/hash.service';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';

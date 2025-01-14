@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, ConflictException, InternalServerErrorException } from "@nestjs/common";
 
 export function handlePostgresError(error: any): void {
     switch(error.code) {
