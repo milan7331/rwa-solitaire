@@ -13,6 +13,7 @@ import { UpdateLeaderboardDto } from "./dto/update-leaderboard.dto";
 import { handlePostgresError } from "src/util/postgres-error-handler";
 import { FindLeaderboardDto } from "./dto/find-leaderboard.dto";
 import { RemoveLeaderboardDto } from "./dto/remove-leaderboard.dto";
+import { POSTGRES_MAX_INTEGER } from "src/util/postgres-constants";
 
 @Injectable()
 export class LeaderboardService {
@@ -195,9 +196,9 @@ export class LeaderboardService {
         userData[username] = {
           username,
           totalGames: 0,
-          leastMoves: Number.MAX_SAFE_INTEGER,
+          leastMoves: POSTGRES_MAX_INTEGER,
           totalDuration: 0,
-          bestTime: Number.MAX_SAFE_INTEGER,
+          bestTime: POSTGRES_MAX_INTEGER,
           gamesWon: 0,
         };
       }

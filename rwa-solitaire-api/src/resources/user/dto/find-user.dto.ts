@@ -19,9 +19,9 @@ export class FindUserDto {
 
     @IsNotEmpty()
     @IsBoolean()
-    withDeleted: boolean;
+    withDeleted: boolean = false;
 
     @IsNotEmpty()
     @IsBoolean()
-    withRelations: boolean;
+    withRelations: boolean = false;
 }

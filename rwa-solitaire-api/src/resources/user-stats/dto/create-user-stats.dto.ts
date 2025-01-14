@@ -1,5 +1,6 @@
 import { IsNotEmpty, isNumber, IsNumber, IsOptional } from "class-validator";
 import { User } from "src/resources/user/entities/user.entity";
+import { POSTGRES_MAX_INTEGER } from "src/util/postgres-constants";
 
 export class CreateUserStatsDto {
 
@@ -20,10 +21,10 @@ export class CreateUserStatsDto {
 
     @IsOptional()
     @IsNumber()
-    averageSolveTime: number = Number.MAX_SAFE_INTEGER;
+    averageSolveTime: number = POSTGRES_MAX_INTEGER;
 
     @IsOptional()
     @IsNumber()    
-    fastestSolveTime: number = Number.MAX_SAFE_INTEGER;
+    fastestSolveTime: number = POSTGRES_MAX_INTEGER;
     
 }

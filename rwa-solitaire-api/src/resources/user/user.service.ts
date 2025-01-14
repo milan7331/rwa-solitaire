@@ -12,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserDto } from './dto/find-user.dto';
 import { RemoveUserDto } from './dto/remove-user.dto';
+import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 // fix remove/restore to use proper cascades + entity fix
 
@@ -32,7 +33,6 @@ export class UserService {
     const findDto: FindUserDto = {
       email,
       username,
-      plainPassword: password,
       withDeleted: false,
       withRelations: false
     }
@@ -46,8 +46,8 @@ export class UserService {
     newStats.gamesPlayed = 0;
     newStats.gamesWon = 0;
     newStats.totalTimePlayed = 0;
-    newStats.averageSolveTime = Number.MAX_SAFE_INTEGER;
-    newStats.fastestSolveTime = Number.MAX_SAFE_INTEGER;
+    newStats.averageSolveTime = POSTGRES_MAX_INTEGER;
+    newStats.fastestSolveTime = POSTGRES_MAX_INTEGER;
 
     const newGameHistory: GameHistory[] = [];
 
@@ -80,17 +80,17 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where,
         withDeleted,
-        relations: withRelations ? ['GameHistory', 'UserStats', 'SavedGame'] : [],
+        relations: withRelations ? ['gameHistory', 'userStats', 'savedGame'] : [],
       });
       
       // if plainPassword was provided, verify it before returning
       // works like a "more secure" version this way
-      if (plainPassword) {
+      if (user && plainPassword) {
         const check = await this.hashService.verifyPassword(user.passwordHash, plainPassword);
         if (!check) throw new UnauthorizedException('User password doesnt match!');
       };
       
-      user.passwordHash = '';
+      if (user) user.passwordHash = '';
       return user;
     } catch(error) {
       handlePostgresError(error);

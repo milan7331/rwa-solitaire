@@ -25,7 +25,6 @@ export class CronService {
         for (let i = 0; i < retries; i++) {
             const result = await this.leaderboardService.leaderboardRefresh(WeeklyLeaderboard);
             if (result) return;
-            console.warn('Weekly leaderboard update failed!');
             this.sleep(3000);
         }
     }
@@ -36,7 +35,6 @@ export class CronService {
         for (let i = 0; i < retries; i++) {
             const result = await this.leaderboardService.leaderboardRefresh(MonthlyLeaderboard);
             if (result) return;
-            console.warn('Weekly leaderboard update failed!');
             this.sleep(3000);
         }
     }
@@ -47,7 +45,6 @@ export class CronService {
         for (let i = 0; i < retries; i++) {
             const result = await this.leaderboardService.leaderboardRefresh(YearlyLeaderboard);
             if (result) return;
-            console.warn('Weekly leaderboard update failed!');
             this.sleep(3000);
         }
     }

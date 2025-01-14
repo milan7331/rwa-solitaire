@@ -18,15 +18,15 @@ export class UserStats {
     gamesWon: number;
 
     // time is stored in seconds
-    @Column({ type: 'interval', default: 0 })
+    @Column({ type: 'integer', default: 0 })
     totalTimePlayed: number;
   
     // time is stored in seconds
-    @Column({ type: 'interval', nullable: true })
+    @Column({ type: 'integer', nullable: true })
     averageSolveTime: number;
   
     // time is stored in seconds
-    @Column({ type: 'interval', nullable: true })
+    @Column({ type: 'integer', nullable: true })
     fastestSolveTime: number;
 
     @UpdateDateColumn({type: 'timestamptz'})

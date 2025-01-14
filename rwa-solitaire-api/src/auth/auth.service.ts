@@ -13,10 +13,9 @@ export class AuthService {
     ) {}
 
     // find one also checks for password matching, no need to call the hashService derictly
-    async validateUser(username: string, plainPassword: string): Promise<DeepPartial<User> | null> {
+    async validateUser(username: string, password: string): Promise<DeepPartial<User> | null> {
         const findUserDto: FindUserDto = {
             username,
-            plainPassword,
             withDeleted: false,
             withRelations: false
         }
