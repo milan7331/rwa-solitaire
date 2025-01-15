@@ -68,7 +68,7 @@ export class UserService {
   }
   
   async findOne(findDto: FindUserDto): Promise<User | null> {
-    const { username, email, id, withDeleted, withRelations, plainPassword } = findDto;
+    const { username, email, id, withDeleted, withRelations, password } = findDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
 
     const where: any = { };
@@ -83,10 +83,10 @@ export class UserService {
         relations: withRelations ? ['gameHistory', 'userStats', 'savedGame'] : [],
       });
       
-      // if plainPassword was provided, verify it before returning
+      // if password was provided, verify it before returning
       // works like a "more secure" version this way
-      if (user && plainPassword) {
-        const check = await this.hashService.verifyPassword(user.passwordHash, plainPassword);
+      if (user && password) {
+        const check = await this.hashService.verifyPassword(user.passwordHash, password);
         if (!check) throw new UnauthorizedException('User password doesnt match!');
       };
       
@@ -98,14 +98,14 @@ export class UserService {
   }
 
   async update(updateDto: UpdateUserDto): Promise<boolean> {
-    const {id, email, username, plainPassword, newPlainPassword} = updateDto;
+    const {id, email, username, password, newPassword } = updateDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserDto = {
       id,
       username,
       email,
-      plainPassword,
+      password,
       withDeleted: false,
       withRelations: false
     }
@@ -124,14 +124,14 @@ export class UserService {
   }
 
   async remove(removeDto: RemoveUserDto): Promise<boolean> {
-    const { id, username, email, plainPassword} = removeDto;
+    const { id, username, email, password} = removeDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindUserDto = {
       id,
       username,
       email,
-      plainPassword,
+      password,
       withDeleted: false,
       withRelations: true
     }
@@ -161,14 +161,14 @@ export class UserService {
   }
 
   async restore(restoreDto: RemoveUserDto): Promise<boolean> {
-    const { id, username, email, plainPassword } = restoreDto;
+    const { id, username, email, password } = restoreDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindUserDto = {
       id,
       username,
       email,
-      plainPassword,
+      password,
       withRelations: true,
       withDeleted: true
     }

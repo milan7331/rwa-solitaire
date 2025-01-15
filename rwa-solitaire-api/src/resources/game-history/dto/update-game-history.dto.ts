@@ -2,7 +2,8 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreateGameHistoryDto } from './create-game-history.dto';
 import { SolitaireDifficulty } from '../entities/game-history.entity';
 import { User } from 'src/resources/user/entities/user.entity';
-import { IsBoolean, IsDate, IsNumber, IsOptional } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 export class UpdateGameHistoryDto {
 
@@ -12,6 +13,8 @@ export class UpdateGameHistoryDto {
 
     @IsOptional()
     @IsNumber()
+    @Min(0)
+    @Max(POSTGRES_MAX_INTEGER)
     moves?: number;
 
     @IsOptional()
@@ -23,6 +26,7 @@ export class UpdateGameHistoryDto {
     gameFinished?: boolean;
 
     @IsOptional()
+    @IsEnum(SolitaireDifficulty)
     gameDifficulty?: SolitaireDifficulty;
 
     @IsOptional()
@@ -35,6 +39,8 @@ export class UpdateGameHistoryDto {
 
     @IsOptional()
     @IsNumber()
+    @Min(0)
+    @Max(POSTGRES_MAX_INTEGER)
     gameDurationInSeconds?: number;
 
     @IsOptional()

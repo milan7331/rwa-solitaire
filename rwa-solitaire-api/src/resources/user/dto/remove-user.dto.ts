@@ -7,6 +7,7 @@ export class RemoveUserDto {
 
     @IsOptional()
     @IsString()
+    @MinLength(6)
     username?: string;
 
     @IsOptional()
@@ -15,6 +16,7 @@ export class RemoveUserDto {
     email?: string;
 
     @IsNotEmpty()
+    @IsString()
     @MinLength(8)
-    plainPassword: string;
+    password: string;
 }

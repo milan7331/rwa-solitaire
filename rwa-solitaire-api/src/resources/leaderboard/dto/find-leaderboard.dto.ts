@@ -3,7 +3,6 @@ import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
 import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";
 
-
 export class FindLeaderboardDto {
     @IsOptional()
     @IsNumber()
@@ -16,7 +15,6 @@ export class FindLeaderboardDto {
     @IsOptional()
     type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard;
 
-    @IsOptional()
     @IsBoolean()
-    withDeleted?: boolean;
+    withDeleted: boolean = false;
 }

@@ -8,18 +8,22 @@ export class UpdateUserDto {
     id?: number;
     
     @IsOptional()
+    @IsString()
     @IsEmail()
     email?: string;
 
     @IsOptional()
     @IsString()
+    @MinLength(6)
     username?: string;
 
     @IsOptional()
     @IsString()
-    plainPassword?: string;
+    @MinLength(8)
+    password?: string;
 
     @IsOptional()
     @IsString()
-    newPlainPassword?: string;
+    @MinLength(8)
+    newPassword?: string;
 }

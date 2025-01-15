@@ -12,19 +12,15 @@ export class CreateLeaderboardDto {
     @IsNotEmpty()
     type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard;
 
-    @IsNotEmpty()
     @IsArray()
-    top20_averageTime: UserData[];
+    top20_averageTime: UserData[] = [];
 
-    @IsNotEmpty()
     @IsArray()
-    top20_bestTime: UserData[];
+    top20_bestTime: UserData[] = [];
 
-    @IsNotEmpty()
     @IsArray()
-    top20_numberOfMoves: UserData[];
+    top20_numberOfMoves: UserData[] = [];
 
-    @IsNotEmpty()
     @IsArray()
-    top20_gamesPlayed: UserData[];
+    top20_gamesPlayed: UserData[] = [];
 }

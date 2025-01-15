@@ -6,13 +6,10 @@ import { YearlyLeaderboard } from '../entities/leaderboard-yearly.entity';
 import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateLeaderboardDto extends PartialType(CreateLeaderboardDto) {
-
     @IsOptional()
     @IsNumber()
     id?: number;
 
     @IsOptional()
-    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard;
-
-    
+    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard; 
 }

@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from "class-validator";
 
 export class FindUserDto {
     @IsOptional()
@@ -7,6 +7,7 @@ export class FindUserDto {
 
     @IsOptional()
     @IsString()
+    @MinLength(6)
     username?: string;
 
     @IsOptional()
@@ -15,7 +16,8 @@ export class FindUserDto {
 
     @IsOptional()
     @IsString()
-    plainPassword?: string;
+    @MinLength(8)
+    password?: string;
 
     @IsNotEmpty()
     @IsBoolean()

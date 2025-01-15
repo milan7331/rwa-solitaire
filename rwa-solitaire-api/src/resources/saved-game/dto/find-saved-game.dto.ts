@@ -11,5 +11,5 @@ export class FindSavedGameDto {
 
     @IsOptional()
     @IsBoolean()
-    withDeleted?: boolean;
+    withDeleted: boolean = false;
 }

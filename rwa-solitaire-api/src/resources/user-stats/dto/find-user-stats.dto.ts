@@ -9,7 +9,6 @@ export class FindUserStatsDto {
     @IsOptional()
     user?: User;
 
-    @IsNotEmpty()
     @IsBoolean()
-    withDeleted: boolean;
+    withDeleted: boolean = false;
 }
