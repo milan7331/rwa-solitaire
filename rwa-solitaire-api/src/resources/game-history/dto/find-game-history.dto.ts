@@ -4,15 +4,16 @@ import { User } from "src/resources/user/entities/user.entity";
 export class FindGameHistoryDto {
         @IsOptional()
         @IsNumber()
-        id?: number;
+        id?: number = undefined;
 
         @IsOptional()
-        user?: User;
+        user?: User = undefined;
 
         @IsOptional()
         @IsDate()
-        startedTime?: Date;
+        startedTime?: Date = undefined;
 
+        @IsOptional()
         @IsBoolean()
         withDeleted: boolean = false;
 }

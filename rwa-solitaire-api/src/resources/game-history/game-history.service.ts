@@ -124,7 +124,8 @@ export class GameHistoryService {
       where: {
         user: createUserDto.user,
         startedTime: createUserDto.startedTime
-      }
+      },
+      withDeleted: true
     });
     if (existingGame) throw new ConflictException('This game already exists!');
     
@@ -140,7 +141,8 @@ export class GameHistoryService {
   async findAllForUser(user: User): Promise<GameHistory[]> {
     try {
       const games = await this.historyRepository.find({
-        where: { user: user }
+        where: { user: user },
+        withDeleted: false
       });
       return games;
     } catch(error) {

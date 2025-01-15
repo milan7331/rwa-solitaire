@@ -4,16 +4,13 @@ import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";
 
 export class FindLeaderboardDto {
-    @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
 
-    @IsOptional()
     @IsDate()
-    timePeriod?: Date;
+    timePeriod?: Date = undefined;
 
-    @IsOptional()
-    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard;
+    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard = undefined;
 
     @IsBoolean()
     withDeleted: boolean = false;

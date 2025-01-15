@@ -52,10 +52,11 @@ export class UserStatsService {
   }
 
   async update(updateDto: UpdateUserStatsDto): Promise<boolean> {
-    const { user } = updateDto;
-    if (!user) throw new BadRequestException('Invalid parameters!');;
+    const { id, user } = updateDto;
+    if (!id && !user) throw new BadRequestException('Invalid parameters!');;
 
     const findDto: FindUserStatsDto = {
+      id,
       user,
       withDeleted: false
     }

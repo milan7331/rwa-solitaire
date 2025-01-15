@@ -14,6 +14,9 @@ export class GameHistory {
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
+    @UpdateDateColumn({ type: 'timestamptz'})
+    updatedAt: Date;
+
     @Column({ type: 'integer', default: 0 })
     moves: number;
 
@@ -39,6 +42,6 @@ export class GameHistory {
     @JoinColumn()
     user: User;
 
-    @DeleteDateColumn()
-    deletedAt?: Date;
+    @DeleteDateColumn({ type: 'timestamptz' })
+    deletedAt: Date;
 }

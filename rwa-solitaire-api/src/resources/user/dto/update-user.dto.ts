@@ -5,25 +5,25 @@ import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from '
 export class UpdateUserDto {
     @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
     
     @IsOptional()
     @IsString()
     @IsEmail()
-    email?: string;
+    email?: string = undefined;
 
     @IsOptional()
     @IsString()
     @MinLength(6)
-    username?: string;
+    username?: string = undefined;
 
     @IsOptional()
     @IsString()
     @MinLength(8)
-    password?: string;
+    password?: string = undefined;
 
     @IsOptional()
     @IsString()
     @MinLength(8)
-    newPassword?: string;
+    newPassword?: string = undefined;
 }

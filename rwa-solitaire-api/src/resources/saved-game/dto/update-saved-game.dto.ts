@@ -5,5 +5,5 @@ import { IsNumber, IsOptional } from 'class-validator';
 export class UpdateSavedGameDto extends PartialType(CreateSavedGameDto) {
     @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
 }

@@ -4,8 +4,8 @@ import { User } from "src/resources/user/entities/user.entity";
 export class RemoveUserStatsDto {
     @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
 
     @IsOptional()
-    user?: User;
+    user?: User = undefined;
 }

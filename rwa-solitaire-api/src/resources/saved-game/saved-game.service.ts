@@ -110,7 +110,7 @@ export class SavedGameService {
     if (!game) throw new NotFoundException('No game to update found!');
 
     try {
-      const result = await this.savedGameRepository.update(id, updateDto);
+      const result = await this.savedGameRepository.update(game.id, updateDto);
       if (result.affected > 0) return true;
       return false;
     } catch(error) {

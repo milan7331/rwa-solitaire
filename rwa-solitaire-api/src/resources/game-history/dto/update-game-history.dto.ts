@@ -6,43 +6,42 @@ import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, Max, Min } from 'class
 import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 export class UpdateGameHistoryDto {
-
     @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
 
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Max(POSTGRES_MAX_INTEGER)
-    moves?: number;
+    moves?: number = undefined;
 
     @IsOptional()
     @IsBoolean()
-    gameWon?: boolean;
+    gameWon?: boolean = undefined;
 
     @IsOptional()
     @IsBoolean()
-    gameFinished?: boolean;
+    gameFinished?: boolean = undefined;
 
     @IsOptional()
     @IsEnum(SolitaireDifficulty)
-    gameDifficulty?: SolitaireDifficulty;
+    gameDifficulty?: SolitaireDifficulty = undefined;
 
     @IsOptional()
     @IsDate()
-    startedTime?: Date;
+    startedTime?: Date = undefined;
 
     @IsOptional()
     @IsDate()
-    finishedTime?: Date;
+    finishedTime?: Date = undefined;
 
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Max(POSTGRES_MAX_INTEGER)
-    gameDurationInSeconds?: number;
+    gameDurationInSeconds?: number = undefined;
 
     @IsOptional()
-    user?: User;
+    user?: User = undefined;
 }

@@ -3,21 +3,21 @@ import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from
 export class FindUserDto {
     @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
 
     @IsOptional()
     @IsString()
     @MinLength(6)
-    username?: string;
+    username?: string = undefined;
 
     @IsOptional()
     @IsString()
-    email?: string;
+    email?: string = undefined;
 
     @IsOptional()
     @IsString()
     @MinLength(8)
-    password?: string;
+    password?: string = undefined;
 
     @IsNotEmpty()
     @IsBoolean()

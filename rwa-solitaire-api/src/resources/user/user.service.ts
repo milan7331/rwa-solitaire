@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, LessThan, Repository } from 'typeorm';
+import { DataSource, DeepPartial, LessThan, Repository } from 'typeorm';
 
 import { HashService } from 'src/auth/hash.service';
 import { SavedGame } from '../saved-game/entities/saved-game.entity';
@@ -33,7 +33,7 @@ export class UserService {
     const findDto: FindUserDto = {
       email,
       username,
-      withDeleted: false,
+      withDeleted: true,
       withRelations: false
     }
     const existingUser = await this.findOne(findDto);
@@ -68,7 +68,7 @@ export class UserService {
   }
   
   async findOne(findDto: FindUserDto): Promise<User | null> {
-    const { username, email, id, withDeleted, withRelations, password } = findDto;
+    const { id, username, email, withDeleted, withRelations, password } = findDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
 
     const where: any = { };
@@ -99,22 +99,26 @@ export class UserService {
 
   async update(updateDto: UpdateUserDto): Promise<boolean> {
     const {id, email, username, password, newPassword } = updateDto;
-    if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
+    if (!id) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserDto = {
       id,
-      username,
-      email,
       password,
       withDeleted: false,
       withRelations: false
     }
     
     const user = await this.findOne(findDto);
-    if (!user)  throw new NotFoundException('User to update not found!');;
+    if (!user)  throw new NotFoundException('User to update not found!');
+
+    const update: DeepPartial<User>  = { }
+    if (id) update.id = id;
+    if (email) update.email = email;
+    if (username) update.username = username;
+    if (newPassword) update.passwordHash = await this.hashService.hashPassword(newPassword);
 
     try {
-      const result = await this.userRepository.update(username, updateDto);
+      const result = await this.userRepository.update(user.id, update);
 
       if (result.affected > 0) return true;
       return false;
@@ -162,6 +166,7 @@ export class UserService {
 
   async restore(restoreDto: RemoveUserDto): Promise<boolean> {
     const { id, username, email, password } = restoreDto;
+    console.log("xd");
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindUserDto = {
@@ -174,7 +179,7 @@ export class UserService {
     }
     const user = await this.findOne(findDto);
     if (!user) throw new NotFoundException('User to restore not found!');
-
+    
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

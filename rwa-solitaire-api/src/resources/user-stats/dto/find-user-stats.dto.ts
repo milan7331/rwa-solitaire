@@ -4,10 +4,10 @@ import { User } from "src/resources/user/entities/user.entity";
 export class FindUserStatsDto {
     @IsOptional()
     @IsNumber()
-    id?: number;
+    id?: number = undefined;
 
     @IsOptional()
-    user?: User;
+    user?: User = undefined;
 
     @IsBoolean()
     withDeleted: boolean = false;
