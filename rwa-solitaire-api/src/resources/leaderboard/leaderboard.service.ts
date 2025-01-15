@@ -14,6 +14,8 @@ import { handlePostgresError } from "src/util/postgres-error-handler";
 import { FindLeaderboardDto } from "./dto/find-leaderboard.dto";
 import { RemoveLeaderboardDto } from "./dto/remove-leaderboard.dto";
 import { POSTGRES_MAX_INTEGER } from "src/util/postgres-constants";
+import { GetLeaderboardDto } from "./dto/get-leaderboard.dto";
+import { Leaderboard } from "./entities/leaderboard.entity";
 
 @Injectable()
 export class LeaderboardService {
@@ -31,7 +33,7 @@ export class LeaderboardService {
     private readonly yearlyRepository: Repository<YearlyLeaderboard>
   ) { }
 
-  // method inserts new weekly row or updates ongoing one used in the cron service
+  // method inserts new row or updates ongoing one. Used in the cron service
   async leaderboardRefresh(type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard): Promise<boolean> {
     const [allGames, timePeriod] =
       type === WeeklyLeaderboard ? await this.historyService.getAllGamesFromThisWeek() :
@@ -43,6 +45,41 @@ export class LeaderboardService {
     const leaderboardDto = this.prepareUpsertDto(userData, timePeriod, type);
 
     return this.upsert(leaderboardDto);
+  }
+
+  // dto used only for class validation
+  async loadLeaderboards(getDto: GetLeaderboardDto): Promise<Leaderboard[]> {
+    const { type, take, page } = getDto;
+    
+    const repo = this.getRepository(type);
+    const pageCount = await this.getLeaderboardPageCount(repo);
+
+    return this.getLeaderboardPages(repo, take, page);
+  }
+
+  async getLeaderboardPageCount(repo: Repository<Leaderboard>): Promise<number> {
+    return await repo.count();
+  }
+
+  async getLeaderboardPages(repo: Repository<Leaderboard>, take: number = 10, page: number = 1): Promise<Leaderboard[]> {
+    if (!repo || take < 1) throw new BadRequestException('Invalid parameters!');
+
+    // pages are not zero based!
+    const realPage = (!page || page < 1) ? 1 : page;
+
+    try {
+      const result = await repo.find({
+        order: {
+          timePeriod: 'DESC'
+        },
+        skip: (realPage - 1) * take,
+        take: take
+      });
+
+      return result;
+    } catch(error) {
+      handlePostgresError(error);
+    }
   }
 
   async create(createDto: CreateLeaderboardDto): Promise<boolean> {

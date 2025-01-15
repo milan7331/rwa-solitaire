@@ -8,10 +8,50 @@ import { MonthlyLeaderboard } from './entities/leaderboard-monthly.entity';
 import { YearlyLeaderboard } from './entities/leaderboard-yearly.entity';
 import { FindLeaderboardDto } from './dto/find-leaderboard.dto';
 import { RemoveLeaderboardDto } from './dto/remove-leaderboard.dto';
+import { GetLeaderboardDto } from './dto/get-leaderboard.dto';
 
 @Controller('leaderboard')
 export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) { }
+
+  @Get('load-weekly')
+  @Get('load_weekly')
+  async loadWeeklyLeaderboards(@Body() getDto: GetLeaderboardDto) {
+    getDto.type = WeeklyLeaderboard;
+    const result = await this.leaderboardService.loadLeaderboards(getDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Weekly leaderboards loaded!',
+      leaderboards: result
+    }
+  }
+
+  @Get('load-monthly')
+  @Get('load_monthly')
+  async loadMonthlyLeaderboards(@Body() getDto: GetLeaderboardDto) {
+    getDto.type = MonthlyLeaderboard;
+    const result = await this.leaderboardService.loadLeaderboards(getDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Monthly leaderboards loaded!',
+      leaderboards: result
+    }
+  }
+
+  @Get('load-yearly')
+  @Get('load_yearly')
+  async loadYearlyLeaderboards(@Body() getDto: GetLeaderboardDto) {
+    getDto.type = YearlyLeaderboard;
+    const result = await this.leaderboardService.loadLeaderboards(getDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Yearly leaderboards loaded!',
+      leaderboards: result
+    }
+  }
 
   @Post('refresh')
   @Post('refresh-leaderboard')
