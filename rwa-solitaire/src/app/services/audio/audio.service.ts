@@ -1,8 +1,10 @@
-import { Store } from '@ngrx/store';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { selectAppVolume, selectAppMuted } from '../../store/selectors/audio.selectors';
-import { SolitaireBoard, SolitaireDifficulty } from '../../models/solitaire/solitaire-board';
+import { Store } from '@ngrx/store'
+
+import { SolitaireDifficulty } from '../../models/solitaire/solitaire-difficulty';
+import { SolitaireBoard } from '../../models/solitaire/solitaire-board';
+import { selectAudioMuted, selectAudioVolume } from '../../store/selectors/audio.selectors';
 
 @Injectable({
   providedIn: 'root'
@@ -13,125 +15,121 @@ export class AudioService implements OnDestroy {
   #volume: number = 0.8;
   #muted: boolean = false;
 
-  #sound_cardDropSucessful: HTMLAudioElement;
-  #sound_cardDropUnsuccessful: HTMLAudioElement;
-  #sound_cardFlipUp: HTMLAudioElement;
-  #sound_cardPickUp: HTMLAudioElement;
-  #sound_deckDraw3: HTMLAudioElement;
-  #sound_deckRewind: HTMLAudioElement;
-  #sound_levelComplete: HTMLAudioElement;
-  #sound_button: HTMLAudioElement;
-  #sound_notification: HTMLAudioElement;
-  #sound_popUp: HTMLAudioElement;
-  #sound_undo: HTMLAudioElement;
-  #sound_error: HTMLAudioElement;
-  
+  #sound_cardDropSucessful = new Audio("/sounds/card-drop-successful.wav");
+  #sound_cardDropUnsuccessful = new Audio("/sounds/card-drop-unsuccessful.wav");
+  #sound_cardFlipUp = new Audio("/sounds/card-flip-up.wav");
+  #sound_cardPickUp = new Audio("/sounds/card-pickup.wav");
+  #sound_deckDraw3 = new Audio("/sounds/deck-draw-3.wav");
+  #sound_deckRewind = new Audio("/sounds/deck-rewind.wav");
+  #sound_levelComplete = new Audio("/sounds/level-complete.wav");
+  #sound_button = new Audio("/sounds/button.wav");
+  #sound_notification = new Audio("/sounds/notification.wav");
+  #sound_popUp = new Audio("/sounds/popup.wav");
+  #sound_undo = new Audio("/sounds/undo.wav");
+  #sound_error = new Audio("/sounds/error.wav");
+
   constructor(private store: Store) {
-    this.store.select(selectAppVolume)
-      .pipe(takeUntil(this.#destroy$))
-      .subscribe((volume) => this.#volume = volume);
+    this.store.select(selectAudioVolume)
+    .pipe(takeUntil(this.#destroy$))
+    .subscribe((volume) => {
+      this.#volume = volume;
+      this.#prepareSound();
+    });
 
-    this.store.select(selectAppMuted)
-      .pipe(takeUntil(this.#destroy$))
-      .subscribe((muted) => this.#muted = muted);
-
-    this.#sound_cardDropSucessful = new Audio("/assets/sounds/card-drop-successful.wav");
-    this.#sound_cardDropUnsuccessful = new Audio("/assets/sounds/card-drop-unsuccessful.wav");
-    this.#sound_cardFlipUp = new Audio("/assets/sounds/card-flip-up.wav");
-    this.#sound_cardPickUp = new Audio("/assets/sounds/card-pickup.wav");
-    this.#sound_deckDraw3 = new Audio("/assets/sounds/deck-draw-3.wav");
-    this.#sound_deckRewind = new Audio("/assets/sounds/deck-rewind.wav");
-    this.#sound_levelComplete = new Audio("/assets/sounds/level-complete.wav");
-    this.#sound_button = new Audio("/assets/sounds/button.wav");
-    this.#sound_notification = new Audio("/assets/sounds/notification.wav");
-    this.#sound_popUp = new Audio("/assets/sounds/popup.wav");
-    this.#sound_undo = new Audio("/assets/sounds/undo.wav");
-    this.#sound_error = new Audio("/assets/sounds/error.wav");
+  this.store.select(selectAudioMuted)
+    .pipe(takeUntil(this.#destroy$))
+    .subscribe((muted) => {
+      this.#muted = muted;
+      this.#prepareSound();
+    });
   }
-
-  ngOnDestroy() {
+  
+  ngOnDestroy(): void {
     this.#destroy$.next();
     this.#destroy$.complete();
   }
 
-  private prepareSound(soundElement: HTMLAudioElement): void {
-    soundElement.volume = this.#volume;
-    soundElement.muted = this.#muted;
+  #prepareSound() {
+    this.#sound_cardDropSucessful.muted = this.#muted;
+    this.#sound_cardDropUnsuccessful.muted = this.#muted;
+    this.#sound_cardFlipUp.muted = this.#muted;
+    this.#sound_cardPickUp.muted = this.#muted;
+    this.#sound_deckDraw3.muted = this.#muted;
+    this.#sound_deckRewind.muted = this.#muted;
+    this.#sound_levelComplete.muted = this.#muted;
+    this.#sound_button.muted = this.#muted;
+    this.#sound_notification.muted = this.#muted;
+    this.#sound_popUp.muted = this.#muted;
+    this.#sound_undo.muted = this.#muted;
+    this.#sound_error.muted = this.#muted;
+
+    this.#sound_cardDropSucessful.volume = this.#volume;
+    this.#sound_cardDropUnsuccessful.volume = this.#volume;
+    this.#sound_cardFlipUp.volume = this.#volume;
+    this.#sound_cardPickUp.volume = this.#volume;
+    this.#sound_deckDraw3.volume = this.#volume;
+    this.#sound_deckRewind.volume = this.#volume;
+    this.#sound_levelComplete.volume = this.#volume;
+    this.#sound_button.volume = this.#volume;
+    this.#sound_notification.volume = this.#volume;
+    this.#sound_popUp.volume = this.#volume;
+    this.#sound_undo.volume = this.#volume;
+    this.#sound_error.volume = this.#volume;
   }
 
-  public play_cardDropSuccessful(): void {
-    this.prepareSound(this.#sound_cardDropSucessful);
+  play_cardDropSuccessful(): void {
     this.#sound_cardDropSucessful.play();
   }
 
-  public play_cardDropUnsuccessful(): void {
-    this.prepareSound(this.#sound_cardDropUnsuccessful);
+  play_cardDropUnsuccessful(): void {
     this.#sound_cardDropUnsuccessful.play();
   }
 
-  public play_cardFlipUp(): void {
-    this.prepareSound(this.#sound_cardFlipUp);
+  play_cardFlipUp(): void {
     this.#sound_cardFlipUp.play();
   }
 
-  public play_cardPickUp(): void {
-    this.prepareSound(this.#sound_cardPickUp);
+  play_cardPickUp(): void {
     this.#sound_cardPickUp.play();
   }
 
   public play_deckDraw(board: SolitaireBoard): void {
+    const soundToPlay = 
+      (board.deckStock.length === 0 && board.deckWaste.length > 0) ? this.#sound_deckRewind :
+      (board.difficulty === SolitaireDifficulty.Easy || board.deckStock.length === 1) ? this.#sound_cardFlipUp :
+      (board.difficulty === SolitaireDifficulty.Hard && board.deckStock.length > 1) ? this.#sound_deckDraw3 :
+      null;
 
-    if (board.deckStock.length === 0 && board.deckWaste.length > 0) {
-      this.prepareSound(this.#sound_deckRewind);
-      this.#sound_deckRewind.play();
-      return;
-    }
-
-    if (board.difficulty === SolitaireDifficulty.Easy || board.deckStock.length === 1) {
-      this.prepareSound(this.#sound_cardFlipUp);
-      this.#sound_cardFlipUp.play();
-      return;
-    }
-
-    if (board.difficulty === SolitaireDifficulty.Hard && board.deckStock.length > 1) {
-      this.prepareSound(this.#sound_deckDraw3);
-      this.#sound_deckDraw3.play();
-      return;
+    if (soundToPlay) {
+      soundToPlay.play();
     }
   }
 
-  public play_deckRewind(): void {
-    this.prepareSound(this.#sound_deckRewind);
+  play_deckRewind(): void {
     this.#sound_deckRewind.play();
   }
   
-  public play_levelComplete(): void {
-    this.prepareSound(this.#sound_levelComplete);
+  play_levelComplete(): void {
     this.#sound_levelComplete.play();
   }
 
-  public play_buttonPress(): void {
-    this.prepareSound(this.#sound_button);
+  play_buttonPress(): void {
     this.#sound_button.play();
   }
   
-  public play_notification(): void {
-    this.prepareSound(this.#sound_notification);
+  play_notification(): void {
     this.#sound_notification.play();
   }
   
-  public play_popUp(): void {
-    this.prepareSound(this.#sound_popUp);
+  play_popUp(): void {
     this.#sound_popUp.play();
   }
   
-  public play_undo(): void {
-    this.prepareSound(this.#sound_undo);
+  play_undo(): void {
     this.#sound_undo.play();
   }
   
-  public play_error(): void {
-    this.prepareSound(this.#sound_error);
+  play_error(): void {
     this.#sound_error.play();
   }
 }

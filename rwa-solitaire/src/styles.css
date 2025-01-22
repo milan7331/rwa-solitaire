@@ -1,0 +1,29 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'primeflex/primeflex.css';
+@import "primeicons/primeicons.css";
+
+/* doesnt exist lmao
+@import "primeng/resources/themes/aura-dark-noir/theme.css"; 
+@import "primeng/resources/primeng.css";
+
+@import "primeng/resources/themes/aura-dark-noir/theme.css";
+@import "primeng/resources/primeng.css";
+@import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeflex/primeflex.css";
+@import "primeicons/primeicons.css";
+*/
+
+
+body {
+    background-image: url(/backgrounds/bg2.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}

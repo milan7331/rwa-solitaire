@@ -1,42 +1,45 @@
 import { Component } from '@angular/core';
+import { ButtonModule } from 'primeng/button'
+
+import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { Router } from '@angular/router';
 import { AudioService } from '../../../services/audio/audio.service';
-import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-board';
 
 @Component({
   selector: 'app-home',
+  imports: [
+    ButtonModule
+  ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.css',
+  standalone: true
 })
 export class HomeComponent {
-  aboutVisible: boolean = false;
+  difficulty = SolitaireDifficulty;
 
-  constructor(private router: Router, private audio: AudioService) {}
+  constructor(
+    private readonly router: Router,
+    private readonly audio: AudioService
+  ) {
 
-  loadAboutPage(): void {
-    this.aboutVisible = true;
-    this.audio.play_buttonPress();
   }
 
-  loadSolitairePage(difficulty: string): void {
-    switch (difficulty) {
-      case "easy":
-        this.router.navigate(["/solitaire"], { state: { difficulty: SolitaireDifficulty.Easy }});
-        break;
-
-      case "hard":
-        this.router.navigate(["/solitaire"], { state: { difficulty: SolitaireDifficulty.Hard }});
-        break;
-
-      default:
-        this.router.navigate(["/*"]);
-        break;
-    }
-    this.audio.play_buttonPress();
+  loadSolitairePage(difficulty: SolitaireDifficulty) {
+    this.router.navigate(['/solitaire'], { state: { difficulty }});
+    // this.audio.play_buttonPress();
   }
 
-  loadLeaderboardsPage(): void {
-    this.router.navigate(["/leaderboards"]);
-    this.audio.play_buttonPress();
+  loadLeaderboardsPage() {
+    this.router.navigate(['/leaderboards']);
+    // this.audio.play_buttonPress();
   }
+
+  loadAboutPage() {
+    // ngrx variant?
+  }
+
+  toggleDarkMode() {
+    document.body.classList.toggle('dark');
+  }
+
 }

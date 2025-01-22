@@ -1,6 +1,6 @@
-import { createAction, createActionGroup, emptyProps, props } from "@ngrx/store";
-import { SolitaireDifficulty } from "../../models/solitaire/solitaire-board";
-import { CardSuit } from "../../models/solitaire/card";
+import { createActionGroup, emptyProps, props } from "@ngrx/store";
+import { SolitaireDifficulty } from "../../models/solitaire/solitaire-difficulty";
+import { Card, CardSuit } from "../../models/solitaire/card";
 
 export const solitaireActions = createActionGroup({
     source: "Solitaire game",
@@ -9,8 +9,8 @@ export const solitaireActions = createActionGroup({
         'Restart game': emptyProps(),
         
         'Draw cards': emptyProps(),
-        'Drop on foundation': props<{suit: CardSuit, src: number[], dest: number[], srcIndex: number}>(),
-        'Drop on tableau': props<{src: number[], dest: number[], srcIndex: number}>(),
+        'Drop on foundation': props<{suit: CardSuit, src: Card[], dest: Card[], srcIndex: number}>(),
+        'Drop on tableau': props<{src: Card[], dest: Card[], srcIndex: number}>(),
         'Undo': emptyProps(),
 
     }

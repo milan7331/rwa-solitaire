@@ -1,4 +1,5 @@
 export interface VisibilityState {
     showAudioControl: boolean,
-    showHint: boolean
+    showHint: boolean,
+    showAboutPage: boolean
 }

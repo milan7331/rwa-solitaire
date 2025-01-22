@@ -8,10 +8,10 @@ describe('AudioControlComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AudioControlComponent]
+      imports: [AudioControlComponent]
     })
     .compileComponents();
-    
+
     fixture = TestBed.createComponent(AudioControlComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

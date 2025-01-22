@@ -9,7 +9,7 @@ export const initialAudioState: AudioState = {
 
 export const audioReducer = createReducer(
     initialAudioState,
-    on(volumeControlActions.setVolume, (state, {value}) => ({
+    on(volumeControlActions.setVolume, (state, { value }) => ({
         ...state,
         audioVolume: Math.max(0.00, Math.min(value, 1.00))
     })),

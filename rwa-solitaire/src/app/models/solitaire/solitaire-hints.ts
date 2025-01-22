@@ -1,14 +1,8 @@
-import { Card } from "./card";
+import { SolitaireMove } from "./solitaire-move";
 
 export interface SolitaireHints {
-    moves: SolitaireMove[],
-    cycleDeck: boolean,
-    hintIndex: number,
-    hintVisible: boolean
-}
-
-export interface SolitaireMove {
-    source: number[];
-    dest: number[];
-    sourceIndex: number;
+    moves: SolitaireMove[];
+    cycleDeck: boolean;
+    hintIndex: number;
+    hintVisible: boolean;
 }

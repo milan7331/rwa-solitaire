@@ -1,17 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { PrimeNGConfig } from 'primeng/api';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
+  imports: [
+    RouterOutlet, 
+  ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.css',
+  standalone: true
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'rwa-solitaire';
-
-  constructor(private primengConfig: PrimeNGConfig) {}
-
-  ngOnInit(): void {
-    this.primengConfig.ripple = true;
-  }
 }

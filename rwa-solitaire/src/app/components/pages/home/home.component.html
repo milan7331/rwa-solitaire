@@ -15,16 +15,15 @@
                     QUICK PLAY
                 </div>
                 <div class="flex flex-row flex-nowrap justify-content-between column-gap-2">
-                    <p-button label="Easy" (onClick)="loadSolitairePage('easy')" />
-                    <p-button label="Hard" (onClick)="loadSolitairePage('hard')" />
+                    <p-button label="Easy" (onClick)="loadSolitairePage(difficulty.Easy)" />
+                    <p-button label="Hard" (onClick)="loadSolitairePage(difficulty.Hard)" />
                 </div>
             </div>
 
         </div>
         <div class="home-about-container fadeinleft animation-duration-2000 animation-iteration-1 animation-ease-in-out">
             <p-button label="About" icon="pi pi-info-circle" severity="secondary" (onClick)="loadAboutPage()" />
-            <app-about [(visible)]="aboutVisible"></app-about>
+            <p-button label="Nigga" icon="pi pi-info-circle" severity="secondary" (onClick)="toggleDarkMode()" />
         </div>
     </div>
 </div>
-    

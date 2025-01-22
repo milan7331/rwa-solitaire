@@ -1,4 +1,4 @@
-import { createActionGroup, emptyProps, props } from "@ngrx/store";
+import { createActionGroup, emptyProps } from "@ngrx/store";
 
 export const visibilityActions = createActionGroup({
     source: 'Component visibility control',
@@ -7,6 +7,10 @@ export const visibilityActions = createActionGroup({
         'Hide audio controls': emptyProps(),
         'Toggle audio controls': emptyProps(),
 
-        'Show hint': emptyProps()
+        'Show hint': emptyProps(),
+
+        'Show about page': emptyProps(),
+        'Hide about page': emptyProps(),
+        'Toggle about page': emptyProps()
     }
 })

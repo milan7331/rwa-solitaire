@@ -4,16 +4,17 @@ import { BehaviorSubject, interval, map, Observable, Subscription } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class TimerService implements OnDestroy {
+export class TimerService implements OnDestroy{
   #timer$: BehaviorSubject<number>;
   #timerSubscription: Subscription | null;
-  
+
   #startTime: number;
   #elapsedTime: number;
-  
+
   public time$: Observable<number>;
   public formatedTime$: Observable<string>;
-  
+
+
   constructor() {
     this.#timer$ = new BehaviorSubject<number>(0);
     this.#timerSubscription = null;
@@ -32,7 +33,6 @@ export class TimerService implements OnDestroy {
         map(() => Math.floor((Date.now() - this.#startTime!) / 1000) + this.#elapsedTime)
       ).subscribe(seconds => {
         this.#timer$.next(seconds);
-        console.log(this.#timer$.value);
       });
     }
   }
@@ -79,7 +79,4 @@ export class TimerService implements OnDestroy {
     this.#removeTimerSubscription();
     this.#timer$.complete();
   }
-
 }
-
-
