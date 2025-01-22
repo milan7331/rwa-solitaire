@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { ButtonModule } from 'primeng/button'
 
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { Router } from '@angular/router';
@@ -7,9 +6,6 @@ import { AudioService } from '../../../services/audio/audio.service';
 
 @Component({
   selector: 'app-home',
-  imports: [
-    ButtonModule
-  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   standalone: true
