@@ -1,8 +1,0 @@
-<p-button [severity]="buttonSeverity" [icon]="volumeIcon" [outlined]="!muted" [label]="buttonLabel" (onClick)="toggleOverlay($event)">
-    <p-overlayPanel #op>
-        <div class="flex flex-row flex-nowrap justify-content-center align-items-center">
-            <p-button [severity]="buttonSeverity" [icon]="volumeIcon" [outlined]="true" (onClick)="toggleMute()" class="mr-4"></p-button>
-            <p-slider  min="0.0" max="1.0" step="0.01" [(ngModel)]="volume" (ngModelChange)="changeVolume()" [disabled]="muted" class="mr-2" styleClass="w-10rem"/>
-        </div>
-    </p-overlayPanel>
-</p-button>
