@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+
 
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { Router } from '@angular/router';
@@ -6,8 +9,12 @@ import { AudioService } from '../../../services/audio/audio.service';
 
 @Component({
   selector: 'app-home',
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+  ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
+  styleUrl: './home.component.scss',
   standalone: true
 })
 export class HomeComponent {
@@ -35,7 +42,7 @@ export class HomeComponent {
   }
 
   toggleDarkMode() {
-    document.body.classList.toggle('dark');
+    document.body.classList.toggle('dark-mode');
   }
 
 }

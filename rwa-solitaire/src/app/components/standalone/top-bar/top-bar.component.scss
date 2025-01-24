@@ -1,0 +1,30 @@
+@use '@angular/material' as mat;
+
+.top-bar-container {
+    overflow: hidden;
+}
+
+.top-bar {
+    @include mat.toolbar-overrides((
+        container-background-color: var(--mat-sys-primary-container),
+        container-text-color: var(--mat-sys-on-primary-container),
+    ));
+
+
+
+    display: flex;
+}
+
+.icon-btn {
+    @include mat.icon-overrides((
+        color: var(--mat-sys-on-primary-container)
+    ));
+}
+
+.ml-05 {
+    margin-left: 0.5rem;
+}
+
+.top-bar-spacer {
+    flex: 1 1 auto;
+}
