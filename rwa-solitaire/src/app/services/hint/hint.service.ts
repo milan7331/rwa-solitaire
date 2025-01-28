@@ -8,7 +8,9 @@ import { Card, CardNumber } from '../../models/solitaire/card';
   providedIn: 'root'
 })
 export class HintService {
-  constructor() { }
+  constructor() {}
+
+  getHintsEmpty(): SolitaireHints { return { moves: [], cycleDeck: false, hintIndex: -1, hintVisible: false }; }
 
   getHints(board: SolitaireBoard): SolitaireHints {
     const result: SolitaireHints = { moves: [], cycleDeck: false, hintIndex: -1, hintVisible: false };

@@ -1,3 +1,9 @@
+:host {
+    flex: 1 1 auto;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
 .solitaire-container {
     height: 100vh;
     overflow: hidden;

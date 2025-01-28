@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,7 +24,7 @@ import { WindowService } from '../../../services/window/window.service';
   styleUrl: './home.component.scss',
   standalone: true
 })
-export class HomeComponent implements OnInit, OnDestroy{
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy{
   destroy$ = new Subject<void>();
   difficulty = SolitaireDifficulty;
   
@@ -46,6 +46,10 @@ export class HomeComponent implements OnInit, OnDestroy{
         this.bgElementCount = this.#getBgElementCount(win.width, win.height);
         this.bgElements = this.#fillBgElementsArray(this.bgElementCount);
       });
+    }
+    
+    ngAfterViewInit(): void {
+    this.#setRandomAnimationTimings();
   }
 
   #getBgElementCount(x: number, y: number): { x: number, y: number } {
@@ -67,6 +71,20 @@ export class HomeComponent implements OnInit, OnDestroy{
     this.bgElements = this.bgElements.concat(this.suits.slice(0, rest));
 
     return this.bgElements;
+  }
+
+  #setRandomAnimationTimings() {
+    const elements = document.querySelectorAll<HTMLElement>('div.bg-element');
+
+    elements.forEach(el => {
+      const element = el as HTMLElement;
+
+      const duration = Math.floor(Math.random() * 40);
+      const delay = Math.floor(Math.random() * (duration * 0.8));
+
+      element.style.animationDuration = duration + 's';
+      element.style.animationDelay = '-' + delay + 's';
+    })
   }
   
   loadSolitairePage(difficulty: SolitaireDifficulty) {
