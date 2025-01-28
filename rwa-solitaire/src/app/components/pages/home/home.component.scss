@@ -1,6 +1,8 @@
 @use 'sass:list';
 
 :host {
+    $durations: 8s, 15s, 12s, 6s, 20s, 11s, 7s, 14s, 24s, 17s, 5s, 19s, 4s, 10s, 60s, 9s, 18s, 4s;
+
     flex: 1 1 auto;
     position: relative;
     border-radius: 10px;
@@ -37,6 +39,21 @@
         animation-direction: alternate;
         animation-timing-function: ease-in;
         animation-fill-mode: both;
+
+    }
+
+    @for $i from 1 through 18 {
+        .bg-element:nth-child(19n+#{$i}) {
+            animation-duration: list.nth($durations, $i);
+        }
+    }
+
+    .bg-element:nth-child(2) {
+        animation-delay: -12s;
+    }
+
+    .bg-element:nth-child(17) {
+        animation-delay: -14s;
     }
 
     .home-card {
@@ -51,25 +68,15 @@
     .mr-05 {
         margin-right: 0.5rem;
     }
-
-    $durations: 8s, 15s, 12s, 6s, 20s, 11s, 7s, 14s, 24s, 17s, 5s, 19s, 4s, 10s, 60s, 9s, 18s, 4s;
-
-    @for $i from 1 through 18 {
-        .bg-element:nth-child(19n+#{$i}) {
-            animation-duration: list.nth($durations, $i);
-        }
-    }
 }
-
-
-
 
 @keyframes glimmer {
     0%, 80% {
         opacity: 0;
+        transform: scale(1);
     }
     100% {
       opacity: 1;
-      
+      transform: scale(2.5);
     }
 }

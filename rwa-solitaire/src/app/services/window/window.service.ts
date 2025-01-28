@@ -5,34 +5,38 @@ import { BehaviorSubject, debounceTime, fromEvent, Subject, takeUntil } from 'rx
   providedIn: 'root'
 })
 export class WindowService implements OnDestroy {
-  private destroy$ = new Subject<void>();
+  #destroy$ = new Subject<void>();
 
-  private windowSize = new BehaviorSubject<{ width: number; height: number }>({
+  #windowSize = new BehaviorSubject<{ width: number; height: number }>({
     width: window.innerWidth,
     height: window.innerHeight
   });
-  windowSize$ = this.windowSize.asObservable();
-
-  private cursorPosition = new BehaviorSubject<{ x: number, y: number }>({
+  #cursorPosition = new BehaviorSubject<{ x: number, y: number }>({
     x: 0,
     y: 0
   });
-  cursorPosition$ = this.cursorPosition.asObservable();
+  
+  public windowSize$ = this.#windowSize.asObservable();
+  public cursorPosition$ = this.#cursorPosition.asObservable();
 
   constructor() {
+    this.#initialize();
+  }
+
+  #initialize() {
     fromEvent(window, 'resize')
-      .pipe(debounceTime(100), takeUntil(this.destroy$))
+      .pipe(debounceTime(100), takeUntil(this.#destroy$))
       .subscribe(() => {
-        this.windowSize.next({
+        this.#windowSize.next({
           width: window.innerWidth,
           height: window.innerHeight
         });
       });
 
     fromEvent<MouseEvent>(window, 'mousemove')
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.#destroy$))
       .subscribe((event: MouseEvent) => {
-        this.cursorPosition.next({
+        this.#cursorPosition.next({
           x: event.clientX,
           y: event.clientY
         });
@@ -40,7 +44,7 @@ export class WindowService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.#destroy$.next();
+    this.#destroy$.complete();
   }
 }

@@ -29,6 +29,10 @@ export class AudioService implements OnDestroy {
   #sound_error = new Audio("/sounds/error.wav");
 
   constructor(private store: Store) {
+    this.#initialize();
+  }
+
+  #initialize() {
     this.store.select(selectAudioVolume)
     .pipe(takeUntil(this.#destroy$))
     .subscribe((volume) => {

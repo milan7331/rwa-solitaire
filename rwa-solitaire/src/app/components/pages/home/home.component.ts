@@ -20,14 +20,11 @@ import { WindowService } from '../../../services/window/window.service';
     MatListModule,
     MatIconModule,
   ],
-  providers: [
-    WindowService
-  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   standalone: true
 })
-export class HomeComponent implements OnDestroy{
+export class HomeComponent implements OnInit, OnDestroy{
   destroy$ = new Subject<void>();
   difficulty = SolitaireDifficulty;
   
@@ -40,14 +37,15 @@ export class HomeComponent implements OnDestroy{
     private readonly router: Router,
     private readonly audio: AudioService,
     private readonly winService: WindowService
-  ) {
-    winService.windowSize$
+  ) { }
+
+  ngOnInit(): void {
+    this.winService.windowSize$
       .pipe(takeUntil(this.destroy$))
       .subscribe((win) => {
         this.bgElementCount = this.#getBgElementCount(win.width, win.height);
         this.bgElements = this.#fillBgElementsArray(this.bgElementCount);
       });
-
   }
 
   #getBgElementCount(x: number, y: number): { x: number, y: number } {
@@ -70,16 +68,14 @@ export class HomeComponent implements OnDestroy{
 
     return this.bgElements;
   }
+  
+  loadSolitairePage(difficulty: SolitaireDifficulty) {
+    this.router.navigate(['/solitaire'], { state: { difficulty }});
+    this.audio.play_buttonPress();
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 }
-
-
-  // loadSolitairePage(difficulty: SolitaireDifficulty) {
-  //   this.router.navigate(['/solitaire'], { state: { difficulty }});
-  //   // this.audio.play_buttonPress();
-  // }

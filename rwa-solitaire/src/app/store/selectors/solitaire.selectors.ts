@@ -5,14 +5,6 @@ import { SolitaireDifficulty } from "../../models/solitaire/solitaire-difficulty
 
 const selectSolitaireState = createFeatureSelector<SolitaireState>('solitaireState');
 
-
-// cards sada ne postoje treba selektovati nekako drugačije
-
-// const selectCardsState = createSelector(
-//     selectSolitaireState,
-//     (state: SolitaireState) => state.cards
-// );
-
 const selectBoardsState = createSelector(
   selectSolitaireState,
   (state: SolitaireState) => state.boards
@@ -23,14 +15,7 @@ export const selectGameEndConditionState = createSelector(
     (state: SolitaireState) => state.winCondition
 )
 
-// const { selectAll: selectCardsAll } = cardAdapter.getSelectors(selectCardsState);
 const { selectTotal: selectBoardsTotal } = boardAdapter.getSelectors(selectBoardsState);
-
-
-// export const selectCards = createSelector(
-//     selectCardsAll,
-//     (cards) => cards
-// );
 
 export const selectBoard = createSelector(
     selectBoardsState,
@@ -53,15 +38,6 @@ export const selectUndoAvailability = createSelector(
         return (total > 1)? true : false;
     }
 )
-
-
-
-
-
-
-
-
-
 
 
 // import { createFeatureSelector, createSelector } from "@ngrx/store";

@@ -5,26 +5,16 @@ import { BehaviorSubject, interval, map, Observable, Subscription } from 'rxjs';
   providedIn: 'root'
 })
 export class TimerService implements OnDestroy{
-  #timer$: BehaviorSubject<number>;
-  #timerSubscription: Subscription | null;
+  #timer$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  #timerSubscription: Subscription | null = null;
 
-  #startTime: number;
-  #elapsedTime: number;
+  #startTime: number = 0;
+  #elapsedTime: number = 0;
 
-  public time$: Observable<number>;
-  public formatedTime$: Observable<string>;
-
-
-  constructor() {
-    this.#timer$ = new BehaviorSubject<number>(0);
-    this.#timerSubscription = null;
-    this.#startTime = 0;
-    this.#elapsedTime = 0;
-    this.time$ = this.#timer$.asObservable();
-    this.formatedTime$ = this.time$.pipe(
-      map(seconds => this.#formatDisplayTime(seconds))
-    );
-  }
+  public time$: Observable<number> = this.#timer$.asObservable();
+  public formatedTime$: Observable<string> = this.time$.pipe(
+    map(seconds => this.#formatDisplayTime(seconds))
+  );
 
   start(): void {
     if (this.#timerSubscription === null) {
