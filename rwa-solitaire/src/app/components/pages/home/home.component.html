@@ -1,6 +1,45 @@
-<mat-card>
-    <mat-card-title>Title card</mat-card-title>
-    <mat-card-content>Card content123</mat-card-content>
+
+@for (item of bgElements; track $index) {
+    <div class="bg-element">{{ item }}</div>
+}
+<mat-card class="home-card">
+    <mat-card-header>
+        <h1 style="text-align: center;">Welcome to RWA Solitaire!</h1>
+    </mat-card-header>
+    <mat-card-content>
+        This project is a part of the Razvoj Web Aplikacija course and showcases a classic Solitaire game built entirely with modern web development technologies.
+
+        <h4>Key Features:</h4>
+        <mat-list>
+            <mat-list-item>
+                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
+                <span matListItemTitle>Built with Angular</span>
+                <span matListItemLine>Leveraging the power of a dynamic framework for a responsive and interactive user experience.</span>
+            </mat-list-item>
+            <mat-list-item>
+                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
+                <span matListItemTitle>State Management with NgRx</span>
+                <span matListItemLine>Demonstrating efficient state handling for a seamless gameplay experience.</span>
+            </mat-list-item>
+            <mat-list-item>
+                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
+                <span matListItemTitle>Reactive Programming with RxJS</span>
+                <span matListItemLine>Enhancing user interaction with powerful reactive streams.</span>
+            </mat-list-item>
+            <mat-list-item>
+                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
+                <span matListItemTitle>Backend with NestJS</span>
+                <span matListItemLine>Providing a robust platform that tracks player statistics, manages leaderboards.</span>
+            </mat-list-item>
+        </mat-list>
+        <h4>Quick play available! Jump right into a game!</h4>
+    </mat-card-content>
+    <mat-card-footer>
+        <mat-card-actions align="start">
+            <button mat-button>Easy</button>
+            <button mat-button>Hard</button>
+        </mat-card-actions>
+    </mat-card-footer>
 </mat-card>
 
 <!-- <div class="home-container flex flex-column flex-nowrap justify-content-start align-items-stretch p-2">
@@ -14,6 +53,11 @@
             <div class="font-title flex-auto fadeinright animation-duration-1000 animation-iteration-1 animation-ease-in-out">
                 RWA SOLITAIRE
             </div>
+
+            // .font-title {
+//     font-size: clamp(1rem, 20vh, 15rem);
+//     font-weight: 900;
+// }
 
             <div class="buttons-container flex flex-column flex-nowrap justify-content-start align-items-stretch fadeinleft animation-duration-1000 animation-iteration-1 animation-ease-in-out row-gap-2">
                 <div class="align-self-start font-bold mt-4">

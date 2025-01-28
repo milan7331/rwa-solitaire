@@ -1,9 +1,71 @@
+@use 'sass:list';
+
 :host {
     flex: 1 1 auto;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+
+    padding-left: 60px;
+    padding-right: 60px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    align-content: space-evenly;
+    gap: 120px;
+
+    h4 {
+        margin-bottom: 0;
+    }
+
+    mat-card-content {
+        word-wrap: break-word;
+    }
+
+    .bg-element {
+        font-size: 30px;
+        user-select: none;
+        color: var(--mat-sys-primary);
+        opacity: 0;
+
+        animation-name: glimmer;
+        animation-duration: 8s;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+        animation-timing-function: ease-in;
+        animation-fill-mode: both;
+    }
+
+    .home-card {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        max-width: 40vw;
+    }
+
+    $durations: 8s, 15s, 12s, 6s, 20s, 11s, 7s, 14s, 24s, 17s, 5s, 19s, 4s, 10s, 60s, 9s, 18s, 4s;
+
+    @for $i from 1 through 18 {
+        .bg-element:nth-child(19n+#{$i}) {
+            animation-duration: list.nth($durations, $i);
+        }
+    }
 }
 
 
-// .font-title {
-//     font-size: clamp(1rem, 20vh, 15rem);
-//     font-weight: 900;
-// }
+
+
+@keyframes glimmer {
+    0%, 80% {
+        opacity: 0;
+    }
+    100% {
+      opacity: 1;
+      
+    }
+}
