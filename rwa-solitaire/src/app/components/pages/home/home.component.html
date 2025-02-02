@@ -1,42 +1,12 @@
-@for (item of bgElements; track $index) {
-    <div class="bg-element">{{ item }}</div>
-}
+@for (item of bgElements; track $index) { <div class="bg-element">{{ item }}</div> }
 <mat-card class="home-card">
-    <mat-card-header>
-        <h1 style="text-align: center;">Welcome to RWA Solitaire!</h1>
-    </mat-card-header>
     <mat-card-content>
-        This project is a part of the Razvoj Web Aplikacija course and showcases a classic Solitaire game built entirely with modern web development technologies.
-
-        <h4>Key Features:</h4>
-        <mat-list>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>Built with Angular</span>
-                <span matListItemLine>Leveraging the power of a dynamic framework for a responsive and interactive user experience.</span>
-            </mat-list-item>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>State Management with NgRx</span>
-                <span matListItemLine>Demonstrating efficient state handling for a seamless gameplay experience.</span>
-            </mat-list-item>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>Reactive Programming with RxJS</span>
-                <span matListItemLine>Enhancing user interaction with powerful reactive streams.</span>
-            </mat-list-item>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>Backend with NestJS</span>
-                <span matListItemLine>Providing a robust platform that tracks player statistics, manages leaderboards.</span>
-            </mat-list-item>
-        </mat-list>
-        <h4>Quick play available! Jump right into a game!</h4>
+        <div class="title">RWA Solitaire</div>
+        <p>This project was developed for the Razvoj Web Aplikacija course and presents a modern take on the classic Solitaire game. Built using modern web development technologies.</p>
+        <div class="label">QUICK PLAY</div>
+        <div class="quick-play">
+            <button mat-fab extended (click)="loadSolitairePage(difficulty.Easy)">Easy</button>
+            <button mat-fab extended (click)="loadSolitairePage(difficulty.Hard)">Hard</button>
+        </div>
     </mat-card-content>
-    <mat-card-footer>
-        <mat-card-actions align="start">
-            <button mat-button class="mr-05" (click)="loadSolitairePage(difficulty.Easy)">Easy</button>
-            <button mat-button class="mr-05" (click)="loadSolitairePage(difficulty.Hard)">Hard</button>
-        </mat-card-actions>
-    </mat-card-footer>
 </mat-card>

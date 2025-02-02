@@ -1,9 +1,11 @@
-import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, OnInit, HostBinding } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Subject, takeUntil, filter, Observable } from 'rxjs';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
 
 import { selectBoard, selectGameDifficulty, selectGameEndConditionState, selectUndoAvailability } from '../../../store/selectors/solitaire.selectors';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
@@ -16,18 +18,25 @@ import { Card, CardSuit, CardColor, CardNumber } from '../../../models/solitaire
 import { SolitaireBoard } from '../../../models/solitaire/solitaire-board';
 import { SolitaireHints } from '../../../models/solitaire/solitaire-hints';
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
+import { ThemeService } from '../../../services/theme/theme.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-solitaire',
   imports: [
     DragDropModule,
     MatGridListModule,
+    MatCardModule,
+    MatDividerModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './solitaire.component.html',
   styleUrl: './solitaire.component.scss',
   standalone: true
 })
-export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
+export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {    
   // dosta posla oko tipova null / undefined etc prepraviti na kraju
   // potrebno prepraviti game end check, već postoji selektor samo ga napraviti da prikazuje prozor etc
 
@@ -58,12 +67,18 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
     private readonly audioService: AudioService,
     private readonly hintService: HintService,
     private readonly timerService: TimerService,
+    private readonly themeService: ThemeService,
   ) {
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras.state as { difficulty: SolitaireDifficulty } | undefined;
     const value = state?.difficulty;
     this.start(value);
   }
+
+  @HostBinding('class.light-mode')
+  get lightModeClassBinding() {
+    return this.themeService.lightMode();
+  } 
 
   ngOnInit(): void {
     this.#board$ = this.store.select(selectBoard);
@@ -135,6 +150,28 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.hints.moves.length > 0) {
       this.hints.hintIndex = (this.hints.hintIndex + 1) % this.hints.moves.length;
     }
+  }
+
+  public getFoundationBg(index: number): string {
+    let bg = "url('/cards/placeholder.svg')";
+    switch (index) {
+      case 0:
+        bg = "url('/cards/clubs_placeholder.svg')";
+        break;
+      case 1:
+        bg = "url('/cards/diamonds_placeholder.svg')";
+        break;
+      case 2:
+        bg = "url('/cards/hearts_placeholder.svg')";
+        break;
+      case 3:
+        bg = "url('/cards/spades_placeholder.svg')";
+        break;
+      default:
+        break;
+    }
+
+    return bg;
   }
 
   // public hideHints(): void {

@@ -5,6 +5,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AudioService } from '../../../services/audio/audio.service';
+import { ThemeService } from '../../../services/theme/theme.service';
 
 @Component({
   selector: 'app-top-bar',
@@ -20,10 +21,13 @@ import { AudioService } from '../../../services/audio/audio.service';
   standalone: true
 })
 export class TopBarComponent {
-  constructor(private readonly audio: AudioService) {}
+  constructor(
+    private readonly audio: AudioService,
+    private readonly theme: ThemeService
+  ) {}
 
   toggleDarkMode(): void {
-    document.body.classList.toggle('light-mode');
+    this.theme.toggleLightMode();
     this.audio.play_buttonPress();
   }
 }

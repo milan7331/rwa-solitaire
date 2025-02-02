@@ -1,7 +1,7 @@
 :host {
     flex: 1 1 auto;
     position: relative;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
 
     padding-left: 60px;
@@ -15,13 +15,6 @@
     align-content: space-evenly;
     gap: 120px;
 
-    h4 {
-        margin-bottom: 0;
-    }
-
-    mat-card-content {
-        word-wrap: break-word;
-    }
 
     .bg-element {
         font-size: 30px;
@@ -35,7 +28,6 @@
         animation-direction: alternate;
         animation-timing-function: ease-in;
         animation-fill-mode: both;
-
     }
 
     .home-card {
@@ -44,11 +36,33 @@
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 2;
-        max-width: 40vw;
+        max-width: 40rem;
     }
 
-    .mr-05 {
-        margin-right: 0.5rem;
+    mat-card-content {
+        text-align: center;
+
+        .title {
+            font: var(--mat-sys-display-large)
+        }
+
+        .label {
+            font: var(--mat-sys-label-large);
+            font-weight: 900;
+            
+        }
+
+    }
+
+    .quick-play {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: baseline;
+        * {
+            margin: 8px 8px;
+        }
     }
 }
 

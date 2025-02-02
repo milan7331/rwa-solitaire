@@ -1,182 +1,250 @@
+@use '@angular/material' as mat;
+
 :host {
     flex: 1 1 auto;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
+    padding: 2vh;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: start;
+    column-gap: 2vh;
+
+    background-image: url("/backgrounds/bg1.jpg");
+    background-position: center;
+    background-size: cover;
+        
+    --card-back: url("/cards/back.svg");
+    --placeholder: url("/cards/placeholder.svg");
+    --clubs-placeholder: url("/cards/clubs_placeholder.svg");
+    --diamonds-placeholder: url("/cards/diamonds_placeholder.svg");
+    --hearts-placeholder: url("/cards/hearts_placeholder.svg");
+    --spades-placeholder: url("/cards/spades_placeholder.svg");
+
+    @include mat.divider-overrides((
+        color: white,
+      ));
+}
+:host.light-mode {
+    --card-back: url("/cards/back_light.svg");
 }
 
-.solitaire-container {
-    height: 100vh;
+
+.left-container {
+    min-width: fit-content;
+    height: 100%;
     overflow: hidden;
 
-    .solitaire-top-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    row-gap: 2vh;
 
-        min-height: 17vh;
-        height: fit-content;
-        max-height: 20%;
-        overflow: hidden;
+    .foundation {
+        //flex: 1 1 auto;
+    
+        min-width: fit-content;
+        height: 18vh;
+    
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        column-gap: 2vh;
+    }
 
-        .solitaire-card-stack {
-            display: grid;
+    .deck-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        column-gap: 2vh;
+        justify-content: space-between;
 
-            > * {
-                grid-row: 1;
-                grid-column: 1;
-            }
+        .deck-stock {
+            background-image: var(--card-back);
         }
 
-        .solitaire-deck-container {
-            width: fit-content;
-            max-width: 40%;
-            overflow: hidden;
-
-            .deck-waste-spread-1 {
-                margin-right: 6vh;
-            }
-
-            .deck-waste-spread-2 {
-                margin-right: 3vh;
-
-                :nth-last-child(1) {
-                    margin-left: 3vh;
-                }
-            }
-
-            .deck-waste-spread-3 {
-                :nth-last-child(2) {
-                    margin-left: 3vh;
-                }
-                :nth-last-child(1) {
-                    margin-left: 6vh;
-                }
+        .waste-stack:has(.card:nth-last-child(2)) {
+            .card:nth-last-child(1) {
+                margin-left: 3vh;
             }
         }
-    }
-
-    .tableau-stack-element {
-        margin-top: -13vh;
-    }
-
-    .tableau-stack-element-compact-1 {
-        margin-top: -13.25vh;
-    }
-
-    .tableau-stack-element-compact-2 {
-        margin-top: -13.50vh;
-    }
-
-    .tableau-stack-element-compact-3 {
-        margin-top: -13.75vh;
-    }
-
-    .tableau-stack-element-compact-4 {
-        margin-top: -14vh;
-    }
-
-    .tableau-stack-element-compact-5 {
-        margin-top: -14.25vh;
-    }
-
-    .tableau-stack-element-compact-6 {
-        margin-top: -14.40vh;
-    }
-
-    .tableau-stack-element-compact-7 {
-        margin-top: -14.50vh;
-    }
-
-    .solitaire-card {
-        height: 17vh;
-        aspect-ratio: 0.714285; // 2.5 x 3.5
-
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-    }
-
-    #card-stack-dragged {
-        position: absolute;
-        top: 110vh;
-        left: 110vw;
-        pointer-events: none;
-    }
-
-    #ghost-image {
-        opacity: 0;
-        display: none;
-
-        position: absolute;
-        top: 140vh;
-        left: 140vw;
-        width: 100px;
-        height: 100px;
-    }
-
-    .hidden-card {
-        opacity: 0.0001;
-        ~ * {
-            opacity: 0.0001;
+        
+        .waste-stack:has(.card:nth-last-child(3)) {
+            .card:nth-last-child(2) {
+                margin-left: 3vh;
+            }
+            .card:nth-last-child(1) {
+                margin-left: 6vh;
+            }
         }
     }
 
-    .highlighted-card {
+    .game-info {
+        box-sizing: border-box;
+        height: 18vh;
+        padding: 2vh;
+        color: white;
+        border-color: white;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 12px;
+
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+}
+
+.right-container {
+    flex: 1 1 auto;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+
+    .card {
+        box-sizing: border-box;
+        margin-bottom: -13.5vh;
+    }
+}
+
+.card-stack {
+    display: grid;
+
+    > * {
+        grid-row: 1;
+        grid-column: 1;
+    }
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.card {
+    height: 18vh;
+    aspect-ratio: 63 / 88; // 0.715909; // 63mm x 88mm
+
+    border-style: solid;
+    border-color: var(--mat-sys-outline);
+    border-width: 1px;
+    border-radius: 12px;
+    box-sizing: border-box;
+
+    background-position: top;
+    background-clip: border-box;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: var(--placeholder);
+}
+
+.highlighted-card {
+    box-shadow: 0 0 0.5vh 0.25vh gold inset;
+    border-radius: 0.8vh;
+
+    ~ * {
         box-shadow: 0 0 0.5vh 0.25vh gold inset;
         border-radius: 0.8vh;
-
-        ~ * {
-            box-shadow: 0 0 0.5vh 0.25vh gold inset;
-            border-radius: 0.8vh;
-        }
-    }
-
-    .non-interactable {
-        pointer-events: none;
-    }
-
-    #demo-buttons {
-        
-        display: flex;
-        bottom: 1vh;
-        left: 1vh;
-    }
-
-    .bg-card-back {
-        background-image: url("/assets/cards/back_0.svg");
-    }
-
-    .bg-card-back-alternative {
-        background-image: url("/assets/cards/back_1.svg");
-    }
-
-    .bg-card-back-2 {
-        background-image: url("/assets/cards/back_2.svg");
-    }
-
-    .bg-card-back-2-alternative {
-        background-image: url("/assets/cards/back_3.svg");
-    }
-
-    .bg-card-placeholder {
-        background-image: url("/assets/cards/placeholder_default.svg");
-    }
-
-    .bg-card-tableau-placeholder {
-        background-image: url("/assets/cards/placeholder_default.svg");
-        margin-bottom: -17vh;
-    }
-
-    .bg-card-clubs {
-        background-image: url("/assets/cards/placeholder_clubs.svg");
-    }
-
-    .bg-card-diamonds {
-        background-image: url("/assets/cards/placeholder_diamonds.svg");
-    }
-
-    .bg-card-hearts {
-        background-image: url("/assets/cards/placeholder_hearts.svg");
-    }
-
-    .bg-card-spades {
-        background-image: url("/assets/cards/placeholder_spades.svg");
     }
 }
+
+.non-interactable {
+    pointer-events: none;
+}
+
+#demo-buttons {
+    
+    display: flex;
+    bottom: 1vh;
+    left: 1vh;
+}
+
+.card-tableau {
+    margin-bottom: -17vh;
+}
+
+.card-back {
+    background-image: var(--card-back);
+}
+
+.placeholder-clubs {
+    background-image: var(--clubs-placeholder);
+}
+
+.placeholder-diamonds {
+    background-image: var(--diamonds-placeholder);
+}
+
+.placeholder-hearts {
+    background-image: var(--hearts-placeholder);
+}
+
+.placeholder-spades {
+    background-image: var(--spades-placeholder);
+}
+
+    // .tableau-stack-element {
+    //     margin-top: -13vh;
+    // }
+
+    // .tableau-stack-element-compact-1 {
+    //     margin-top: -13.25vh;
+    // }
+
+    // .tableau-stack-element-compact-2 {
+    //     margin-top: -13.50vh;
+    // }
+
+    // .tableau-stack-element-compact-3 {
+    //     margin-top: -13.75vh;
+    // }
+
+    // .tableau-stack-element-compact-4 {
+    //     margin-top: -14vh;
+    // }
+
+    // .tableau-stack-element-compact-5 {
+    //     margin-top: -14.25vh;
+    // }
+
+    // .tableau-stack-element-compact-6 {
+    //     margin-top: -14.40vh;
+    // }
+
+    // .tableau-stack-element-compact-7 {
+    //     margin-top: -14.50vh;
+    // }
+
+
+    // #card-stack-dragged {
+    //     position: absolute;
+    //     top: 110vh;
+    //     left: 110vw;
+    //     pointer-events: none;
+    // }
+
+    // #ghost-image {
+    //     opacity: 0;
+    //     display: none;
+
+    //     position: absolute;
+    //     top: 140vh;
+    //     left: 140vw;
+    //     width: 100px;
+    //     height: 100px;
+    // }
+
+
+
+    // .hidden-card {
+    //     opacity: 0.0001;
+    //     ~ * {
+    //         opacity: 0.0001;
+    //     }
+    // }

@@ -79,7 +79,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy{
     elements.forEach(el => {
       const element = el as HTMLElement;
 
-      const duration = Math.floor(Math.random() * 40);
+      const duration = Math.floor(Math.random() * 35) + 5;
       const delay = Math.floor(Math.random() * (duration * 0.8));
 
       element.style.animationDuration = duration + 's';
