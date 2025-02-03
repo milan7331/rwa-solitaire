@@ -1,24 +1,21 @@
-<!-- <p>about works!</p>
-<h4>Key Features:</h4>
-        <mat-list>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>Built with Angular</span>
-                <span matListItemLine>Leveraging the power of a dynamic framework for a responsive and interactive user experience.</span>
-            </mat-list-item>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>State Management with NgRx</span>
-                <span matListItemLine>Demonstrating efficient state handling for a seamless gameplay experience.</span>
-            </mat-list-item>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>Reactive Programming with RxJS</span>
-                <span matListItemLine>Enhancing user interaction with powerful reactive streams.</span>
-            </mat-list-item>
-            <mat-list-item>
-                <span matListItemIcon><mat-icon>double_arrow</mat-icon></span>
-                <span matListItemTitle>Backend with NestJS</span>
-                <span matListItemLine>Providing a robust platform that tracks player statistics, manages leaderboards.</span>
-            </mat-list-item>
-        </mat-list> -->
+<mat-card class="about-card">
+    <mat-card-header>
+        <mat-card-title>About</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <p>This project was developed for the Razvoj Web Aplikacija course and presents a modern take on the classic Solitaire game. Built using modern web development technologies.</p>
+        <h4>Key Features:</h4>
+        <p><strong>Built with Angular:</strong> Leveraging the power of a dynamic framework for a responsive and interactive user experience.</p>
+        <p><strong>State Management with NgRx:</strong> Demonstrating efficient state handling for a seamless gameplay experience.</p>
+        <p><strong>Reactive Programming with RxJS:</strong> Enhancing user interaction with powerful reactive streams.</p>
+        <p><strong>Backend with NestJS:</strong> Providing a robust platform that tracks player statistics, manages leaderboards.</p>
+        <div class="contact-info">
+            <span><strong>Contact:</strong></span>
+            <a mat-button href="mailto:milan7331@protonmail.com"><mat-icon>email</mat-icon> Email</a>
+            <a mat-button href="https://github.com/milan7331" target="_blank"><mat-icon>code</mat-icon> GitHub</a>
+      </div>
+    </mat-card-content>
+    <mat-card-actions align="start">
+        <button mat-stroked-button class="back-button" (click)="goBack()"><mat-icon>arrow_back</mat-icon>Go back</button>
+    </mat-card-actions>
+</mat-card>

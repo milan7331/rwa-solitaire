@@ -13,6 +13,10 @@
     ));
 }
 
+.title-btn {
+    font: var(----mat-sys-display-medium);
+}
+
 .icon-btn {
     @include mat.icon-overrides((
         color: var(--mat-sys-on-primary-container)

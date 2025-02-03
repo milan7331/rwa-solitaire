@@ -1,11 +1,11 @@
 <mat-card class="top-bar-container">
     <mat-toolbar class="top-bar">
-        <span>RWA Solitaire</span>
+        <button mat-button class="title-btn" (click)="loadHomePage()">RWA Solitaire</button>
         <span class="top-bar-spacer"></span>
-        <button mat-raised-button class="ml-05"><mat-icon>login</mat-icon>Log in</button>
-        <button mat-button class="ml-05"><mat-icon>person_add</mat-icon>Register</button>
-        <button mat-button class="ml-05"><mat-icon>leaderboard</mat-icon>Leaderboards</button>
-        <button mat-button class="ml-05"><mat-icon>info</mat-icon>About</button>
+        <button mat-raised-button class="ml-05" (click)="loadLoginPage()"><mat-icon>login</mat-icon>Log in</button>
+        <button mat-button class="ml-05" (click)="loadRegisterPage()"><mat-icon>person_add</mat-icon>Register</button>
+        <button mat-button class="ml-05" (click)="loadLeaderboardsPage()"><mat-icon>leaderboard</mat-icon>Leaderboards</button>
+        <button mat-button class="ml-05" (click)="loadAboutPage()"><mat-icon>info</mat-icon>About</button>
         <button mat-icon-button class="ml-05 icon-btn" (click)="toggleDarkMode()"><mat-icon>dark_mode</mat-icon></button>
     </mat-toolbar>
 </mat-card>

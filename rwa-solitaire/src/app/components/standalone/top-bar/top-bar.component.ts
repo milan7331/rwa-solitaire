@@ -4,8 +4,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+
 import { AudioService } from '../../../services/audio/audio.service';
 import { ThemeService } from '../../../services/theme/theme.service';
+import { AboutComponent } from '../about/about.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-top-bar',
@@ -14,7 +17,7 @@ import { ThemeService } from '../../../services/theme/theme.service';
     MatToolbarModule,
     MatButtonToggleModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: './top-bar.component.html',
   styleUrl: './top-bar.component.scss',
@@ -23,8 +26,34 @@ import { ThemeService } from '../../../services/theme/theme.service';
 export class TopBarComponent {
   constructor(
     private readonly audio: AudioService,
-    private readonly theme: ThemeService
+    private readonly theme: ThemeService,
+    private readonly router: Router,
   ) {}
+
+  loadHomePage(): void {
+    this.router.navigate(['']);
+    this.audio.play_buttonPress();
+  }
+
+  loadLoginPage(): void {
+    this.router.navigate(['/login']);
+    this.audio.play_buttonPress();
+  }
+
+  loadRegisterPage(): void {
+    this.router.navigate(['/register']);
+    this.audio.play_buttonPress();
+  }
+
+  loadLeaderboardsPage(): void {
+    this.router.navigate(['/leaderboards']);
+    this.audio.play_buttonPress();
+  }
+
+  loadAboutPage(): void {
+    this.router.navigate(['/about']);
+    this.audio.play_buttonPress();
+  }
 
   toggleDarkMode(): void {
     this.theme.toggleLightMode();
