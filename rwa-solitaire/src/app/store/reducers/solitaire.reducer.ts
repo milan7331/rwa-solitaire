@@ -261,7 +261,6 @@ function updateCardsForGameRestart(cards: Card[], updateCardIds: number[]): Upda
 function findCurrentBoard(state: SolitaireState): SolitaireBoard | undefined {
     const currentBoardId = state.boards.ids.at(-1);
     if (currentBoardId === undefined) {
-        console.log("currentBoard-undefined!");
         return undefined;
     }
 

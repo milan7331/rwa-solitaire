@@ -40,7 +40,6 @@ export class HintService {
       newHints.hintIndex = (newHints.hintIndex + 1) % newHints.moves.length;
     }
 
-    console.log(newHints);
     return newHints;
   }
 

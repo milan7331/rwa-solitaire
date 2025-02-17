@@ -13,6 +13,5 @@ export class ThemeService {
   toggleLightMode(): void {
     document.body.classList.toggle('light-mode');
     this.#lightModeInternal.update((currentMode) => !currentMode);
-    console.log(this.lightMode());
   }
 }

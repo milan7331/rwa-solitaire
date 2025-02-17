@@ -166,7 +166,6 @@ export class UserService {
 
   async restore(restoreDto: RemoveUserDto): Promise<boolean> {
     const { id, username, email, password } = restoreDto;
-    console.log("xd");
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindUserDto = {
