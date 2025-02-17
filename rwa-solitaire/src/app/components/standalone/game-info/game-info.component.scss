@@ -1,0 +1,16 @@
+:host {
+    box-sizing: border-box;
+    height: 18vh;
+    padding: 2vh;
+    color: white;
+    border-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 12px;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-end;
+}

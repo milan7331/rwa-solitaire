@@ -1,37 +1,44 @@
-import { Component, AfterViewInit, OnDestroy, OnInit, HostBinding } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, OnInit, HostBinding, ElementRef, ChangeDetectorRef,  } from '@angular/core';
+import { CommonModule, Location, NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Subject, takeUntil, filter, Observable } from 'rxjs';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { MatGridListModule } from '@angular/material/grid-list';
+import { DragDropModule, CdkDragPreview, CdkDragDrop, CdkDragStart, CdkDrag } from '@angular/cdk/drag-drop';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { combineLatest, Subject, takeUntil, filter, Observable } from 'rxjs';
 
-import { selectBoard, selectGameDifficulty, selectGameEndConditionState, selectUndoAvailability } from '../../../store/selectors/solitaire.selectors';
+import { selectBoard, selectGameEndConditionState } from '../../../store/selectors/solitaire.selectors';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
 
 import { AudioService } from '../../../services/audio/audio.service';
 import { HintService } from '../../../services/hint/hint.service';
 import { TimerService } from '../../../services/timer/timer.service';
+import { ThemeService } from '../../../services/theme/theme.service';
 
 import { Card, CardSuit, CardColor, CardNumber } from '../../../models/solitaire/card';
 import { SolitaireBoard } from '../../../models/solitaire/solitaire-board';
 import { SolitaireHints } from '../../../models/solitaire/solitaire-hints';
+import { SolitaireMove } from '../../../models/solitaire/solitaire-move';
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
-import { ThemeService } from '../../../services/theme/theme.service';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+
+import { GameInfoComponent } from "../../standalone/game-info/game-info.component";
+import { GameControlComponent } from "../../standalone/game-control/game-control.component";
 
 @Component({
   selector: 'app-solitaire',
   imports: [
+    CommonModule,
     DragDropModule,
-    MatGridListModule,
     MatCardModule,
     MatDividerModule,
     MatButtonModule,
     MatIconModule,
-  ],
+    GameInfoComponent,
+    GameControlComponent,
+    NgTemplateOutlet,
+],
   templateUrl: './solitaire.component.html',
   styleUrl: './solitaire.component.scss',
   standalone: true
@@ -40,51 +47,47 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
   // dosta posla oko tipova null / undefined etc prepraviti na kraju
   // potrebno prepraviti game end check, već postoji selektor samo ga napraviti da prikazuje prozor etc
 
-  difficulty = SolitaireDifficulty;
-
   #destroy$: Subject<void> = new Subject<void>();
-  #board$: Observable<SolitaireBoard | undefined> | undefined;
 
-  board: SolitaireBoard | undefined;
-  hints: SolitaireHints | undefined;
+  difficulty: SolitaireDifficulty;
 
-  draggedCards: Card[] = [];
-  draggedCardsStartIndex: number | null = null;
-  draggedCardsOrigin: Card[] | null = null;
+  board: SolitaireBoard | null;
+  hints: SolitaireHints;
 
-  // nepotrebno??
-  cardStackDragged: HTMLElement | null = null;
-  ghostImage: HTMLElement | null = null;
-  invisibleCard: HTMLElement | null = null;
+  hiddenCards: Card[];
+  hiddenCardsIndex: number;
 
   // možda nepotrebno??
   clickedElementOffsetX: number = 0;
   clickedElementOffsetY: number = 0;
-
-  constructor(
-    private readonly router: Router,
-    private readonly store: Store,
-    private readonly audioService: AudioService,
-    private readonly hintService: HintService,
-    private readonly timerService: TimerService,
-    private readonly themeService: ThemeService,
-  ) {
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras.state as { difficulty: SolitaireDifficulty } | undefined;
-    const value = state?.difficulty;
-    this.start(value);
-  }
 
   @HostBinding('class.light-mode')
   get lightModeClassBinding() {
     return this.themeService.lightMode();
   } 
 
-  ngOnInit(): void {
-    this.#board$ = this.store.select(selectBoard);
-    this.hints = this.hintService.getHintsEmpty();
+  constructor(
+    private readonly router: Router,
+    private readonly location: Location,
+    private readonly store: Store,
+    private readonly audioService: AudioService,
+    private readonly hintService: HintService,
+    private readonly timerService: TimerService,
+    private readonly themeService: ThemeService,
+  ) {
+    this.board = null;
+    this.difficulty = this.getGameDifficultyFromRoute();
+    this.hints = hintService.getHintsEmpty();
 
-    this.#board$.pipe(
+    this.hiddenCards = [];
+    this.hiddenCardsIndex = 20;
+  }
+
+  ngOnInit(): void {
+    this.store.dispatch(solitaireActions.startNewGame({ difficulty: this.difficulty }));
+    const board$ = this.store.select(selectBoard);
+
+    board$.pipe(
       takeUntil(this.#destroy$),
       filter(board => board !== undefined)
     ).subscribe((board) => {
@@ -94,98 +97,65 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.cardStackDragged = document.getElementById("card-stack-dragged");
-    this.ghostImage = document.getElementById("ghost-image");
-
-    document.addEventListener("mousedown", this.clickOffset);
+    // document.addEventListener("mousedown", this.clickOffset);
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener("mousedown", this.clickOffset);
+    // document.removeEventListener("mousedown", this.clickOffset);
 
     this.#destroy$.next();
     this.#destroy$.complete();
   }
+
+  getGameDifficultyFromRoute(): SolitaireDifficulty {
+    const state = this.location.getState() as { difficulty?: SolitaireDifficulty };
+    if (!state) return SolitaireDifficulty.Hard;
+
+    const value = state['difficulty'];
+    return value?? SolitaireDifficulty.Hard;
+  }
   
-  public start(difficulty = SolitaireDifficulty.Hard): void {
-    // ovde treba provera za acc ako je neka igra u toku?? inače start new bez pitanja
-    // takođe difficulty pitanje da iskače prozor ili nešto
-    this.resetDraggedCards();
-
-    this.store.dispatch(solitaireActions.startNewGame({difficulty}));
-  }
-
-  public restartGame(): void {
-    this.resetDraggedCards();
-
-    this.store.dispatch(solitaireActions.restartGame());
-  }
-
-  private clickOffset = (event: MouseEvent) => {
-    const target = event.target as HTMLElement;
-    
-    if (target) {
-      const rect = target.getBoundingClientRect();
-      this.clickedElementOffsetX = event.clientX - rect.left;
-      this.clickedElementOffsetY = event.clientY - rect.top;
-    }
-  }
-
-  private followCursor = (event: DragEvent) => {
-    this.cardStackDragged!.style.left = (event.clientX - this.clickedElementOffsetX) + "px";
-    this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
-  }
-
   public drawCards(): void {
-    if (this.board === undefined) return;
+    if (this.board === null) return;
 
-    this.audioService.play_deckDraw(this.board);
+    this.audioService.play_deckDraw(this.board, this.difficulty);
     this.store.dispatch(solitaireActions.drawCards());
   }
+
+  // private clickOffset = (event: MouseEvent) => {
+  //   const target = event.target as HTMLElement;
+    
+  //   if (target) {
+  //     const rect = target.getBoundingClientRect();
+  //     this.clickedElementOffsetX = event.clientX - rect.left;
+  //     this.clickedElementOffsetY = event.clientY - rect.top;
+  //   }
+  // }
+
+  // private followCursor = (event: DragEvent) => {
+  //   this.cardStackDragged!.style.left = (event.clientX - this.clickedElementOffsetX) + "px";
+  //   this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
+  // }
 
   public showHints(): void {
     if (this.hints === undefined) return;
 
-    this.hints.hintVisible = true;
-    if (this.hints.moves.length > 0) {
-      this.hints.hintIndex = (this.hints.hintIndex + 1) % this.hints.moves.length;
-    }
+    this.hints = this.hintService.showHints(this.hints);
   }
 
-  public getFoundationBg(index: number): string {
-    let bg = "url('/cards/placeholder.svg')";
-    switch (index) {
-      case 0:
-        bg = "url('/cards/clubs_placeholder.svg')";
-        break;
-      case 1:
-        bg = "url('/cards/diamonds_placeholder.svg')";
-        break;
-      case 2:
-        bg = "url('/cards/hearts_placeholder.svg')";
-        break;
-      case 3:
-        bg = "url('/cards/spades_placeholder.svg')";
-        break;
-      default:
-        break;
-    }
+  public hideHints(): void {
+    if (this.hints === undefined) return;
 
-    return bg;
+    this.hints = this.hintService.hideHints(this.hints);
+
+    const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
+    const highlightedCards = document.querySelectorAll(".highlighted-card-single");
+
+    highlightedCardStacks.forEach((el) => { el.classList.remove("highlighted-card-stack"); });
+    highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
   }
 
-  // public hideHints(): void {
-  //   this.hints.hintVisible = false;
-  //   this.hints.hintIndex = -1;
-
-  //   const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
-  //   const highlightedCards = document.querySelectorAll(".highlighted-card-single");
-
-  //   highlightedCardStacks.forEach((el) => { el.classList.remove("highlighted-card-stack"); });
-  //   highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
-  // }
-
-  // public isHighlighted(containingStack: number[], elementIndex: number): boolean {
+  // public isHighlighted(containingStack: Card[], elementIndex: number): boolean {
   //   if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
   //   if (!this.hints.moves[this.hints.hintIndex]) return false;
     
@@ -205,7 +175,7 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
   //   return this.hints.cycleDeck;
   // }
 
-  // public isHighlighted_placeholder(containingStack: number[]): boolean {
+  // public isHighlighted_placeholder(containingStack: Card[]): boolean {
   //   if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
   //   if (!this.hints.moves[this.hints.hintIndex]) return false;
   
@@ -216,319 +186,76 @@ export class SolitaireComponent implements AfterViewInit, OnInit, OnDestroy {
     
   // }
   
-  // public dragStart(ev: DragEvent, startArray: number[], index: number) {
-  //   this.draggedCards = startArray.slice(index);
-  //   this.draggedCardsStartIndex = index;
-  //   this.draggedCardsOrigin = startArray;
+  public dragStart(arrayToHide?: Card[], index?: number) {
+    // this.hideHints();
 
-  //   this.invisibleCard = ev.target as HTMLElement;
-  //   this.invisibleCard.classList.add("hidden-card");
+    if (!this.board) return;
 
-  //   if (this.ghostImage) ev.dataTransfer?.setDragImage(this.ghostImage, 0, 0);
+    if (arrayToHide !== undefined && index !== undefined) {
+      this.hiddenCards = arrayToHide;
+      this.hiddenCardsIndex = index + 1;
+    }
 
-  //   // this.hideHints();
+    this.audioService.play_cardPickUp();
 
-  //   this.audio.play_cardPickUp();
+    //document.addEventListener('drag', this.followCursor);
+  }
 
-  //   document.addEventListener('drag', this.followCursor);
-  // }
+  public dragRelease() {
+    this.hiddenCards = [];
+    this.hiddenCardsIndex = 20;
 
-  // public dragEnd() {
-  //   this.audio.play_cardDropUnsuccessful();
-  //   this.dragAndDropCleanUp();
-  // }
+    this.audioService.play_cardDropUnsuccessful();
+    this.dragAndDropCleanUp();
+  }
 
-  // public dropOnFoundation(cardSuit: CardSuit, dropArray: number[]): void {
-  //   if (!this.board) return;
-  //   if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
+  public dropOnFoundation(event: CdkDragDrop<Card[]>): void {
+    if (!this.board) return;
+    if (event.container.data === event.previousContainer.data) return;
 
-  //   const lastMove = this.board!.moveNumber;
+    const lastMove = this.board.moveNumber;
 
-  //   this.store.dispatch(solitaireActions.dropOnFoundation({
-  //     suit: cardSuit,
-  //     src: this.draggedCardsOrigin,
-  //     dest: dropArray,
-  //     srcIndex: this.draggedCardsStartIndex
-  //   }));
+    this.store.dispatch(solitaireActions.dropOnFoundation({
+      src: event.previousContainer.data,
+      dest: event.container.data,
+      srcIndex: event.previousIndex
+    }));
 
-  //   if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
-  // }
+    if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
+  }
 
-  // public dropOnTableau(dropArray: number[]) {
-  //   if (!this.board) return;
-  //   if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
+  public dropOnTableau(event: CdkDragDrop<Card[]>): void {
+    if (!this.board) return;
+    if (event.container.data === event.previousContainer.data) return;
 
-  //   const lastMove = this.board?.moveNumber;
-  //   this.store.dispatch(solitaireActions.dropOnTableau({
-  //     src: this.draggedCardsOrigin,
-  //     dest: dropArray,
-  //     srcIndex: this.draggedCardsStartIndex
-  //   }));
 
-  //   if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
-  // }
+    const lastMove = this.board.moveNumber;
+
+    this.store.dispatch(solitaireActions.dropOnTableau({
+      src: event.previousContainer.data,
+      dest: event.container.data,
+      srcIndex: event.previousIndex
+    }));
+
+    if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
+  }
 
   private cardDroppedSuccessfuly(): void {
     this.audioService.play_cardDropSuccessful();
     this.dragAndDropCleanUp();
   }
 
-  private dragAndDropCleanUp(): void {
-    document.removeEventListener('drag', this.followCursor);
-
-    this.cardStackDragged!.style.visibility = "hidden";
-    this.cardStackDragged!.style.left = "110vw";
-    this.cardStackDragged!.style.top = "110vh";
-    this.cardStackDragged!.style.visibility = "visible";
-
-    this.invisibleCard!.classList.remove("hidden-card");
-    this.invisibleCard = null;
-
-    this.resetDraggedCards();
+  public getFoundationBg(index: number): string {
+    switch (index) {
+      case 0: return "url('/cards/clubs_placeholder.svg')";
+      case 1: return "url('/cards/diamonds_placeholder.svg')";
+      case 2: return "url('/cards/hearts_placeholder.svg')";
+      case 3: return "url('/cards/spades_placeholder.svg')";
+      default: return "url('/cards/placeholder.svg')"
+    }
   }
 
-  private resetDraggedCards(): void {
-    this.draggedCards = [];
-    this.draggedCardsStartIndex = null;
-    this.draggedCardsOrigin = null;
+  private dragAndDropCleanUp(): void {
+    // document.removeEventListener('drag', this.followCursor);
   }
 }
-
-// export class SolitaireComponent1 implements AfterViewInit, OnInit, OnDestroy {
-//   difficulty = SolitaireDifficulty;
-
-//   #destroy$: Subject<void> = new Subject<void>();
-//   #board$: Observable<SolitaireBoard | undefined>;
-//   #cards$: Observable<Card[]>
-
-//   board: SolitaireBoard | undefined | null;
-//   cards: Card[] | undefined | null;
-//   hints: SolitaireHints = { moves: [], cycleDeck: false, hintIndex: -1, hintVisible: false } as SolitaireHints;
-
-//   draggedCards: number[] = [];
-//   draggedCardsStartIndex: number | null = null;
-//   draggedCardsOrigin: number[] | null = null;
-
-//   cardStackDragged: HTMLElement | null = null;
-//   ghostImage: HTMLElement | null = null;
-//   invisibleCard: HTMLElement | null = null;
-
-//   clickedElementOffsetX: number = 0;
-//   clickedElementOffsetY: number = 0;
-
-//   constructor(
-//     private audio: AudioService,
-//     private store: Store,
-//     private helper: SolitaireHelperService,
-//     private router: Router,
-//     private timer: TimerService
-//   ) {
-//     this.#board$ = this.store.select(selectBoard);
-//     this.#cards$ = this.store.select(selectCards);
-
-//     const navigation = this.router.getCurrentNavigation();
-//     const state = navigation?.extras.state as { difficulty: SolitaireDifficulty } | undefined;
-//     const value = state?.difficulty;
-//     this.start(value);
-//   }
-
-//   ngOnInit(): void {
-//     this.#board$.pipe(takeUntil(this.#destroy$)).subscribe((board) => {
-//       this.board = board;
-//     });
-
-//     this.#cards$.pipe(takeUntil(this.#destroy$)).subscribe((cards) => {
-//       this.cards = cards;
-//     });
-
-//     combineLatest([this.#board$, this.#cards$])
-//     .pipe(
-//         takeUntil(this.#destroy$),
-//         filter(([board, cards]) => !!board && !!cards)
-//     )
-//     .subscribe(([board, cards]) => {
-//       this.hints = this.helper.getHints(board!, cards!);
-//     });
-//   }
-
-//   ngAfterViewInit(): void {
-//     this.cardStackDragged = document.getElementById("card-stack-dragged");
-//     this.ghostImage = document.getElementById("ghost-image");
-
-//     document.addEventListener("mousedown", this.clickOffset);
-//   }
-
-//   ngOnDestroy(): void {
-//     document.removeEventListener("mousedown", this.clickOffset);
-
-//     this.#destroy$.next();
-//     this.#destroy$.complete();
-//   }
-
-//   public start(difficulty: SolitaireDifficulty = SolitaireDifficulty.Hard) {
-//     // ovde treba provera za acc ako je neka igra u toku?? inače start new bez pitanja
-//     // takođe difficulty pitanje da iskače prozor ili nešto
-
-//     this.resetDraggedCards();
-
-//     this.store.dispatch(solitaireActions.startNewGame({difficulty}));
-//   }
-
-//   public restartGame(): void {
-//     // add a restart deal feature?
-    
-//     this.resetDraggedCards();
-//     this.store.dispatch(solitaireActions.restartGame());
-//   }
-
-//   private clickOffset = (event: MouseEvent) => {
-//     const target = event.target as HTMLElement;
-    
-//     if (target) {
-//       const rect = target.getBoundingClientRect();
-//       this.clickedElementOffsetX = event.clientX - rect.left;
-//       this.clickedElementOffsetY = event.clientY - rect.top;
-//     }
-//   }
-
-//   private followCursor = (event: DragEvent) => {
-//     this.cardStackDragged!.style.left = (event.clientX - this.clickedElementOffsetX) + "px";
-//     this.cardStackDragged!.style.top = (event.clientY - this.clickedElementOffsetY) + "px";
-//   }
-
-//   public drawCards(): void {
-//     if (!this.board) return;
-//     this.audio.play_deckDraw(this.board);
-//     this.store.dispatch(solitaireActions.drawCards());
-//   }
-
-//   public showHints(): void {
-//     this.hints.hintVisible = true;
-
-//     if (this.hints.moves.length > 0) {
-//       this.hints.hintIndex = (this.hints.hintIndex + 1) % this.hints.moves.length;
-//     }
-//   }
-
-//   public hideHints(): void {
-//     this.hints.hintVisible = false;
-//     this.hints.hintIndex = -1;
-
-//     const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
-//     const highlightedCards = document.querySelectorAll(".highlighted-card-single");
-
-//     highlightedCardStacks.forEach((el) => { el.classList.remove("highlighted-card-stack"); });
-//     highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
-//   }
-
-//   public isHighlighted(containingStack: number[], elementIndex: number): boolean {
-//     if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
-//     if (!this.hints.moves[this.hints.hintIndex]) return false;
-    
-//     let selectedHint: SolitaireMove = this.hints.moves[this.hints.hintIndex];
-    
-//     // source highlight
-//     if (selectedHint.source === containingStack && selectedHint.sourceIndex === elementIndex) return true;
-    
-//     // dest highlight
-//     if (selectedHint.dest === containingStack && containingStack.length - 1 === elementIndex) return true;
-
-//     return false;
-//   }
-
-//   public isHighlighted_deck(): boolean {
-//     if (!this.hints.hintVisible) return false;
-//     return this.hints.cycleDeck;
-//   }
-
-//   public isHighlighted_placeholder(containingStack: number[]): boolean {
-//     if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
-//     if (!this.hints.moves[this.hints.hintIndex]) return false;
-  
-//     let selectedHint: SolitaireMove = this.hints.moves[this.hints.hintIndex];
-  
-//     // placeholder highlight
-//     return selectedHint.dest === containingStack && containingStack.length === 0;
-    
-//   }
-  
-//   public dragStart(ev: DragEvent, startArray: number[], index: number) {
-//     this.draggedCards = startArray.slice(index);
-//     this.draggedCardsStartIndex = index;
-//     this.draggedCardsOrigin = startArray;
-
-//     this.invisibleCard = ev.target as HTMLElement;
-//     this.invisibleCard.classList.add("hidden-card");
-
-//     if (this.ghostImage) ev.dataTransfer?.setDragImage(this.ghostImage, 0, 0);
-
-//     // this.hideHints();
-
-//     this.audio.play_cardPickUp();
-
-//     document.addEventListener('drag', this.followCursor);
-//   }
-
-//   public dragEnd() {
-//     this.audio.play_cardDropUnsuccessful();
-//     this.dragAndDropCleanUp();
-//   }
-
-//   public dropOnFoundation(cardSuit: CardSuit, dropArray: number[]): void {
-//     if (!this.board) return;
-//     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
-
-//     const lastMove = this.board!.moveNumber;
-
-//     this.store.dispatch(solitaireActions.dropOnFoundation({
-//       suit: cardSuit,
-//       src: this.draggedCardsOrigin,
-//       dest: dropArray,
-//       srcIndex: this.draggedCardsStartIndex
-//     }));
-
-//     if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
-//   }
-
-//   public dropOnTableau(dropArray: number[]) {
-//     if (!this.board) return;
-//     if (this.draggedCardsOrigin === null || this.draggedCardsStartIndex === null) return;
-
-//     const lastMove = this.board?.moveNumber;
-//     this.store.dispatch(solitaireActions.dropOnTableau({
-//       src: this.draggedCardsOrigin,
-//       dest: dropArray,
-//       srcIndex: this.draggedCardsStartIndex
-//     }));
-
-//     if (this.board.moveNumber > lastMove) this.cardDroppedSuccessfuly();
-//   }
-
-//   private cardDroppedSuccessfuly(): void {
-//     this.audio.play_cardDropSuccessful();
-
-//     // game end check je broken treba ga prepraviti veoma zajebano rip
-//     // this.gameEndCheck(); // zar ne treba ovo sranje da bude negde drugde a ne da komponenta za prikaz ovo računa???
-//     this.dragAndDropCleanUp();
-//   }
-
-//   private dragAndDropCleanUp(): void {
-//     document.removeEventListener('drag', this.followCursor);
-
-//     this.cardStackDragged!.style.visibility = "hidden";
-//     this.cardStackDragged!.style.left = "110vw";
-//     this.cardStackDragged!.style.top = "110vh";
-//     this.cardStackDragged!.style.visibility = "visible";
-
-//     this.invisibleCard!.classList.remove("hidden-card");
-//     this.invisibleCard = null;
-
-//     this.resetDraggedCards();
-//   }
-
-//   private resetDraggedCards(): void {
-//     this.draggedCards = [];
-//     this.draggedCardsStartIndex = null;
-//     this.draggedCardsOrigin = null;
-//   }
-// }

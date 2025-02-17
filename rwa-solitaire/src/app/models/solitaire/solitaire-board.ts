@@ -7,5 +7,4 @@ export interface SolitaireBoard {
     tableau: Card[][];
     deckStock: Card[];
     deckWaste: Card[];
-    difficulty: SolitaireDifficulty;
 }

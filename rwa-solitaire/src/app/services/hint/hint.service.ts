@@ -32,6 +32,27 @@ export class HintService {
     return result;
   }
 
+  showHints(hints: SolitaireHints): SolitaireHints {
+    let newHints = this.#makeCleanHintsCopy(hints);
+    
+    newHints.hintVisible = true;
+    if (newHints.moves.length > 0) {
+      newHints.hintIndex = (newHints.hintIndex + 1) % newHints.moves.length;
+    }
+
+    console.log(newHints);
+    return newHints;
+  }
+
+  hideHints(hints: SolitaireHints): SolitaireHints {
+    let newHints = this.#makeCleanHintsCopy(hints);
+
+    newHints.hintVisible = false;
+    newHints.hintIndex = -1;
+
+    return newHints;
+  }
+
   // check if a tableau move that uncovers new cards / moves cards from an empty field exists
   #getTableauToTableauMoves(tableau: Card[][]): SolitaireMove[] {
     const results: SolitaireMove[] = [];
@@ -201,5 +222,14 @@ export class HintService {
     if (foundation.length > 0 && card.number - stackTop.number === 1) return true;
 
     return false;
+  }
+
+  #makeCleanHintsCopy(hints: SolitaireHints): SolitaireHints {
+    return {
+      moves: hints.moves.map((move) => ({ ...move })),
+      cycleDeck: hints.cycleDeck,
+      hintIndex: hints.hintIndex,
+      hintVisible: hints.hintVisible
+    }
   }
 }

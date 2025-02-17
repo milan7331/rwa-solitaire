@@ -1,0 +1,7 @@
+<button mat-fab extended (click)="undoMove()" [disabled]="!(undoAvailable$ | async)"><mat-icon>undo</mat-icon>Undo</button>
+<button mat-fab extended (click)="getHints()"><mat-icon>lightbulb</mat-icon>Hint</button>
+<div class="bottom-row-buttons">
+    <button mat-fab extended (click)="startNewGame()"><mat-icon>sports_esports</mat-icon>New game</button>
+    <button mat-fab extended (click)="restartGame()"><mat-icon>cached</mat-icon>Restart</button>
+    <button mat-fab extended (click)="changeDifficulty()"><mat-icon>speed</mat-icon>Change difficulty</button>
+</div>

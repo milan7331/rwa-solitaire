@@ -97,11 +97,11 @@ export class AudioService implements OnDestroy {
     this.#sound_cardPickUp.play();
   }
 
-  public play_deckDraw(board: SolitaireBoard): void {
+  public play_deckDraw(board: SolitaireBoard, difficulty: SolitaireDifficulty): void {
     const soundToPlay = 
       (board.deckStock.length === 0 && board.deckWaste.length > 0) ? this.#sound_deckRewind :
-      (board.difficulty === SolitaireDifficulty.Easy || board.deckStock.length === 1) ? this.#sound_cardFlipUp :
-      (board.difficulty === SolitaireDifficulty.Hard && board.deckStock.length > 1) ? this.#sound_deckDraw3 :
+      (difficulty === SolitaireDifficulty.Easy || board.deckStock.length === 1) ? this.#sound_cardFlipUp :
+      (difficulty === SolitaireDifficulty.Hard && board.deckStock.length > 1) ? this.#sound_deckDraw3 :
       null;
 
     if (soundToPlay) {

@@ -88,7 +88,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy{
   }
   
   loadSolitairePage(difficulty: SolitaireDifficulty) {
-    this.router.navigate(['/solitaire'], { state: { difficulty }});
+    this.router.navigate(['/solitaire'], { state: {difficulty} });
     this.audio.play_buttonPress();
   }
 

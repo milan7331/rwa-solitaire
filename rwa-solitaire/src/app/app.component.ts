@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 
 import { TopBarComponent } from "./components/standalone/top-bar/top-bar.component";
 
@@ -8,10 +7,7 @@ import { TopBarComponent } from "./components/standalone/top-bar/top-bar.compone
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    MatCardModule,
     TopBarComponent,
-
-    TopBarComponent
 ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

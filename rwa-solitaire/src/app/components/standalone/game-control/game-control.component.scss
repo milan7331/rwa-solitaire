@@ -1,0 +1,17 @@
+:host {
+    overflow: visible;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    row-gap: 2vh;
+
+    .bottom-row-buttons {
+        overflow: visible;
+        
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}

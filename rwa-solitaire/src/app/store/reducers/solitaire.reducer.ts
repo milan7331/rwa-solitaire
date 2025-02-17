@@ -14,19 +14,21 @@ export const boardAdapter: EntityAdapter<SolitaireBoard> = createEntityAdapter<S
 
 export const initialSolitaireState: SolitaireState = {
     boards: boardAdapter.getInitialState(),
-    winCondition: false
+    winCondition: false,
+    difficulty: SolitaireDifficulty.Hard,
 }
 
 export const solitaireReducer = createReducer(
     initialSolitaireState,
     on(solitaireActions.startNewGame, (state, {difficulty}) => {
         const newWinCondition: boolean = false;
-        const newBoard = setUpInitialBoard(difficulty);
+        const newBoard = setUpInitialBoard();
         
         return {
             ...state,
             boards: boardAdapter.setAll([newBoard], state.boards),
-            winCondition: newWinCondition
+            winCondition: newWinCondition,
+            difficulty: difficulty,
         } as SolitaireState;
     }),
     on(solitaireActions.restartGame, (state) => {
@@ -50,7 +52,7 @@ export const solitaireReducer = createReducer(
         newBoard.moveNumber += 1;
 
         if (newBoard.deckStock.length > 0) {
-            const drawCount = (newBoard.difficulty === SolitaireDifficulty.Hard)? 3 : 1;
+            const drawCount = (state.difficulty === SolitaireDifficulty.Hard)? 3 : 1;
             const cardsToDraw = newBoard.deckStock.slice(-drawCount);
             newBoard.deckWaste.push(...cardsToDraw);
             newBoard.deckStock = newBoard.deckStock.slice(0, -cardsToDraw.length);
@@ -65,10 +67,10 @@ export const solitaireReducer = createReducer(
             boards: boardAdapter.addOne(newBoard, state.boards)
         } as SolitaireState;
     }),
-    on(solitaireActions.dropOnFoundation, (state, {suit, src, dest, srcIndex}) => {
+    on(solitaireActions.dropOnFoundation, (state, {src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
-        if (!canDropOnFoundation(suit, src, dest, srcIndex)) return state;
+        if (!canDropOnFoundation(src, dest, srcIndex, currentBoard.foundation)) return state;
 
         let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
@@ -89,17 +91,18 @@ export const solitaireReducer = createReducer(
     on(solitaireActions.dropOnTableau, (state, {src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
+
         if (!canDropOnTableau(src, dest, srcIndex)) return state;
 
-        let newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
+        const newBoard: SolitaireBoard = makePureBoardCopy(currentBoard);
         newBoard.moveNumber += 1;
 
-        let newSrc = findArrayInNewBoard(newBoard, currentBoard, src);
-        let newDest = findArrayInNewBoard(newBoard, currentBoard, dest);
+        const newSrc = findArrayInNewBoard(newBoard, currentBoard, src);
+        const newDest = findArrayInNewBoard(newBoard, currentBoard, dest);
         if (newSrc === null || newDest === null) return state;
         
         if (!moveCards(newSrc, newDest, srcIndex)) return state;
-        const updatedBoard = updateCardsAfterMove(newSrc, currentBoard)
+        const updatedBoard = updateCardsAfterMove(newSrc, newBoard);
 
         return {
             ...state,
@@ -160,14 +163,13 @@ function generateDeck(): Card[] {
     return deck;
 }
 
-function generateEmptyBoard(difficulty: SolitaireDifficulty): SolitaireBoard {
+function generateEmptyBoard(): SolitaireBoard {
     return {
         moveNumber: 0,
         foundation: Array.from({length: 4}, () => { return [] as Card[] }),
         tableau: Array.from({length: 7}, () => { return [] as Card[] }),
         deckStock: generateDeck(),
         deckWaste: [],
-        difficulty: difficulty,
     } as SolitaireBoard;
 }
 
@@ -182,7 +184,6 @@ function makePureBoardCopy(board: SolitaireBoard): SolitaireBoard {
         tableau: board.tableau.map(tab => makePureCardsCopy(tab)),
         deckStock: makePureCardsCopy(board.deckStock),
         deckWaste: makePureCardsCopy(board.deckWaste),
-        difficulty: board.difficulty
     } as SolitaireBoard;
 }
 
@@ -234,8 +235,8 @@ function placeInitialCards(board: SolitaireBoard): SolitaireBoard {
     return newBoard;
 }
 
-function setUpInitialBoard(difficulty: SolitaireDifficulty): SolitaireBoard {
-    let newBoard = generateEmptyBoard(difficulty);
+function setUpInitialBoard(): SolitaireBoard {
+    let newBoard = generateEmptyBoard();
 
     newBoard.deckStock = fisherYatesDeckShuffle(newBoard.deckStock);
 
@@ -282,17 +283,17 @@ function findArrayInNewBoard(newBoard: SolitaireBoard, oldBoard: SolitaireBoard,
     return null;
 }
 
-function updateCardsAfterMove(stack: Card[], currentBoard: SolitaireBoard): SolitaireBoard {
-    if (!checkIfStackTopIsHidden(stack)) return currentBoard;
+function updateCardsAfterMove(stack: Card[], board: SolitaireBoard): SolitaireBoard {
+    if (!checkIfStackTopIsHidden(stack)) return board;
 
     const topCard: Card | undefined = stack.at(-1)!;
 
-    if (topCard === undefined) return currentBoard;
-    if (topCard.faceShown || topCard.movable) return currentBoard; 
+    if (topCard === undefined) return board;
+    if (topCard.faceShown || topCard.movable) return board; 
 
-    const updatedBoard = makePureBoardCopy(currentBoard);
-    const updatedArray = findArrayInNewBoard(updatedBoard, currentBoard, stack);
-    if (updatedArray === null) return currentBoard;
+    const updatedBoard = makePureBoardCopy(board);
+    const updatedArray = findArrayInNewBoard(updatedBoard, board, stack);
+    if (updatedArray === null) return board;
     
     updatedArray.at(-1)!.faceShown = true;
     updatedArray.at(-1)!.movable = true;
@@ -323,7 +324,7 @@ function checkIfStackTopIsHidden(stack: Card[]): boolean {
     return false;
 }
 
-function canDropOnFoundation(suit: CardSuit, src: Card[], dest: Card[], srcIndex: number): boolean {
+function canDropOnFoundation(src: Card[], dest: Card[], srcIndex: number, foundation: Card[][]): boolean {
     // parameter check
     if (src.length <= 0 || srcIndex < 0 || src.length <= srcIndex) return false; 
 
@@ -334,7 +335,11 @@ function canDropOnFoundation(suit: CardSuit, src: Card[], dest: Card[], srcIndex
     // card check
     const cardToMove: Card = cardsToMove[0];
     if (!cardToMove) return false;
-    if (cardToMove!.suit !== suit) return false;
+
+    // foundation suit check
+    const fndIndex = foundation.findIndex(fnd => fnd === dest);
+    if (!fndIndex) return false;
+    if (fndIndex !== cardToMove.suit) return false;
 
     // ace check
     if (dest.length === 0 && cardToMove.number === CardNumber.Ace) return true;
@@ -356,18 +361,18 @@ function canDropOnTableau(src: Card[], dest: Card[], srcIndex: number): boolean 
     if (cardsToMove.length <= 0) return false;
 
     // first card from the moved stack
-    const firstCardMoved: Card | undefined = cardsToMove[0];
+    const firstCardMoved: Card = cardsToMove[0];
     if (firstCardMoved === undefined) return false;
 
     // can drop king
-    if (dest.length === 0 && firstCardMoved!.number === CardNumber.King) return true;
+    if (dest.length === 0 && firstCardMoved.number === CardNumber.King) return true;
 
     // dest stack top
     const destStackTop: Card | undefined = dest.at(-1)!;
     if (destStackTop === undefined) return false;
 
     // regular card drop test
-    if (firstCardMoved!.color !== destStackTop!.color && destStackTop!.number - firstCardMoved!.number === 1) return true;
+    if (firstCardMoved.color !== destStackTop.color && destStackTop.number - firstCardMoved.number === 1) return true;
 
     return false;
 }

@@ -1,53 +1,67 @@
-@if (board !== undefined) {
-    <div class="left-container">
-        <div class="foundation">
-            @for (fnd of board.foundation; track $index; let fndIndex = $index) {
-                @if (fnd.length <= 0) {
-                    <div class="card" [style.background-image]="getFoundationBg(fndIndex)"></div>
-                } @else {
-                    <div class="card-stack">
+<ng-template #cardStackDragPreview let-cards="cards">
+    <div class="card-stack" [style.--total-cards]="cards.length">
+        @for (card of cards; track $index) {
+            <div class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg)'"></div>
+        }
+    </div>
+</ng-template>
+
+@if (board !== null) {
+    <ng-container cdkDropListGroup>
+        <div class="left-container">
+            <div class="foundation">
+                @for (fnd of board.foundation; track $index; let fndIndex = $index) {
+                    <div cdkDropList (cdkDropListDropped)="dropOnFoundation($event)" [cdkDropListData]="fnd" [cdkDropListSortingDisabled]="true" class="card-stack-foundation">   
+                        <div class="card" [style.background-image]="getFoundationBg(fndIndex)"></div>
                         @for (card of fnd; track card.id; let index = $index) {
-                            <div class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'"></div>
+                            <div cdkDrag (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
+                                <ng-template cdkDragPreview>
+                                    <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: [card]}"></ng-container>
+                                </ng-template>
+                                <ng-template cdkDragPlaceholder />
+                            </div>
                         }
                     </div>
                 }
-            }
-        </div>
-        <div class="deck-container">
-            @if (board.deckStock.length > 0) {
-                <div class="card card-back"></div>
-            } @else { <div class="card"></div> }
-            <div class="waste-stack card-stack">
-                @if (board.deckWaste.length > 0) {
-                    @for (card of board.deckWaste; track card.id; let index = $index) {
-                        <div class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'"></div>
+            </div>
+            <div class="deck-container">
+                <div class="card" (click)="drawCards()" [class.card-back]="board.deckStock.length > 0"></div>
+                <div cdkDropList [cdkDropListData]="board.deckWaste" [cdkDropListSortingDisabled]="true" class="card-stack-foundation waste-stack">
+                    <div class="card"></div>
+                    @for (card of board.deckWaste; track card.id; let index = $index; let count = $count) {
+                        <div cdkDrag (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="index + 1 !== count" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
+                            <ng-template cdkDragPreview>
+                                <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: [card]}"></ng-container>
+                            </ng-template>
+                            <ng-template cdkDragPlaceholder />
+                        </div>
                     }
-                } @else { <div class="card"></div> }
+                </div>
+                <div class="spacer"></div>
+                <app-game-info></app-game-info>
             </div>
             <div class="spacer"></div>
-            <div class="game-info">
-                <div>Time: 00:00s</div>
-                <div>Moves: 0</div>
-                <div>Difficulty: Hard</div>
-            </div>
+            <app-game-control (hintButtonPressed)="showHints()"></app-game-control> 
         </div>
-        <div class="spacer"></div>
-        <button mat-fab extended><mat-icon>lightbulb</mat-icon>Hint</button>
-        <button mat-fab extended><mat-icon>undo</mat-icon>Undo</button> 
-        <button mat-fab extended><mat-icon>sports_esports</mat-icon>New game</button>
-        <button mat-fab extended><mat-icon>cached</mat-icon>Restart</button>
-        <button mat-fab extended><mat-icon>speed</mat-icon>Change difficulty</button>
-    </div>
-    <mat-divider vertical="true"></mat-divider>
-    <div class="right-container">
-        @for (tab of board.tableau; track $index) {
-            <div>
-                @for (card of tab; track card.id) {
-                    <div class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg)'"></div>
-                }
-            </div>
-        }
-    </div>
+        <mat-divider vertical="true"></mat-divider>
+        <div class="right-container">
+            @for (tab of board.tableau; track $index) {
+                <div cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="dropOnTableau($event)" [cdkDropListData]="tab" class="card-stack card-stack-tableau" [style.--total-cards]="tab.length">
+                    <div class="card"></div>
+                    @for (card of tab; track card.id; let index = $index) {
+                        @if (tab !== hiddenCards || index < hiddenCardsIndex) {
+                            <div cdkDrag (cdkDragStarted)="dragStart(tab, index)" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="(!card.faceShown || !card.movable)" class="card" [ngStyle]="{'background-image': (card.faceShown && card.movable) ? 'url(/cards/' + card.picture + '.svg)' : 'var(--card-back)'}">
+                                <ng-template cdkDragPreview>    
+                                    <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: tab.slice(index)}"></ng-container>
+                                </ng-template>
+                                <ng-template cdkDragPlaceholder />
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </ng-container>
 }
 
 <!-- <div class="solitaire-container flex flex-column flex-nowrap justify-content-start align-items-stretch p-2">
