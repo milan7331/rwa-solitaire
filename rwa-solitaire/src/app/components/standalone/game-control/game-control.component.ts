@@ -23,11 +23,12 @@ import { selectGameDifficultyState, selectUndoAvailability } from '../../../stor
     MatDividerModule,
   ],
   templateUrl: './game-control.component.html',
-  styleUrl: './game-control.component.scss'
+  styleUrl: './game-control.component.scss',
+  standalone: true
 })
 export class GameControlComponent implements OnInit, OnDestroy {
   #destroy$: Subject<void>;
-  #difficulty$: Observable<SolitaireDifficulty> | null;
+  #difficulty$: Observable<SolitaireDifficulty>;
   undoAvailable$: Observable<boolean>;
 
   #difficulty: SolitaireDifficulty;
@@ -40,9 +41,10 @@ export class GameControlComponent implements OnInit, OnDestroy {
     private readonly audioService: AudioService
   ) {
     this.#destroy$ = new Subject<void>();
-    this.#difficulty$ = null;
-    this.#difficulty = SolitaireDifficulty.Hard;
+    this.#difficulty$ = of(SolitaireDifficulty.Hard);
     this.undoAvailable$ = of(false);
+
+    this.#difficulty = SolitaireDifficulty.Hard;
 
     this.hintButtonPressed = new EventEmitter<void>();
   }
@@ -82,7 +84,6 @@ export class GameControlComponent implements OnInit, OnDestroy {
   }
 
   public changeDifficulty(): void {
-    if (this.#difficulty$ === null) return;
     const newDiff = this.#difficulty === SolitaireDifficulty.Hard ? SolitaireDifficulty.Easy : SolitaireDifficulty.Hard; 
     this.store.dispatch(solitaireActions.startNewGame({ difficulty: newDiff }));
     this.audioService.play_buttonPress();

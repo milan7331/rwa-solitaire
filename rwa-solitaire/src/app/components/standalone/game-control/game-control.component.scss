@@ -13,5 +13,10 @@
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: space-between;
+        column-gap: 2vh;
+
+        > * {
+            flex: 1 1 auto;
+        }
     }
 }

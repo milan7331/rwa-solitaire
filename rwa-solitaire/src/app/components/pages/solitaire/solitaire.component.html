@@ -1,5 +1,5 @@
 <ng-template #cardStackDragPreview let-cards="cards">
-    <div class="card-stack" [style.--total-cards]="cards.length">
+    <div id="dragPreview" class="card-stack" [style.--total-cards]="cards.length">
         @for (card of cards; track $index) {
             <div class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg)'"></div>
         }
@@ -14,7 +14,7 @@
                     <div cdkDropList (cdkDropListDropped)="dropOnFoundation($event)" [cdkDropListData]="fnd" [cdkDropListSortingDisabled]="true" class="card-stack-foundation">   
                         <div class="card" [style.background-image]="getFoundationBg(fndIndex)"></div>
                         @for (card of fnd; track card.id; let index = $index) {
-                            <div cdkDrag (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
+                            <div cdkDrag (mousedown)="getClickOffset($event)" (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
                                 <ng-template cdkDragPreview>
                                     <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: [card]}"></ng-container>
                                 </ng-template>
@@ -29,7 +29,7 @@
                 <div cdkDropList [cdkDropListData]="board.deckWaste" [cdkDropListSortingDisabled]="true" class="card-stack-foundation waste-stack">
                     <div class="card"></div>
                     @for (card of board.deckWaste; track card.id; let index = $index; let count = $count) {
-                        <div cdkDrag (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="index + 1 !== count" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
+                        <div cdkDrag (mousedown)="getClickOffset($event)" (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="index + 1 !== count" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
                             <ng-template cdkDragPreview>
                                 <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: [card]}"></ng-container>
                             </ng-template>
@@ -50,7 +50,7 @@
                     <div class="card"></div>
                     @for (card of tab; track card.id; let index = $index) {
                         @if (tab !== hiddenCards || index < hiddenCardsIndex) {
-                            <div cdkDrag (cdkDragStarted)="dragStart(tab, index)" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="(!card.faceShown || !card.movable)" class="card" [ngStyle]="{'background-image': (card.faceShown && card.movable) ? 'url(/cards/' + card.picture + '.svg)' : 'var(--card-back)'}">
+                            <div cdkDrag (mousedown)="getClickOffset($event)"  (cdkDragStarted)="dragStart(tab, index)" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="(!card.faceShown || !card.movable)" class="card" [ngStyle]="{'background-image': (card.faceShown && card.movable) ? 'url(/cards/' + card.picture + '.svg)' : 'var(--card-back)'}">
                                 <ng-template cdkDragPreview>    
                                     <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: tab.slice(index)}"></ng-container>
                                 </ng-template>
@@ -63,170 +63,3 @@
         </div>
     </ng-container>
 }
-
-<!-- <div class="solitaire-container flex flex-column flex-nowrap justify-content-start align-items-stretch p-2">
-    <div class="solitaire-container flex-auto flex flex-column flex-nowrap justify-content-start align-items-stretch row-gap-2">
-        <div>
-            <app-top-bar></app-top-bar>
-        </div>
-        <div *ngIf="cards && board" class="flex-auto flex flex-column flex-nowrap justify-content-start align-items-stretch row-gap-2">
-            <div class="solitaire-top-container flex flex-row flex-nowrap justify-content-between align-items-start">
-                <div class="flex-auto flex flex-row flex-nowrap justify-content-start column-gap-4">
-                    <div *ngFor="let f of board.foundation; let i = index" pDroppable (onDrop)="dropOnFoundation(i, f)" class="solitaire-card-stack">
-                        <div class="solitaire-card"
-                        [ngClass]="{
-                            'bg-card-clubs': i === 0,
-                            'bg-card-diamonds': i === 1,
-                            'bg-card-hearts': i === 2,
-                            'bg-card-spades': i === 3,
-                            'highlighted-card': isHighlighted_placeholder(f)
-                        }"></div>
-
-                        <div class="solitaire-card"
-                        *ngFor="let cardId of f; let j = index"
-                        [ngClass]="{
-                            'highlighted-card': isHighlighted(f, j)
-                        }"
-                        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"
-                        pDraggable
-                        (onDragStart)="dragStart($event, f, j)"
-                        (onDragEnd)="dragEnd()"></div>
-                    </div>
-                </div>
-                <div class="solitaire-deck-container flex-auto flex flex-row flex-nowrap justify-content-end gap-4">
-                    <div class="solitaire-card-stack"
-                    [ngClass]="{
-                        'deck-waste-spread-1': board.deckWaste.length < 2,
-                        'deck-waste-spread-2': board.deckWaste.length == 2,
-                        'deck-waste-spread-3': board.deckWaste.length > 2,
-                        
-                    }">
-                        <div  class="solitaire-card bg-card-placeholder"></div>
-                        <div class="solitaire-card"
-                        *ngFor="let cardId of board.deckWaste; let i = index"
-                        [ngClass]="{
-                            'highlighted-card': isHighlighted(board.deckWaste, i),
-                            'non-interactable': i !== board.deckWaste.length - 1
-                        }"
-                        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"
-                        pDraggable
-                        (onDragStart)="dragStart($event, board.deckWaste, i)"
-                        (onDragEnd)="dragEnd()"></div>
-                    </div>
-                    <div class="solitaire-card"
-                    (click)="drawCards()"
-                    [ngClass]="{                        
-                        'highlighted-card': isHighlighted_deck(),
-                        'bg-card-back': board.deckStock.length != 0,
-                        'bg-card-placeholder': board.deckStock.length == 0
-                    }"></div>
-                </div>
-            </div>
-            <div class="solitaire-tableau-container flex-auto flex flex-row justify-content-evenly align-items-start overflow-hidden gap-2">
-                <div *ngFor="let tab of board.tableau" pDroppable (onDrop)="dropOnTableau(tab)">
-                    <div class="solitaire-card bg-card-tableau-placeholder" [ngClass]="{
-                        'highlighted-card': isHighlighted_placeholder(tab)
-                    }"></div>
-                    <div class="solitaire-card"
-                    *ngFor="let cardId of tab; let i = index"
-                    [ngClass]="{
-                        'tableau-stack-element': i !== 0 && tab.length < 13,
-                        'tableau-stack-element-compact-1': i !== 0 && tab.length == 13,
-                        'tableau-stack-element-compact-2': i !== 0 && tab.length == 14,
-                        'tableau-stack-element-compact-3': i !== 0 && tab.length == 15,
-                        'tableau-stack-element-compact-4': i !== 0 && tab.length == 16,
-                        'tableau-stack-element-compact-5': i !== 0 && tab.length == 17,
-                        'tableau-stack-element-compact-6': i !== 0 && tab.length == 18,
-                        'tableau-stack-element-compact-7': i !== 0 && tab.length > 18,
-                        'non-interactable': !(cards[cardId].movable),
-                        'highlighted-card': isHighlighted(tab, i)    
-                    }"
-                    [ngStyle]="{'background-image': (cards[cardId].faceShown)? 'url(/assets/cards/'+ cards[cardId].picture +'.svg)' : 'url(/assets/cards/back_0.svg'}"
-                    pDraggable
-                    (onDragStart)="dragStart($event, tab, i)"
-                    (onDragEnd)="dragEnd()"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div  *ngIf="cards && board" id="card-stack-dragged">
-        <div class="solitaire-card"
-        *ngFor="let cardId of draggedCards; let i = index" 
-        [ngClass]="{
-            'tableau-stack-element': i !== 0 && draggedCardsOrigin!.length < 13,
-            'tableau-stack-element-compact-1': i !== 0 && draggedCardsOrigin!.length == 13,
-            'tableau-stack-element-compact-2': i !== 0 && draggedCardsOrigin!.length == 14,
-            'tableau-stack-element-compact-3': i !== 0 && draggedCardsOrigin!.length == 15,
-            'tableau-stack-element-compact-4': i !== 0 && draggedCardsOrigin!.length == 16,
-            'tableau-stack-element-compact-5': i !== 0 && draggedCardsOrigin!.length == 17,
-            'tableau-stack-element-compact-6': i !== 0 && draggedCardsOrigin!.length == 18,
-            'tableau-stack-element-compact-7': i !== 0 && draggedCardsOrigin!.length > 18
-        }"
-        [ngStyle]="{'background-image': 'url(/assets/cards/'+ cards[cardId].picture +'.svg)'}"></div>
-    </div>
-    <app-bottom-bar (hint)="showHints()"></app-bottom-bar>
-    <div id="ghost-image"></div>        
-</div> -->
-
-
-
-<!-- <p-toolbar styleClass="bg-black-alpha-20 border-transparent border-none">
-    <div class="bottom-bar-group-start"></div>
-    <div class="bottom-bar-group-center center-button-div">
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_toggleNewGameDialog()">New game</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_toggleRestartGameDialog()">Restart game</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_toggleChangeDifficultyDialog()">Change difficulty</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_showHint()">Show hint</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_undo()" [disabled]="!(undoAvailable$ | async)">Undo</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_toggleEndGameDialog()">Fake game end</p-button>
-
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerStart()">Start</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerPause()">Pause</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerReset()">Reset</p-button>
-        <p-button class="mr-2" [outlined]="true" (onClick)="pressed_timerShowTime()">Get value</p-button>
-    </div>
-    <div class="bottom-bar-group-end"></div>
-</p-toolbar>
-
-<p-dialog draggable="false" resizable="false" modal="true" closeOnEscape="true" dismissableMask="true" closable="false"
-[(visible)]="showNewGameDialog"
-[header]="'End game in progress?'">
-    <div>
-        <p-button [label]="'Start new game'" severity="primary" (onClick)="pressed_startNewGameButton()" class="mr-2"></p-button>
-        <p-button label="Cancel" severity="secondary" (onClick)="pressed_toggleNewGameDialog()"></p-button>
-    </div>
-</p-dialog>
-
-<p-dialog draggable="false" resizable="false" modal="true" closeOnEscape="true" dismissableMask="true" closable="false"
-[(visible)]="showRestartGameDialog"
-[header]="'End game in progress?'">
-    <div>
-        <p-button [label]="'Restart'" severity="primary" (onClick)="pressed_restartGameButton()" class="mr-2"></p-button>
-        <p-button label="Cancel" severity="secondary" (onClick)="pressed_toggleRestartGameDialog()"></p-button>
-    </div>
-</p-dialog>
-
-<p-dialog draggable="false" resizable="false" modal="true" closeOnEscape="true" dismissableMask="true" closable="false"
-[(visible)]="showChangeDifficultyDialog"
-[header]="'End game in progress?'">
-    <div>
-        <p-button [label]="'Change difficulty'" severity="primary" (onClick)="pressed_changeDifficultyButton()" class="mr-2"></p-button>
-        <p-button label="Cancel" severity="secondary" (onClick)="pressed_toggleChangeDifficultyDialog()"></p-button>
-    </div>
-</p-dialog>
-
-<p-dialog draggable="false" resizable="false" modal="true" closeOnEscape="false" dismissableMask="false" closable="false"
-[(visible)]="showGameEndDialog">
-[header]="'Congratulations!'"
-    <div>
-        All cards are in their place!<br>
-        <br>
-        Score:<br>
-        Time:<br>
-        Level:<br>
-        Games played:<br>
-        <br>
-        <p-button label="Play again" (onClick)="pressed_startNewGameButton()" class="mr-2"></p-button>
-        <p-button label="Exit" (onClick)="pressed_navigateHome()"></p-button>
-    </div>
-</p-dialog> -->

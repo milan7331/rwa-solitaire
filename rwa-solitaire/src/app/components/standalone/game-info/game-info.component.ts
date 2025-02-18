@@ -4,7 +4,8 @@ import { Component } from '@angular/core';
   selector: 'app-game-info',
   imports: [],
   templateUrl: './game-info.component.html',
-  styleUrl: './game-info.component.scss'
+  styleUrl: './game-info.component.scss',
+  standalone: true
 })
 export class GameInfoComponent {
 
