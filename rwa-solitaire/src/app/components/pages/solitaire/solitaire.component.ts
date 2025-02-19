@@ -18,6 +18,7 @@ import { ThemeService } from '../../../services/theme/theme.service';
 
 import { Card} from '../../../models/solitaire/card';
 import { SolitaireBoard } from '../../../models/solitaire/solitaire-board';
+import { SolitaireMove } from '../../../models/solitaire/solitaire-move';
 import { SolitaireHints } from '../../../models/solitaire/solitaire-hints';
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 
@@ -113,44 +114,30 @@ export class SolitaireComponent implements OnInit, OnDestroy {
     if (this.hints === undefined) return;
 
     this.hints = this.hintService.hideHints(this.hints);
-
-    const highlightedCardStacks = document.querySelectorAll(".highlighted-card-stack");
-    const highlightedCards = document.querySelectorAll(".highlighted-card-single");
-
-    highlightedCardStacks.forEach((el) => { el.classList.remove("highlighted-card-stack"); });
-    highlightedCards.forEach((el) => { el.classList.remove("highlighted-card-single"); });
   }
 
-  // public isHighlighted(containingStack: Card[], elementIndex: number): boolean {
-  //   if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
-  //   if (!this.hints.moves[this.hints.hintIndex]) return false;
+  isHighlighted(containingStack: Card[], elementIndex: number): boolean {
+    if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
+    if (!this.hints.moves[this.hints.hintIndex]) return false;
     
-  //   let selectedHint: SolitaireMove = this.hints.moves[this.hints.hintIndex];
+    let selectedHint: SolitaireMove = this.hints.moves[this.hints.hintIndex];
     
-  //   // source highlight
-  //   if (selectedHint.source === containingStack && selectedHint.sourceIndex === elementIndex) return true;
+    // source highlight
+    if (selectedHint.source === containingStack && selectedHint.sourceIndex === elementIndex) return true;
     
-  //   // dest highlight
-  //   if (selectedHint.dest === containingStack && containingStack.length - 1 === elementIndex) return true;
+    // dest highlight
+    if (selectedHint.dest === containingStack && containingStack.length - 1 === elementIndex) return true;
 
-  //   return false;
-  // }
+    // placeholder highlight !!! elementIndex needs to be -1 for this case !!!
+    if (selectedHint.dest === containingStack && containingStack.length === 0 && elementIndex === -1) return true;
 
-  // public isHighlighted_deck(): boolean {
-  //   if (!this.hints.hintVisible) return false;
-  //   return this.hints.cycleDeck;
-  // }
+    return false;
+  }
 
-  // public isHighlighted_placeholder(containingStack: Card[]): boolean {
-  //   if (this.hints.hintIndex < 0 || !this.hints.hintVisible) return false;
-  //   if (!this.hints.moves[this.hints.hintIndex]) return false;
-  
-  //   let selectedHint: SolitaireMove = this.hints.moves[this.hints.hintIndex];
-  
-  //   // placeholder highlight
-  //   return selectedHint.dest === containingStack && containingStack.length === 0;
-    
-  // }
+  isHighlighted_deck(): boolean {
+    if (!this.hints.hintVisible) return false;
+    return this.hints.cycleDeck;
+  }
 
   getClickOffset(event: MouseEvent): void {
     if (!event) this.#clickOffset = { x: 0, y: 0 };
@@ -166,9 +153,9 @@ export class SolitaireComponent implements OnInit, OnDestroy {
   
   dragStart(arrayToHide?: Card[], index?: number) {
     if (!this.board) return;
-    this.audioService.play_cardPickUp();
     
-    // this.hideHints();
+    this.hideHints();
+    this.audioService.play_cardPickUp();
     
     const container: HTMLElement | null = document.querySelector(".cdk-drag-preview");
     if (container) { container.style.overflow = 'visible'; }

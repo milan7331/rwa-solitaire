@@ -8,12 +8,6 @@ export const selectAudioControlVisibility = createSelector(
     (visibility) => visibility.showAudioControl
 )
 
-// ne koristi se??????
-export const selectHintVisibility = createSelector(
-    selectComponentVisibility,
-    (visibility) => visibility.showHint
-)
-
 // treba implementirati
 export const selectAboutPageVisibility = createSelector(
     selectComponentVisibility,

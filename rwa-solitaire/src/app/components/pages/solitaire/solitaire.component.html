@@ -12,9 +12,9 @@
             <div class="foundation">
                 @for (fnd of board.foundation; track $index; let fndIndex = $index) {
                     <div cdkDropList (cdkDropListDropped)="dropOnFoundation($event)" [cdkDropListData]="fnd" [cdkDropListSortingDisabled]="true" class="card-stack-foundation">   
-                        <div class="card" [style.background-image]="getFoundationBg(fndIndex)"></div>
+                        <div class="card" [ngClass]="{ 'highlighted-card': isHighlighted(fnd, -1) }" [style.background-image]="getFoundationBg(fndIndex)"></div>
                         @for (card of fnd; track card.id; let index = $index) {
-                            <div cdkDrag (mousedown)="getClickOffset($event)" (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
+                            <div cdkDrag (mousedown)="getClickOffset($event)" (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" class="card" [ngClass]="{ 'highlighted-card': isHighlighted(fnd, index) }" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
                                 <ng-template cdkDragPreview>
                                     <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: [card]}"></ng-container>
                                 </ng-template>
@@ -27,9 +27,9 @@
             <div class="deck-container">
                 <div class="card" (click)="drawCards()" [class.card-back]="board.deckStock.length > 0"></div>
                 <div cdkDropList [cdkDropListData]="board.deckWaste" [cdkDropListSortingDisabled]="true" class="card-stack-foundation waste-stack">
-                    <div class="card"></div>
+                    <div class="card" [ngClass]="{ 'highlighted-card': isHighlighted(board.deckWaste, -1) }"></div>
                     @for (card of board.deckWaste; track card.id; let index = $index; let count = $count) {
-                        <div cdkDrag (mousedown)="getClickOffset($event)" (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="index + 1 !== count" class="card" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
+                        <div cdkDrag (mousedown)="getClickOffset($event)" (cdkDragStarted)="dragStart()" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="index + 1 !== count" class="card" [ngClass]="{ 'highlighted-card': isHighlighted(board.deckWaste, index) }" [style.background-image]="'url(/cards/' + card.picture + '.svg'">
                             <ng-template cdkDragPreview>
                                 <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: [card]}"></ng-container>
                             </ng-template>
@@ -47,10 +47,10 @@
         <div class="right-container">
             @for (tab of board.tableau; track $index) {
                 <div cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="dropOnTableau($event)" [cdkDropListData]="tab" class="card-stack card-stack-tableau" [style.--total-cards]="tab.length">
-                    <div class="card"></div>
+                    <div class="card" [ngClass]="{ 'highlighted-card': isHighlighted(tab, -1) }"></div>
                     @for (card of tab; track card.id; let index = $index) {
                         @if (tab !== hiddenCards || index < hiddenCardsIndex) {
-                            <div cdkDrag (mousedown)="getClickOffset($event)"  (cdkDragStarted)="dragStart(tab, index)" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="(!card.faceShown || !card.movable)" class="card" [ngStyle]="{'background-image': (card.faceShown && card.movable) ? 'url(/cards/' + card.picture + '.svg)' : 'var(--card-back)'}">
+                            <div cdkDrag (mousedown)="getClickOffset($event)"  (cdkDragStarted)="dragStart(tab, index)" (cdkDragReleased)="dragRelease()" [cdkDragDisabled]="(!card.faceShown || !card.movable)" class="card" [ngClass]="{ 'highlighted-card': isHighlighted(tab, index) }" [ngStyle]="{'background-image': (card.faceShown && card.movable) ? 'url(/cards/' + card.picture + '.svg)' : 'var(--card-back)'}">
                                 <ng-template cdkDragPreview>    
                                     <ng-container [ngTemplateOutlet]="cardStackDragPreview" [ngTemplateOutletContext]="{cards: tab.slice(index)}"></ng-container>
                                 </ng-template>

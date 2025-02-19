@@ -1,3 +1,3 @@
-<div>Time: 00:00s</div>
-<div>Moves: 0</div>
-<div>Difficulty: Hard</div>
+<div>Time: {{ formattedTime$ | async }}</div>
+<div>Moves: {{ currentMove$ | async }}</div>
+<div>Difficulty: {{ difficulty[(gameDifficulty$ | async)!] }}</div>

@@ -7,8 +7,6 @@ export const visibilityActions = createActionGroup({
         'Hide audio controls': emptyProps(),
         'Toggle audio controls': emptyProps(),
 
-        'Show hint': emptyProps(),
-
         'Show about page': emptyProps(),
         'Hide about page': emptyProps(),
         'Toggle about page': emptyProps()

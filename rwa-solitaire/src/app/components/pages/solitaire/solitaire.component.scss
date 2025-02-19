@@ -146,17 +146,11 @@
 }
 
 .highlighted-card {
-    box-shadow: 0 0 0.5vh 0.25vh gold inset;
-    border-radius: 0.8vh;
+    box-shadow: 0 0 0.5vh 0.5vh gold inset;
 
     ~ * {
-        box-shadow: 0 0 0.5vh 0.25vh gold inset;
-        border-radius: 0.8vh;
+        box-shadow: 0 0 0.5vh 0.5vh gold inset;
     }
-}
-
-.non-interactable {
-    pointer-events: none;
 }
 
 .card-back {

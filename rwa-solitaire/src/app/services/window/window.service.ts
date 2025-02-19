@@ -16,8 +16,8 @@ export class WindowService implements OnDestroy {
     y: 0
   });
   
-  public windowSize$ = this.#windowSize.asObservable();
-  public cursorPosition$ = this.#cursorPosition.asObservable();
+  windowSize$ = this.#windowSize.asObservable();
+  cursorPosition$ = this.#cursorPosition.asObservable();
 
   constructor() {
     this.#initialize();

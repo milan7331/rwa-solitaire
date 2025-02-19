@@ -20,17 +20,24 @@ export const selectGameDifficultyState = createSelector(
     (state: SolitaireState) => state.difficulty
 )
 
-const { selectTotal: selectBoardsTotal } = boardAdapter.getSelectors(selectBoardsState);
-
 export const selectBoard = createSelector(
     selectBoardsState,
     (boards) => {
         const { ids, entities } = boards;
-
+        
         const lastId = (ids.length >= 0) ? ids.at(-1) : undefined;
         return (lastId !== undefined) ? entities[lastId] : undefined;
     }
 );
+
+export const selectCurrentMoveNumber = createSelector(
+    selectBoard,
+    (board) => {
+        return (board !== undefined) ? board.moveNumber : 0;
+    }
+);
+
+const { selectTotal: selectBoardsTotal } = boardAdapter.getSelectors(selectBoardsState);
 
 export const selectUndoAvailability = createSelector(
     selectBoardsTotal,
