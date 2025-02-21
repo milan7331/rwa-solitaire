@@ -14,7 +14,6 @@ import { HashService } from './hash.service';
 
 @Module({
   imports: [
-    // PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

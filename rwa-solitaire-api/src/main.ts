@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -9,8 +10,10 @@ async function bootstrap() {
     origin: [
       'http://localhost:4200',
       'https://localhost:4200'
-    ]
+    ],
+    credentials: true
   });
+  app.use(cookieParser());
   app.use(helmet());
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT ?? 3000);

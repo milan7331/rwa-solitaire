@@ -1,5 +1,5 @@
-import { Controller, Post, Request, UseGuards, HttpCode, HttpStatus, Get } from '@nestjs/common';
-import { Request as ExpressRequest} from 'express';
+import { Controller, Post, Req, UseGuards, HttpCode, HttpStatus, Get, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { Public } from './auth.decorators';
@@ -12,18 +12,16 @@ export class AuthController {
     @Public()
     @UseGuards(LocalAuthGuard)
     @Post('login')
-    async login(@Request() req: ExpressRequest) {
-        return this.authService.login(req.user);
+    async login(
+        @Req() req: Request,
+        @Res({ passthrough: true}) res: Response
+    ) {
+        return this.authService.login(req, res);
     }
 
-
-    // delete later
     @Public()
-    @Get('test')
+    @Get()
     async test() {
-        return {
-            statusCode: HttpStatus.OK,
-            message: 'API works as intended'
-        }
+        return { message: 'API works as intended' };
     }
 }
