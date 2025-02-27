@@ -4,17 +4,22 @@
     border-radius: 12px;
     overflow: hidden;
 
-    .home-card {
+    .login-card {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 2;
         max-width: 40rem;
+        min-width: 20rem;
     }
 
     mat-card-content {
         text-align: center;
+
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
 
         .title {
             font: var(--mat-sys-display-large)
@@ -24,17 +29,6 @@
             font: var(--mat-sys-label-large);
             font-weight: 900;
             
-        }
-    }
-
-    .quick-play {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        justify-content: center;
-        align-items: baseline;
-        * {
-            margin: 8px 8px;
         }
     }
 }

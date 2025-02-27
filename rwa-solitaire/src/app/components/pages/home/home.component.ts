@@ -1,15 +1,13 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { Router } from '@angular/router';
 import { AudioService } from '../../../services/audio/audio.service';
-import { WindowService } from '../../../services/window/window.service';
+import { BgAnimationComponent } from "../../standalone/bg-animation/bg-animation.component";
 
 @Component({
   selector: 'app-home',
@@ -17,83 +15,23 @@ import { WindowService } from '../../../services/window/window.service';
     CommonModule,
     MatCardModule,
     MatButtonModule,
-    MatListModule,
     MatIconModule,
-  ],
+    BgAnimationComponent
+],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   standalone: true
 })
-export class HomeComponent implements OnInit, AfterViewInit, OnDestroy{
-  destroy$ = new Subject<void>();
+export class HomeComponent {
   difficulty = SolitaireDifficulty;
-  
-  // Note: background animations are set to work with fixed dimensions -> font-size 30px & 60 px margin
-  suits = '♠♥♦♣';
-  bgElements: string = '';
-  bgElementCount: { x: number, y: number } = { x: 40, y: 30 };
   
   constructor(
     private readonly router: Router,
     private readonly audio: AudioService,
-    private readonly winService: WindowService
   ) { }
-
-  ngOnInit(): void {
-    this.winService.windowSize$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((win) => {
-        this.bgElementCount = this.#getBgElementCount(win.width, win.height);
-        this.bgElements = this.#fillBgElementsArray(this.bgElementCount);
-      });
-    }
-    
-    ngAfterViewInit(): void {
-    this.#setRandomAnimationTimings();
-  }
-
-  #getBgElementCount(x: number, y: number): { x: number, y: number } {
-    if (x < 300 || y < 200) return { x:40, y:30 };
-
-    let xNum = Math.floor((x - 120) / 150);
-    if (xNum % 4 === 0) xNum++;
-    let yNum = Math.floor((y - 120) / 150);
-    if (yNum % 4 === 0) yNum++;
-
-    return { x:xNum, y:yNum }
-  }
-
-  #fillBgElementsArray(elementCount: {x: number, y: number}): string {
-    const result = Math.floor((elementCount.x * elementCount.y) / 4);
-    const rest = (elementCount.x * elementCount.y) % 4;
-
-    this.bgElements = this.suits.repeat(result);
-    this.bgElements = this.bgElements.concat(this.suits.slice(0, rest));
-
-    return this.bgElements;
-  }
-
-  #setRandomAnimationTimings() {
-    const elements = document.querySelectorAll<HTMLElement>('div.bg-element');
-
-    elements.forEach(el => {
-      const element = el as HTMLElement;
-
-      const duration = Math.floor(Math.random() * 35) + 5;
-      const delay = Math.floor(Math.random() * (duration * 0.8));
-
-      element.style.animationDuration = duration + 's';
-      element.style.animationDelay = '-' + delay + 's';
-    })
-  }
-  
+ 
   loadSolitairePage(difficulty: SolitaireDifficulty) {
     this.router.navigate(['/solitaire'], { state: {difficulty} });
     this.audio.play_buttonPress();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
