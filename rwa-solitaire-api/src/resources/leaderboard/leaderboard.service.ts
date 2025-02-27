@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -21,7 +21,8 @@ import { Leaderboard } from "./entities/leaderboard.entity";
 export class LeaderboardService {
   
   constructor(
-    @Inject(forwardRef(() => GameHistoryService)) private readonly historyService: GameHistoryService,
+    @Inject(forwardRef(() => GameHistoryService))
+    private readonly historyService: GameHistoryService,
 
     @InjectRepository(WeeklyLeaderboard)
     private readonly weeklyRepository: Repository<WeeklyLeaderboard>,
@@ -31,14 +32,15 @@ export class LeaderboardService {
     
     @InjectRepository(YearlyLeaderboard)
     private readonly yearlyRepository: Repository<YearlyLeaderboard>
-  ) { }
+  ) {}
 
   // method inserts new row or updates ongoing one. Used in the cron service
   async leaderboardRefresh(type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard): Promise<boolean> {
     const [allGames, timePeriod] =
       type === WeeklyLeaderboard ? await this.historyService.getAllGamesFromThisWeek() :
       type === MonthlyLeaderboard ? await this.historyService.getAllGamesFromThisMonth() :
-      type === YearlyLeaderboard ? await this.historyService.getAllGamesFromThisYear() : [[], new Date()];
+      type === YearlyLeaderboard ? await this.historyService.getAllGamesFromThisYear() :
+      [[], new Date()];
       if (allGames.length <= 0) return false;
 
     const userData = this.prepareUserData(allGames);
@@ -52,20 +54,22 @@ export class LeaderboardService {
     const { type, take, page } = getDto;
     
     const repo = this.getRepository(type);
-    const pageCount = await this.getLeaderboardPageCount(repo);
-
+    
     return this.getLeaderboardPages(repo, take, page);
   }
-
+  
   async getLeaderboardPageCount(repo: Repository<Leaderboard>): Promise<number> {
     return await repo.count();
   }
-
+  
   async getLeaderboardPages(repo: Repository<Leaderboard>, take: number = 10, page: number = 1): Promise<Leaderboard[]> {
     if (!repo || take < 1) throw new BadRequestException('Invalid parameters!');
+    
+    const pageCount = await this.getLeaderboardPageCount(repo);
 
     // pages are not zero based!
-    const realPage = (!page || page < 1) ? 1 : page;
+    let realPage = (!page || page < 1) ? 1 : page;
+    if (realPage > pageCount) realPage = pageCount;
 
     try {
       const result = await repo.find({
@@ -83,7 +87,7 @@ export class LeaderboardService {
   }
 
   async create(createDto: CreateLeaderboardDto): Promise<boolean> {
-    const { type, timePeriod, ...rest } = createDto;
+    const { type, timePeriod } = createDto;
     if (!type || !timePeriod) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindLeaderboardDto = {

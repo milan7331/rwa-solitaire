@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, Max, Min } from "class-validator";
+import { IsNumber, IsOptional, Max, Min } from "class-validator";
 import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
 import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";

@@ -1,9 +1,7 @@
 import { SavedGame } from 'src/resources/saved-game/entities/saved-game.entity';
 import { GameHistory } from 'src/resources/game-history/entities/game-history.entity';
 import { UserStats } from 'src/resources/user-stats/entities/user-stats.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ColumnOptions, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { HashService } from 'src/auth/hash.service';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity()
 export class User {

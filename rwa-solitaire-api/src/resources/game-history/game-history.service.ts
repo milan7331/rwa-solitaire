@@ -182,7 +182,7 @@ export class GameHistoryService {
   }
 
   async update(updateDto: UpdateGameHistoryDto): Promise<boolean> {
-    const { id, user, startedTime, ...rest } = updateDto;
+    const { id, user, startedTime } = updateDto;
     if (!id && (!startedTime || user)) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindGameHistoryDto = {

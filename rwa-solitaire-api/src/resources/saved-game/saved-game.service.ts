@@ -83,7 +83,7 @@ export class SavedGameService {
   }
 
   async upsert(upsertDto: UpdateSavedGameDto): Promise<boolean> {
-    const { id, user, gameState } = upsertDto;
+    const { id, user } = upsertDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
     try {
@@ -97,7 +97,7 @@ export class SavedGameService {
   }
 
   async update(updateDto: UpdateSavedGameDto): Promise<boolean> {
-    const { id, user, gameState } = updateDto;
+    const { id, user } = updateDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
     const findDto: FindSavedGameDto = {

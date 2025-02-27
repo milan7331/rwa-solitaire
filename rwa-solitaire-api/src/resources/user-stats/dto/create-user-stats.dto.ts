@@ -1,4 +1,4 @@
-import { IsNotEmpty, isNumber, IsNumber, IsOptional, Max, Min } from "class-validator";
+import { IsNotEmpty, IsNumber, Max, Min } from "class-validator";
 import { User } from "src/resources/user/entities/user.entity";
 import { POSTGRES_MAX_INTEGER } from "src/util/postgres-constants";
 

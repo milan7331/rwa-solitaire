@@ -1,5 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateGameHistoryDto } from './create-game-history.dto';
 import { SolitaireDifficulty } from '../entities/game-history.entity';
 import { User } from 'src/resources/user/entities/user.entity';
 import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';

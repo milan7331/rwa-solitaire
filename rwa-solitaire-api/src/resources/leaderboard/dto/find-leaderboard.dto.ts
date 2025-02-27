@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsNumber, IsOptional } from "class-validator"
+import { IsBoolean, IsDate, IsNumber } from "class-validator"
 import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
 import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
 import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";

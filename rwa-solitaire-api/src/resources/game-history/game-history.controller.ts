@@ -15,7 +15,7 @@ export class GameHistoryController {
   @Post('start_game')
   @Post('start')
   async startGame(@Body() startDto: CreateGameHistoryDto) {
-    const result = await this.gameHistoryService.startGame(startDto);
+    await this.gameHistoryService.startGame(startDto);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -27,7 +27,7 @@ export class GameHistoryController {
   @Patch('end_game')
   @Patch('end')
   async endGame(@Body() updateDto: UpdateGameHistoryDto) {
-    const result = await this.gameHistoryService.endGame(updateDto);
+    await this.gameHistoryService.endGame(updateDto);
     
     return {
       statusCode: HttpStatus.OK,

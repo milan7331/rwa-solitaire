@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus } from '@nestjs/common';
 import { SavedGameService } from './saved-game.service';
 import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';

@@ -1,4 +1,4 @@
-import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import { IsArray, IsDate, IsNotEmpty } from "class-validator";
 import { UserData } from "../entities/userdata";
 import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
 import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
