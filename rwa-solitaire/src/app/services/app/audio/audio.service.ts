@@ -2,9 +2,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store'
 
-import { SolitaireDifficulty } from '../../models/solitaire/solitaire-difficulty';
-import { SolitaireBoard } from '../../models/solitaire/solitaire-board';
-import { selectAudioMuted, selectAudioVolume } from '../../store/selectors/audio.selectors';
+import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
+import { SolitaireBoard } from '../../../models/solitaire/solitaire-board';
+import { selectAudioMuted, selectAudioVolume } from '../../../store/selectors/audio.selectors';
 
 @Injectable({
   providedIn: 'root'

@@ -5,8 +5,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-import { AudioService } from '../../../services/audio/audio.service';
-import { ThemeService } from '../../../services/theme/theme.service';
+import { AudioService } from '../../../services/app/audio/audio.service';
+import { ThemeService } from '../../../services/app/theme/theme.service';
 import { AboutComponent } from '../about/about.component';
 import { Router } from '@angular/router';
 

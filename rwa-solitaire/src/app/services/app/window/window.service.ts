@@ -1,25 +1,27 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, debounceTime, fromEvent, Observable, Subject, takeUntil } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WindowService implements OnDestroy {
-  #destroy$ = new Subject<void>();
-
-  #windowSize = new BehaviorSubject<{ width: number; height: number }>({
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
-  #cursorPosition = new BehaviorSubject<{ x: number, y: number }>({
-    x: 0,
-    y: 0
-  });
+  #destroy$: Subject<void>;
   
-  windowSize$ = this.#windowSize.asObservable();
-  cursorPosition$ = this.#cursorPosition.asObservable();
+  #windowSize: BehaviorSubject<{ width: number; height: number }>;
+  #cursorPosition: BehaviorSubject<{ x: number, y: number }>;
+  
+  windowSize$: Observable<{ width: number; height: number }>;
+  cursorPosition$: Observable<{ x: number, y: number }>;
 
   constructor() {
+    this.#destroy$ = new Subject<void>();
+
+    this.#windowSize = new BehaviorSubject({ width: window.innerWidth, height: window.innerHeight });
+    this.#cursorPosition = new BehaviorSubject({ x: 0, y: 0 });
+
+    this.windowSize$ = this.#windowSize.asObservable();
+    this.cursorPosition$ = this.#cursorPosition.asObservable();
+  
     this.#initialize();
   }
 

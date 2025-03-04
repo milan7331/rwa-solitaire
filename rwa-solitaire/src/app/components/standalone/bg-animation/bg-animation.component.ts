@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { WindowService } from '../../../services/window/window.service';
+import { WindowService } from '../../../services/app/window/window.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

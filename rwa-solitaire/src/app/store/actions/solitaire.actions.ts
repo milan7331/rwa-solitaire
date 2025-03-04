@@ -1,6 +1,6 @@
 import { createActionGroup, emptyProps, props } from "@ngrx/store";
 import { SolitaireDifficulty } from "../../models/solitaire/solitaire-difficulty";
-import { Card, CardSuit } from "../../models/solitaire/card";
+import { Card } from "../../models/solitaire/card";
 
 export const solitaireActions = createActionGroup({
     source: "Solitaire game",

@@ -11,10 +11,10 @@ import { Subject, takeUntil, filter } from 'rxjs';
 import { selectBoard } from '../../../store/selectors/solitaire.selectors';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
 
-import { AudioService } from '../../../services/audio/audio.service';
-import { HintService } from '../../../services/hint/hint.service';
-import { TimerService } from '../../../services/timer/timer.service';
-import { ThemeService } from '../../../services/theme/theme.service';
+import { AudioService } from '../../../services/app/audio/audio.service';
+import { HintService } from '../../../services/game/hint/hint.service';
+import { TimerService } from '../../../services/game/timer/timer.service';
+import { ThemeService } from '../../../services/app/theme/theme.service';
 
 import { Card} from '../../../models/solitaire/card';
 import { SolitaireBoard } from '../../../models/solitaire/solitaire-board';

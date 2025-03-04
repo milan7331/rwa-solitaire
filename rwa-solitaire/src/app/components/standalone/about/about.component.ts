@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { AudioService } from '../../../services/audio/audio.service';
+import { AudioService } from '../../../services/app/audio/audio.service';
 import { Location } from '@angular/common';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { TimerService } from '../../../services/timer/timer.service';
+import { TimerService } from '../../../services/game/timer/timer.service';
 import { Observable, of } from 'rxjs';
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { selectCurrentMoveNumber, selectGameDifficultyState } from '../../../store/selectors/solitaire.selectors';

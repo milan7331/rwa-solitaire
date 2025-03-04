@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { Router } from '@angular/router';
-import { AudioService } from '../../../services/audio/audio.service';
+import { AudioService } from '../../../services/app/audio/audio.service';
 import { BgAnimationComponent } from "../../standalone/bg-animation/bg-animation.component";
 
 @Component({
