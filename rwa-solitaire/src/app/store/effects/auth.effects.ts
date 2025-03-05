@@ -25,4 +25,33 @@ export class AuthEffects {
             })
         );
     });
+
+    logout$ = createEffect(() => {
+        return this.actions$.pipe(
+            ofType(AuthActions.logout),
+            exhaustMap(() => {
+                return this.authService.logout().pipe(
+                    map(response => {
+                        if (response) return AuthActions.logoutSuccess();
+                        return AuthActions.logoutFailure({ message: 'Logout failed!' });
+                    }),
+                    catchError(error => of(AuthActions.logoutFailure({ message: error.message })))
+                );
+            })
+        );
+    });
+
+    validateSession$ = createEffect(() => {
+        return this.actions$.pipe(
+            ofType(AuthActions.validateSession),
+            exhaustMap(() => {
+                return this.authService.validateSession().pipe(
+                    map(response => {
+                        if (response) return AuthActions.logInSuccess();
+                        return AuthActions.logout(); // jwt cleanup
+                    })
+                )
+            })
+        )
+    })
 }

@@ -4,10 +4,12 @@ import { audioReducer } from "./audio.reducer";
 import { visibilityReducer } from "./visibility.reducer";
 import { solitaireReducer } from "./solitaire.reducer";
 import { userReducer } from "./user.reducer";
+import { AuthReducer } from "./auth.reducer";
 
 export const rootReducer: ActionReducerMap<AppState> = {
     audioState: audioReducer,
     visibilityState: visibilityReducer,
     solitaireState: solitaireReducer,
     userState: userReducer,
+    authState: AuthReducer,
 }

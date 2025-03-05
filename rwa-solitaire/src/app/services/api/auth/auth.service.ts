@@ -22,4 +22,24 @@ export class AuthService {
       })
     );
   }
+
+  logout(): Observable<boolean> {
+    const url = this.#apiUrl + '/logout';
+
+    return this.http.post(url, {}, { withCredentials: true, observe: 'response' }).pipe(
+      map(response => {
+        return response.ok;
+      })
+    );
+  }
+
+  validateSession(): Observable<boolean> {
+    const url = this.#apiUrl + '/validate-session';
+
+    return this.http.post(url, {}, { withCredentials: true, observe: 'response' }).pipe(
+      map(response => {
+        return response.ok
+      })
+    );
+  }
 }

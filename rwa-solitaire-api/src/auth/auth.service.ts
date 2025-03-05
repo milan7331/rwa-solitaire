@@ -47,7 +47,18 @@ export class AuthService {
             path: '/'
         });
 
-        res.statusCode = 200;
+        res.status(200);
+    }
 
+    async logout(res: Response): Promise<void> {
+        res.cookie('token', '', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000,
+            path: '/'
+        });
+
+        res.status(200);
     }
 }
