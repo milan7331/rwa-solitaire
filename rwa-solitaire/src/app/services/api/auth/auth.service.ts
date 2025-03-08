@@ -14,9 +14,9 @@ export class AuthService {
 
   login(username: string, password: string): Observable<boolean> {
     const url = this.#apiUrl + '/login';
-    const loginData = { username, password };
+    const data = { username, password };
 
-    return this.http.post(url, loginData, { withCredentials: true, observe: 'response' }).pipe(
+    return this.http.post(url, data, { withCredentials: true, observe: 'response' }).pipe(
       map(response => {
         return response.ok;
       })

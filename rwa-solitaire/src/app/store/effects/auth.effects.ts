@@ -1,4 +1,3 @@
-import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthActions } from '../actions/auth.actions';
 import { catchError, exhaustMap, map, of } from 'rxjs';
@@ -18,7 +17,7 @@ export class AuthEffects {
                 return this.authService.login(action.username, action.password).pipe(
                     map(response => {
                         if (response) return AuthActions.logInSuccess();
-                        return AuthActions.logInFailure({ message: 'Login failed'});
+                        return AuthActions.logInFailure({ message: 'Login failed!'});
                     }),
                     catchError(error => of(AuthActions.logInFailure({ message: error.message })))
                 );
@@ -48,6 +47,7 @@ export class AuthEffects {
                 return this.authService.validateSession().pipe(
                     map(response => {
                         if (response) return AuthActions.logInSuccess();
+                        console.log('Session not valid!');
                         return AuthActions.logout(); // jwt cleanup
                     })
                 )
