@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Put, Query } from '@nestjs/common';
 
 import { LeaderboardService } from './leaderboard.service';
 import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
@@ -14,48 +14,6 @@ import { GetLeaderboardDto } from './dto/get-leaderboard.dto';
 export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) { }
 
-  @Get('load-weekly')
-  @Get('load_weekly')
-  async loadWeeklyLeaderboards(@Body() getDto: GetLeaderboardDto) {
-    getDto.type = WeeklyLeaderboard;
-    const result = await this.leaderboardService.loadLeaderboards(getDto);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Weekly leaderboards loaded!',
-      leaderboards: result
-    }
-  }
-
-  @Get('load-monthly')
-  @Get('load_monthly')
-  async loadMonthlyLeaderboards(@Body() getDto: GetLeaderboardDto) {
-    getDto.type = MonthlyLeaderboard;
-    const result = await this.leaderboardService.loadLeaderboards(getDto);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Monthly leaderboards loaded!',
-      leaderboards: result
-    }
-  }
-
-  @Get('load-yearly')
-  @Get('load_yearly')
-  async loadYearlyLeaderboards(@Body() getDto: GetLeaderboardDto) {
-    getDto.type = YearlyLeaderboard;
-    const result = await this.leaderboardService.loadLeaderboards(getDto);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Yearly leaderboards loaded!',
-      leaderboards: result
-    }
-  }
-
-  @Post('refresh')
-  @Post('refresh-leaderboard')
-  @Post('refresh_leaderboard')
   async leaderboardRefresh(type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
     const result = await this.leaderboardService.leaderboardRefresh(type);
     
@@ -69,10 +27,49 @@ export class LeaderboardController {
       message: 'No leaderboards were refreshed'
     }
   }
-  
+
+  @Get('load-weekly')
+  @Get('load_weekly')
+  async loadWeeklyLeaderboards(@Query() getDto: GetLeaderboardDto) {
+    getDto.type = WeeklyLeaderboard;
+    const result = await this.leaderboardService.loadLeaderboards(getDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Weekly leaderboards loaded!',
+      leaderboards: result
+    }
+  }
+
+  @Get('load-monthly')
+  @Get('load_monthly')
+  async loadMonthlyLeaderboards(@Query() getDto: GetLeaderboardDto) {
+    getDto.type = MonthlyLeaderboard;
+    const result = await this.leaderboardService.loadLeaderboards(getDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Monthly leaderboards loaded!',
+      leaderboards: result
+    }
+  }
+
+  @Get('load-yearly')
+  @Get('load_yearly')
+  async loadYearlyLeaderboards(@Query() getDto: GetLeaderboardDto) {
+    getDto.type = YearlyLeaderboard;
+    const result = await this.leaderboardService.loadLeaderboards(getDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Yearly leaderboards loaded!',
+      leaderboards: result
+    }
+  }
+
   @Post('create')
-  async create(@Body() createLeaderboardDto: CreateLeaderboardDto) {
-    await this.leaderboardService.create(createLeaderboardDto);
+  async create(@Body() createDto: CreateLeaderboardDto) {
+    await this.leaderboardService.create(createDto);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -82,7 +79,7 @@ export class LeaderboardController {
 
   @Get('find-all')
   @Get('find_all')
-  async findAll(@Body() type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
+  async findAll(@Query() type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard) {
     const result = await this.leaderboardService.findAll(type, false);
 
     if (result.length > 0) return {
@@ -100,7 +97,7 @@ export class LeaderboardController {
   @Get('find-one')
   @Get('find_one')
   @Get('find')
-  async findOne(@Body() findDto: FindLeaderboardDto) {
+  async findOne(@Query() findDto: FindLeaderboardDto) {
     const result = await this.leaderboardService.findOne(findDto);
 
     if (result !== null) return {
@@ -116,8 +113,8 @@ export class LeaderboardController {
   }
 
   @Put('upsert')
-  async upsert(@Body() updateDto: UpdateLeaderboardDto) {
-    await this.leaderboardService.upsert(updateDto);
+  async upsert(@Body() upsertDto: UpdateLeaderboardDto) {
+    await this.leaderboardService.upsert(upsertDto);
 
     return {
       statusCode: HttpStatus.OK,
@@ -142,7 +139,7 @@ export class LeaderboardController {
 
   @Delete('remove')
   @Delete('delete')
-  async remove(@Body() removeDto: RemoveLeaderboardDto) {
+  async remove(@Query() removeDto: RemoveLeaderboardDto) {
     await this.leaderboardService.remove(removeDto);
 
     return {

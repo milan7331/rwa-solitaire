@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query } from '@nestjs/common';
 import { SavedGameService } from './saved-game.service';
 import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
@@ -10,8 +10,8 @@ export class SavedGameController {
   constructor(private readonly savedGameService: SavedGameService) {}
 
   @Post('create')
-  async create(@Body() createSavedGameDto: CreateSavedGameDto) {
-    await this.savedGameService.create(createSavedGameDto);
+  async create(@Body() createDto: CreateSavedGameDto) {
+    await this.savedGameService.create(createDto);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -40,7 +40,7 @@ export class SavedGameController {
   @Get('find_one')
   @Get('find')
   @Get('load')
-  async findOne(@Body() findDto: FindGameHistoryDto) {
+  async findOne(@Query() findDto: FindGameHistoryDto) {
     const result = await this.savedGameService.findOne(findDto);
 
     if (result !== null) return {
@@ -83,7 +83,7 @@ export class SavedGameController {
 
   @Delete('remove')
   @Delete('delete')
-  async remove(@Body() removeDto: RemoveSavedGameDto) {
+  async remove(@Query() removeDto: RemoveSavedGameDto) {
     await this.savedGameService.remove(removeDto);
 
     return {

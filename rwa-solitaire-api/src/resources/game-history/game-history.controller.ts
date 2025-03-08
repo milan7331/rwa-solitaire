@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query } from '@nestjs/common';
 
 import { User } from '../user/entities/user.entity';
 import { GameHistoryService } from './game-history.service';
@@ -37,7 +37,7 @@ export class GameHistoryController {
 
   @Get('get-all-games-user')
   @Get('get_all_games_user')
-  async getAllGames(@Body() user: User) {
+  async getAllGames(@Query() user: User) {
     const result = await this.gameHistoryService.findAllForUser(user);
     
     if (result.length > 0) return {
@@ -82,7 +82,7 @@ export class GameHistoryController {
   @Get('find-one')
   @Get('find_one')
   @Get('find')
-  async findOne(@Body() findDto: FindGameHistoryDto) {
+  async findOne(@Query() findDto: FindGameHistoryDto) {
     const result = await this.gameHistoryService.findOne(findDto);
 
     if (result !== null) return {
@@ -114,7 +114,7 @@ export class GameHistoryController {
 
   @Delete('remove')
   @Delete('delete')
-  async remove(@Body() removeDto: RemoveGameHistoryDto) {
+  async remove(@Query() removeDto: RemoveGameHistoryDto) {
     await this.gameHistoryService.remove(removeDto);
 
     return {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { Public } from 'src/auth/auth.decorators';
@@ -26,7 +26,7 @@ export class UserController {
   @Get('find-one')
   @Get('find_one')
   @Get('find')
-  async findOne(@Body() findDto: FindUserDto) {
+  async findOne(@Query() findDto: FindUserDto) {
     const result = await this.userService.findOne(findDto);
     if (result) result.passwordHash = '';
 
@@ -59,7 +59,7 @@ export class UserController {
 
   @Delete('remove')
   @Delete('delete')
-  async remove(@Body() removeDto: RemoveUserDto) {
+  async remove(@Query() removeDto: RemoveUserDto) {
     await this.userService.remove(removeDto);
 
     return {

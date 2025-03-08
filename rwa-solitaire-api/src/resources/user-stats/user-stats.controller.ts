@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, HttpStatus, Body, Query } from '@nestjs/common';
 import { UserStatsService } from './user-stats.service';
 import { CreateUserStatsDto } from './dto/create-user-stats.dto';
 import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
@@ -10,7 +10,7 @@ export class UserStatsController {
   constructor(private readonly userStatsService: UserStatsService) {}
 
   @Post('create')
-  async create(createDto: CreateUserStatsDto) {
+  async create(@Body() createDto: CreateUserStatsDto) {
     await this.userStatsService.create(createDto);
 
     return {
@@ -22,7 +22,7 @@ export class UserStatsController {
   @Get('find-one')
   @Get('find_one')
   @Get('find')
-  async findOne(findDto: FindUserStatsDto) {
+  async findOne(@Query() findDto: FindUserStatsDto) {
     const result = await this.userStatsService.findOne(findDto);
 
     if (result !== null) return {
@@ -38,7 +38,7 @@ export class UserStatsController {
   }
 
   @Patch('update')
-  async update(updateDto: UpdateUserStatsDto) {
+  async update(@Body() updateDto: UpdateUserStatsDto) {
     const result = await this.userStatsService.update(updateDto);
 
     if (result) return {
@@ -54,7 +54,7 @@ export class UserStatsController {
 
   @Delete('remove')
   @Delete('delete')
-  async remove(removeDto: RemoveUserStatsDto) {
+  async remove(@Query() removeDto: RemoveUserStatsDto) {
     await this.userStatsService.remove(removeDto);
 
     return {
@@ -64,7 +64,7 @@ export class UserStatsController {
   }
 
   @Patch('restore')
-  async restore(restoreDto: RemoveUserStatsDto) {
+  async restore(@Body() restoreDto: RemoveUserStatsDto) {
     const result = await this.userStatsService.restore(restoreDto);
 
     if (result) return {
