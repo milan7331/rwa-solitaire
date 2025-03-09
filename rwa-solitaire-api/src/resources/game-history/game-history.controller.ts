@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query, Res } from '@nestjs/common';
 
 import { User } from '../user/entities/user.entity';
 import { GameHistoryService } from './game-history.service';
@@ -6,6 +6,7 @@ import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
+import { Response } from 'express';
 
 @Controller(['game-history', 'game_history', 'history'])
 export class GameHistoryController {
@@ -15,12 +16,7 @@ export class GameHistoryController {
   @Post('start_game')
   @Post('start')
   async startGame(@Body() startDto: CreateGameHistoryDto) {
-    await this.gameHistoryService.startGame(startDto);
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Game started sucessfully!'
-    };
+    await this.gameHistoryService.create(startDto);
   }
 
   @Patch('end-game')
@@ -28,113 +24,45 @@ export class GameHistoryController {
   @Patch('end')
   async endGame(@Body() updateDto: UpdateGameHistoryDto) {
     await this.gameHistoryService.endGame(updateDto);
-    
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Game ended sucessfully'
-    };
   }
 
   @Get('get-all-games-user')
   @Get('get_all_games_user')
   async getAllGames(@Query() user: User) {
-    const result = await this.gameHistoryService.findAllForUser(user);
-    
-    if (result.length > 0) return {
-      statusCode: HttpStatus.OK,
-      message: 'Users games found.',
-      data: result
-    };
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'No games matching criteria found!'
-    };
+    return await this.gameHistoryService.findAllForUser(user);
   }
 
   @Post('create')
   async create(@Body() createDto: CreateGameHistoryDto) {
     await this.gameHistoryService.create(createDto);
-    
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Game created.'
-    };
   }
 
   @Get('find-all')
   @Get('find_all')
   async findAll() {
-    const result = await this.gameHistoryService.findAll();
-
-    if (result.length > 0) return {
-      statusCode: HttpStatus.OK,
-      message: 'All games found',
-      data: result
-    }
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'No games found!'
-    }
+    return await this.gameHistoryService.findAll();
   }
 
   @Get('find-one')
   @Get('find_one')
   @Get('find')
   async findOne(@Query() findDto: FindGameHistoryDto) {
-    const result = await this.gameHistoryService.findOne(findDto);
-
-    if (result !== null) return {
-      statusCode: HttpStatus.OK,
-      message: 'Game found!',
-      data: result
-    }
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'Game not found!'
-    }
+    return await this.gameHistoryService.findOne(findDto);
   }
 
   @Patch('update')
   async update(@Body() updateDto: UpdateGameHistoryDto) {
-    const result = await this.gameHistoryService.update(updateDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'Game updated!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error updating game!'
-    }
+    return await this.gameHistoryService.update(updateDto);
   }
 
   @Delete('remove')
   @Delete('delete')
   async remove(@Query() removeDto: RemoveGameHistoryDto) {
-    await this.gameHistoryService.remove(removeDto);
-
-    return {
-      statusCode: HttpStatus.NO_CONTENT,
-      message: 'Game deleted!'
-    }
+    return await this.gameHistoryService.remove(removeDto);
   }
 
   @Patch('restore')
   async restore(@Body() restoreDto: RemoveGameHistoryDto) {
-    const result = await this.gameHistoryService.restore(restoreDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'Game restored!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error restoring deleted game!'
-    }
+    return await this.gameHistoryService.restore(restoreDto);
   }
 }

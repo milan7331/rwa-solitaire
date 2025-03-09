@@ -15,25 +15,7 @@ export class SavedGameService {
     private readonly savedGameRepository: Repository<SavedGame>,
   ) { }
 
-  async saveGame(saveDto: UpdateSavedGameDto): Promise<boolean> {
-    if (!saveDto.gameState || !saveDto.user) throw new BadRequestException('Invalid parameters!');
-  
-    return this.update(saveDto); 
-  }
-
-  async loadGame(findDto: FindSavedGameDto): Promise<SavedGame | null> {
-    if (!findDto.id && !findDto.user) throw new BadRequestException('Invalid parameters!');
-    
-    return this.findOne(findDto);
-  }
-
-  async deleteSavedGame(removeDto: RemoveSavedGameDto): Promise<boolean> {
-    if (!removeDto.id && !removeDto.user) throw new BadRequestException('Invalid parameters!');
-
-    return this.remove(removeDto);    
-  }
-
-  async create(createDto: CreateSavedGameDto): Promise<boolean> {
+  async create(createDto: CreateSavedGameDto): Promise<void> {
     if (!createDto.gameState || !createDto.user) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindSavedGameDto = {
@@ -41,12 +23,11 @@ export class SavedGameService {
       withDeleted: false
     }
 
-    try {
-      const existingSave = await this.findOne(findDto);
-      if (existingSave) throw new ConflictException('Error creating game save, user already has a saved game!');
+    const existingSave = await this.findOne(findDto);
+    if (existingSave) throw new ConflictException('Error creating game save, user already has a saved game!');
 
+    try {
       await this.savedGameRepository.save(createDto);
-      return true;
     } catch(error) {
       handlePostgresError(error);
     }
@@ -54,35 +35,35 @@ export class SavedGameService {
 
   async findAll(): Promise<SavedGame[]> {
     try {
-      const games = this.savedGameRepository.find({ withDeleted: false });
-
-      return games;
+      return this.savedGameRepository.find({ withDeleted: false });
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async findOne(findDto: FindSavedGameDto): Promise<SavedGame | null> {
+  async findOne(findDto: FindSavedGameDto): Promise<SavedGame> {
     const { id, user, withDeleted } = findDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    let result: SavedGame | null;
     
     const where: any = { }
     if (id) where.id = id;
     if (user) where.user = user;
 
     try {
-      const game = this.savedGameRepository.findOne({
+      result = await this.savedGameRepository.findOne({
         where,
         withDeleted
       });
-  
-      return game;
     } catch(error) {
       handlePostgresError(error);
     }
+
+    if (!result) throw new NotFoundException('Saved game not found!');
+    return result;
   }
 
-  async upsert(upsertDto: UpdateSavedGameDto): Promise<boolean> {
+  async upsert(upsertDto: UpdateSavedGameDto): Promise<void> {
     const { id, user } = upsertDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
@@ -90,13 +71,12 @@ export class SavedGameService {
       await this.savedGameRepository.upsert(upsertDto, {
         conflictPaths: ['user'],
       });
-      return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async update(updateDto: UpdateSavedGameDto): Promise<boolean> {
+  async update(updateDto: UpdateSavedGameDto): Promise<void> {
     const { id, user } = updateDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
@@ -111,14 +91,13 @@ export class SavedGameService {
 
     try {
       const result = await this.savedGameRepository.update(game.id, updateDto);
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected <= 0) throw new BadRequestException('Error updating saved game!');
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async remove(removeDto: RemoveSavedGameDto): Promise<boolean> {
+  async remove(removeDto: RemoveSavedGameDto): Promise<void> {
     const { id, user } = removeDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
@@ -133,13 +112,12 @@ export class SavedGameService {
 
     try {
       await this.savedGameRepository.softRemove(game);
-      return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async restore(restoreDto: RemoveSavedGameDto): Promise<boolean> {
+  async restore(restoreDto: RemoveSavedGameDto): Promise<void> {
     const { id, user } = restoreDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
@@ -154,8 +132,7 @@ export class SavedGameService {
 
     try {
       const result = await this.savedGameRepository.restore(id);
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected <= 0) throw new BadRequestException('Error restoring saved game!');
     } catch(error) {
       handlePostgresError(error);
     }

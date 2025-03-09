@@ -11,29 +11,13 @@ export class SavedGameController {
 
   @Post('create')
   async create(@Body() createDto: CreateSavedGameDto) {
-    await this.savedGameService.create(createDto);
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Game saved / created!'
-    }
+    return await this.savedGameService.create(createDto);
   }
 
   @Get('find-all')
   @Get('find_all')
   async findAll() {
-    const result = await this.savedGameService.findAll();
-
-    if (result.length > 0) return {
-      statusCode: HttpStatus.OK,
-      message: 'All saved games found',
-      data: result
-    }
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'No saved games found!'
-    }
+    return await this.savedGameService.findAll();
   }
 
   @Get('find-one')
@@ -41,69 +25,28 @@ export class SavedGameController {
   @Get('find')
   @Get('load')
   async findOne(@Query() findDto: FindGameHistoryDto) {
-    const result = await this.savedGameService.findOne(findDto);
-
-    if (result !== null) return {
-      statusCode: HttpStatus.OK,
-      message: 'Saved game found!',
-      data: result
-    }
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'Saved game not found!'
-    }
+    return await this.savedGameService.findOne(findDto);
   }
 
   @Patch('upsert')
   @Patch('save')
   async upsert(@Body() updateDto: UpdateSavedGameDto) {
-    await this.savedGameService.update(updateDto);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Saved game upsert successful!'
-    }
+    return await this.savedGameService.upsert(updateDto);
   }
 
   @Patch('update')
   async update(@Body() updateDto: UpdateSavedGameDto) {
-    const result = await this.savedGameService.update(updateDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'Saved game updated!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error updating saved game!'
-    }
+    return await this.savedGameService.update(updateDto);
   }
 
   @Delete('remove')
   @Delete('delete')
   async remove(@Query() removeDto: RemoveSavedGameDto) {
-    await this.savedGameService.remove(removeDto);
-
-    return {
-      statusCode: HttpStatus.NO_CONTENT,
-      message: 'Saved game deleted!'
-    }
+    return await this.savedGameService.remove(removeDto);
   }
   
   @Patch('restore')
   async restore(@Body() restoreDto: RemoveSavedGameDto) {
-    const result = await this.savedGameService.restore(restoreDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'Saved game restored!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error restoring saved game!'
-    }
+    return await this.savedGameService.restore(restoreDto);
   }
 }

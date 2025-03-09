@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseGuards, Get, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards, Get, Res, Delete } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -15,30 +15,28 @@ export class AuthController {
     @Post('log-in')
     async login(
         @Req() req: Request,
-        @Res({ passthrough: true }) res: Response
+        @Res({ passthrough: true }) res: Response,
     ) {
         return this.authService.login(req, res);
     }
 
-    @Post('logout')
-    @Post('log-out')
+    @Delete('logout')
+    @Delete('log-out')
     async logout(@Res({ passthrough: true }) res: Response) {
         return this.authService.logout(res);
     }
 
     @Post('validate-session')
-    async validateSession() {
+    async validateSession(@Res({ passthrough: true }) res: Response)  {
         // global jwt auth guard does the validation,
         // this metod executes only if its valid & just returns a confirmation
-        return {
-            statusCode: HttpStatus.OK,
-            message: 'Session valid!'
-        }
+        res.statusCode = 200;
+        res.statusMessage = 'Session valid!';
     }
 
     @Public()
     @Get()
     async test() {
-        return { message: 'API works as intended' };
+        return 'API works as intended';
     }
 }

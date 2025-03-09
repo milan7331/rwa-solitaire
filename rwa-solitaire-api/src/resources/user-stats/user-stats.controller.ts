@@ -11,70 +11,29 @@ export class UserStatsController {
 
   @Post('create')
   async create(@Body() createDto: CreateUserStatsDto) {
-    await this.userStatsService.create(createDto);
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'User stats created.'
-    };
+    return await this.userStatsService.create(createDto);
   }
 
   @Get('find-one')
   @Get('find_one')
   @Get('find')
   async findOne(@Query() findDto: FindUserStatsDto) {
-    const result = await this.userStatsService.findOne(findDto);
-
-    if (result !== null) return {
-      statusCode: HttpStatus.OK,
-      message: 'User stats found!',
-      data: result
-    }
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'User stats not found!'
-    }
+    return await this.userStatsService.findOne(findDto);
   }
 
   @Patch('update')
   async update(@Body() updateDto: UpdateUserStatsDto) {
-    const result = await this.userStatsService.update(updateDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'User stats updated!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error updating user stats!'
-    }
+    return await this.userStatsService.update(updateDto);
   }
 
   @Delete('remove')
   @Delete('delete')
   async remove(@Query() removeDto: RemoveUserStatsDto) {
-    await this.userStatsService.remove(removeDto);
-
-    return {
-      statusCode: HttpStatus.NO_CONTENT,
-      message: 'User deleted!'
-    }
+    return await this.userStatsService.remove(removeDto);
   }
 
   @Patch('restore')
   async restore(@Body() restoreDto: RemoveUserStatsDto) {
-    const result = await this.userStatsService.restore(restoreDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'User stats restored!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error restoring user stats!'
-    }
+    return await this.userStatsService.restore(restoreDto);
   }
 }

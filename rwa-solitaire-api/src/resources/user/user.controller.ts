@@ -15,12 +15,7 @@ export class UserController {
   @Post('create')
   @Public()
   async create(@Body() createDto: CreateUserDto) {
-    await this.userService.create(createDto);
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'User account created.'
-    };
+    return await this.userService.create(createDto);
   }
 
   @Get('find-one')
@@ -29,63 +24,28 @@ export class UserController {
   async findOne(@Query() findDto: FindUserDto) {
     const result = await this.userService.findOne(findDto);
     if (result) result.passwordHash = '';
-
-    if (result !== null) return {
-      statusCode: HttpStatus.OK,
-      message: 'User found!',
-      data: result
-    }
-
-    return {
-      statusCode: HttpStatus.NOT_FOUND,
-      message: 'User not found!'
-    }
+    return result;
   } 
 
   @Patch('update')
   async update(@Body() updateDto: UpdateUserDto) {
-    const result = await this.userService.update(updateDto);
-
-    if (result) return {
-      statusCode: HttpStatus.OK,
-      message: 'User updated!'
-    }
-
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Error updating user!'
-    }
+    return await this.userService.update(updateDto);
   }
 
   @Delete('remove')
   @Delete('delete')
   async remove(@Query() removeDto: RemoveUserDto) {
-    await this.userService.remove(removeDto);
-
-    return {
-      statusCode: HttpStatus.NO_CONTENT,
-      message: 'User deleted!'
-    }
+    return await this.userService.remove(removeDto);
   }
 
   @Patch('restore')
   async restore(@Body() restoreDto: RemoveUserDto) {
-    await this.userService.restore(restoreDto);
-    
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'User restored!'
-    }
+    return await this.userService.restore(restoreDto);
   }
 
   @Patch('remove-old-users')
   @Patch('remove_old_users')
   async removeOldUsers() {
-    const result = await this.userService.permanentlyRemoveOldUsers();
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Number of old accounts permanently removed: ' + result
-    }
+    return await this.userService.permanentlyRemoveOldUsers();
   }
 }

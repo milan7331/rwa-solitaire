@@ -14,8 +14,6 @@ import { FindUserDto } from './dto/find-user.dto';
 import { RemoveUserDto } from './dto/remove-user.dto';
 import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
-// fix remove/restore to use proper cascades + entity fix
-
 @Injectable()
 export class UserService {
 
@@ -27,8 +25,9 @@ export class UserService {
     private readonly hashService: HashService
   ) { }
 
-  async create(createDto: CreateUserDto): Promise<boolean> {
+  async create(createDto: CreateUserDto): Promise<void> {
     const { email, username, password } = createDto;
+    if (!email && !username && !password) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserDto = {
       email,
@@ -60,16 +59,15 @@ export class UserService {
 
     try {
       await this.userRepository.save(newUser);
-
-      return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
   
-  async findOne(findDto: FindUserDto): Promise<User | null> {
+  async findOne(findDto: FindUserDto): Promise<User> {
     const { id, username, email, withDeleted, withRelations, password } = findDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
+    let result = null;
 
     const where: any = { };
     if (id) where.id = id;
@@ -77,27 +75,29 @@ export class UserService {
     if (email) where.email = email;
 
     try {
-      const user = await this.userRepository.findOne({
+      result = await this.userRepository.findOne({
         where,
         withDeleted,
         relations: withRelations ? ['gameHistory', 'userStats', 'savedGame'] : [],
       });
-      
-      // if password was provided, verify it before returning
-      // works like a "more secure" version this way
-      if (user && password) {
-        const check = await this.hashService.verifyPassword(user.passwordHash, password);
-        if (!check) throw new UnauthorizedException('User password doesnt match!');
-      };
-      
-      if (user) user.passwordHash = '';
-      return user;
     } catch(error) {
       handlePostgresError(error);
     }
+
+    if (!result) throw new NotFoundException('User not found!');
+
+    // if password was provided, verify it before returning
+    // works like a "more secure" version this way
+    if (password) {
+      const passwordValid = await this.hashService.verifyPassword(result.passwordHash, password);
+      if (!passwordValid) throw new UnauthorizedException('User password doesnt match!');
+    }
+    
+    result.passwordHash = '';
+    return result;
   }
 
-  async update(updateDto: UpdateUserDto): Promise<boolean> {
+  async update(updateDto: UpdateUserDto): Promise<void> {
     const {id, email, username, password, newPassword } = updateDto;
     if (!id) throw new BadRequestException('Invalid parameters!');
 
@@ -112,22 +112,20 @@ export class UserService {
     if (!user)  throw new NotFoundException('User to update not found!');
 
     const update: DeepPartial<User>  = { }
-    if (id) update.id = id;
     if (email) update.email = email;
     if (username) update.username = username;
     if (newPassword) update.passwordHash = await this.hashService.hashPassword(newPassword);
 
     try {
       const result = await this.userRepository.update(user.id, update);
-
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected <= 0) throw new BadRequestException('Error updating user!');
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async remove(removeDto: RemoveUserDto): Promise<boolean> {
+  // needs cleanup, chained removal not needed if cascades are set up
+  async remove(removeDto: RemoveUserDto): Promise<void> {
     const { id, username, email, password} = removeDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
 
@@ -154,8 +152,6 @@ export class UserService {
         await queryRunner.manager.softRemove(user.gameHistory[i]);
       }
       await queryRunner.commitTransaction();
-
-      return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
       handlePostgresError(error);
@@ -164,7 +160,8 @@ export class UserService {
     }
   }
 
-  async restore(restoreDto: RemoveUserDto): Promise<boolean> {
+  // needs cleanup, chained restore not needed if cascades are set up
+  async restore(restoreDto: RemoveUserDto): Promise<void> {
     const { id, username, email, password } = restoreDto;
     if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
 
@@ -191,8 +188,6 @@ export class UserService {
         await queryRunner.manager.restore(GameHistory, user.gameHistory[i].id);
       }
       await queryRunner.commitTransaction();
-
-      return true;
     } catch(error) {
       await queryRunner.rollbackTransaction();
       handlePostgresError(error);
@@ -201,9 +196,9 @@ export class UserService {
     }
   }
   
-  async permanentlyRemoveOldUsers(): Promise<number> {
-    const usersToRemove = await this.findUsersForPermanentRemoval();
-    if (usersToRemove.length <= 0) return 0;
+  async permanentlyRemoveOldUsers(): Promise<void> {
+    const usersToRemove = await this.#findUsersForPermanentRemoval();
+    if (usersToRemove.length <= 0) return;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -219,8 +214,6 @@ export class UserService {
         }
       }
       await queryRunner.commitTransaction();
-
-      return usersToRemove.length;
     } catch(error) {
       await queryRunner.rollbackTransaction();
       handlePostgresError(error);
@@ -229,18 +222,16 @@ export class UserService {
     }
   }
 
-  private async findUsersForPermanentRemoval(): Promise<User[]> {
+  async #findUsersForPermanentRemoval(): Promise<User[]> {
     const ThirtyDaysAgo = new Date();
     ThirtyDaysAgo.setDate(ThirtyDaysAgo.getDate() - 30);
 
     try {
-      const usersToRemove = await this.userRepository.find({
+      return await this.userRepository.find({
         withDeleted: true,
         where: { deletedAt: LessThan(ThirtyDaysAgo)},
         relations: ['GameHistory', 'UserStats', 'savedGame']
       });
-      
-      return usersToRemove;
     } catch(error) {
       handlePostgresError(error);
     }

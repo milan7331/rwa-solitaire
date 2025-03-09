@@ -21,32 +21,17 @@ export class CronService {
 
     @Cron(CronExpression.EVERY_10_MINUTES, { name: 'weeklyLeaderboardUpdate'})
     private async updateWeeklyLeaderboard(): Promise<void> {
-        const retries = 10;
-        for (let i = 0; i < retries; i++) {
-            const result = await this.leaderboardService.leaderboardRefresh(WeeklyLeaderboard);
-            if (result) return;
-            this.sleep(3000);
-        }
+        await this.leaderboardService.leaderboardRefresh(WeeklyLeaderboard);
     }
 
     @Cron(CronExpression.EVERY_HOUR, { name: 'monthlyLeaderboardUpdate'})
     private async updateMonthlyLeaderboard(): Promise<void> {
-        const retries = 10;
-        for (let i = 0; i < retries; i++) {
-            const result = await this.leaderboardService.leaderboardRefresh(MonthlyLeaderboard);
-            if (result) return;
-            this.sleep(3000);
-        }
+        await this.leaderboardService.leaderboardRefresh(MonthlyLeaderboard);
     }
 
     @Cron(CronExpression.EVERY_DAY_AT_10AM, { name: 'yearlyLeaderboardUpdate'})
     private async updateYearlyLeaderboard(): Promise<void> {
-        const retries = 10;
-        for (let i = 0; i < retries; i++) {
-            const result = await this.leaderboardService.leaderboardRefresh(YearlyLeaderboard);
-            if (result) return;
-            this.sleep(3000);
-        }
+        await this.leaderboardService.leaderboardRefresh(YearlyLeaderboard);
     }
 
     getCleanDateSpan_CurrentWeek(): [Date, Date] {

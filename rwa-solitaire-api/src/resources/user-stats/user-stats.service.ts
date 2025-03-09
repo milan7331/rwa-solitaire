@@ -16,7 +16,9 @@ export class UserStatsService {
     private readonly userStatsRepository: Repository<UserStats>,
   ) { }
 
-  async create(createDto: CreateUserStatsDto): Promise<boolean> {
+  async create(createDto: CreateUserStatsDto): Promise<void> {
+    if (!createDto.user) throw new BadRequestException('Invalid parameters!');
+
     const existingStats = await this.userStatsRepository.findOne({
       where: { user: createDto.user }
     });
@@ -24,34 +26,35 @@ export class UserStatsService {
 
     try {
       await this.userStatsRepository.save(createDto);
-
-      return true;
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
-  async findOne(findDto: FindUserStatsDto): Promise<UserStats | null> {
+  async findOne(findDto: FindUserStatsDto): Promise<UserStats> {
     const { id, user, withDeleted } = findDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
+
+    let result = null;
 
     const where: any = { };
     if (id) where.id = id;
     if (user) where.user = user;
 
     try {
-      let stats = await this.userStatsRepository.findOne({
+      result = await this.userStatsRepository.findOne({
         where,
         withDeleted
       });
-
-      return stats;
     } catch (error) {
       handlePostgresError(error);
     }
+
+    if (!result) throw new NotFoundException('User stats not found!');
+    return result;
   }
 
-  async update(updateDto: UpdateUserStatsDto): Promise<boolean> {
+  async update(updateDto: UpdateUserStatsDto): Promise<void> {
     const { id, user } = updateDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');;
 
@@ -66,15 +69,13 @@ export class UserStatsService {
 
     try {
       const result = await this.userStatsRepository.update(stats.id, updateDto);
-      
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected <= 0) throw new BadRequestException('Error updating user stats!');
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
-  async remove(removeDto: RemoveUserStatsDto): Promise<boolean> {
+  async remove(removeDto: RemoveUserStatsDto): Promise<void> {
     const { id, user } = removeDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
     
@@ -89,14 +90,12 @@ export class UserStatsService {
     
     try {
       await this.userStatsRepository.softRemove(stats);
-
-      return true;
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
-  async restore(restoreDto: RemoveUserStatsDto): Promise<boolean> {
+  async restore(restoreDto: RemoveUserStatsDto): Promise<void> {
     const { id, user } = restoreDto;
     if (!id && !user) throw new BadRequestException('Invalid parameters!');
 
@@ -111,9 +110,7 @@ export class UserStatsService {
     
     try {
       const result = await this.userStatsRepository.restore(stats);
-
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected <= 0) throw new BadRequestException('Error restoring user stats!');
     } catch (error) {
       handlePostgresError(error);
     }

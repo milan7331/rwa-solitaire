@@ -51,14 +51,7 @@ export class AuthService {
     }
 
     async logout(res: Response): Promise<void> {
-        res.cookie('token', '', {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'strict',
-            maxAge: 1,
-            path: '/'
-        });
-
+        res.clearCookie('token');
         res.status(200);
     }
 }

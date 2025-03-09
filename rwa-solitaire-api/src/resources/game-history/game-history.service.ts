@@ -12,6 +12,7 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 import { FindUserStatsDto } from '../user-stats/dto/find-user-stats.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class GameHistoryService {
@@ -22,32 +23,33 @@ export class GameHistoryService {
     private readonly statsService: UserStatsService
   ) {}
 
+  // used for leaderboard generation only
   async getAllGamesFromThisWeek(): Promise<[GameHistory[], Date]> {
     const [weekStartDate, weekEndDate] = this.cronService.getCleanDateSpan_CurrentWeek();
-    const games = await this.getAllGamesFromTimeSpan(weekStartDate, weekEndDate);
+    const games = await this.#getAllGamesFromTimeSpan(weekStartDate, weekEndDate);
     return [games, weekStartDate];
   }
   
+  // used for leaderboard generation only
   async getAllGamesFromThisMonth(): Promise<[GameHistory[], Date]> {
     const [monthStartDate, monthEndDate] = this.cronService.getCleanDateSpan_CurrentMonth();
-    const games = await this.getAllGamesFromTimeSpan(monthStartDate, monthEndDate);
+    const games = await this.#getAllGamesFromTimeSpan(monthStartDate, monthEndDate);
     return [games, monthStartDate];
   }
   
+  // used for leaderboard generation only
   async getAllGamesFromThisYear(): Promise<[GameHistory[], Date]> {
     const [yearStartDate, yearEndDate] = this.cronService.getCleanDateSpan_CurrentYear();
-    const games = await this.getAllGamesFromTimeSpan(yearStartDate, yearEndDate);
+    const games = await this.#getAllGamesFromTimeSpan(yearStartDate, yearEndDate);
     return [games, yearStartDate];
   }
 
-
-  private async getAllGamesFromTimeSpan(
+  async #getAllGamesFromTimeSpan(
     startDate: Date,
     endDate: Date
   ): Promise<GameHistory[]> {
-    let results = [];
     try {
-      results = await this.historyRepository.find({
+      return await this.historyRepository.find({
         where: {
           createdAt: Between(startDate, endDate),
           gameFinished: true
@@ -56,18 +58,9 @@ export class GameHistoryService {
     } catch(error) {
       handlePostgresError(error);
     }
-
-    return results;
   }
   
-  async startGame(startDto: CreateGameHistoryDto): Promise<boolean> {
-    let newGame = await this.create(startDto);
-    if (!newGame) throw new InternalServerErrorException('Error starting game!');
-
-    return true;
-  }
-  
-  async endGame(updateDto: UpdateGameHistoryDto): Promise<boolean> {
+  async endGame(updateDto: UpdateGameHistoryDto): Promise<void> {
     if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindGameHistoryDto = {
@@ -76,7 +69,6 @@ export class GameHistoryService {
       startedTime: updateDto.startedTime,
       withDeleted: false
     }
-
 
     let gameInProgress = await this.findOne(findDto);
     if (!gameInProgress) throw new NotFoundException('No game in progress found!');
@@ -88,18 +80,13 @@ export class GameHistoryService {
     gameInProgress.finishedTime = updateDto.finishedTime;
     gameInProgress.gameDurationInSeconds = Math.floor((updateDto.finishedTime.getTime() - updateDto.startedTime.getTime()) / 1000);
 
-    const updated = await this.update(gameInProgress);
-    if (!updated) throw new InternalServerErrorException('Error ending game!');
-
-    const statsUpdated = await this.updateUserStats(gameInProgress);
-    if (!statsUpdated) throw new InternalServerErrorException('Error updating user stats after game end!');
-
-    return true;
+    await this.update(gameInProgress);
+    await this.#updateUserStats(gameInProgress);
   }
   
-  async updateUserStats(finishedGame: GameHistory): Promise<boolean> {
+  async #updateUserStats(finishedGame: GameHistory): Promise<void> {
     const { user, gameFinished } = finishedGame;
-    if (!gameFinished) return false;
+    if (!gameFinished) throw new BadRequestException('Game not finished!');
     
     const findUserStatsDto: FindUserStatsDto = {
       user,
@@ -114,10 +101,10 @@ export class GameHistoryService {
     if (finishedGame.gameWon) userStats.gamesWon++;
     userStats.totalTimePlayed += finishedGame.gameDurationInSeconds;
   
-    return this.statsService.update(userStats);
+    this.statsService.update(userStats);
   }
 
-  async create(createUserDto: CreateGameHistoryDto): Promise<boolean> {
+  async create(createUserDto: CreateGameHistoryDto): Promise<void> {
     if (!createUserDto.user || !createUserDto.startedTime) throw new BadRequestException('Invalid parameters!');
 
     const existingGame = await this.historyRepository.findOne({
@@ -131,8 +118,6 @@ export class GameHistoryService {
     
     try {
       await this.historyRepository.save(createUserDto);
-
-      return true;
     } catch(error) {
       handlePostgresError(error);
     }
@@ -140,11 +125,10 @@ export class GameHistoryService {
 
   async findAllForUser(user: User): Promise<GameHistory[]> {
     try {
-      const games = await this.historyRepository.find({
+      return await this.historyRepository.find({
         where: { user: user },
         withDeleted: false
       });
-      return games;
     } catch(error) {
       handlePostgresError(error);
     }
@@ -152,15 +136,15 @@ export class GameHistoryService {
 
   async findAll(): Promise<GameHistory[]> {
     try {
-      const games = await this.historyRepository.find({ withDeleted: false });
-      return games;
+      return await this.historyRepository.find({ withDeleted: false });
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  findOne(findDto: FindGameHistoryDto): Promise<GameHistory | null> {
+  async findOne(findDto: FindGameHistoryDto): Promise<GameHistory> {
     const { id, user, startedTime, withDeleted } = findDto;
+    let result: GameHistory | null = null;
 
     if (!id && (!user || !startedTime)) throw new BadRequestException('Invalid parameters');
 
@@ -170,18 +154,19 @@ export class GameHistoryService {
     if (startedTime) where.startedTime = startedTime;
 
     try {
-      const game = this.historyRepository.findOne({
+      result = await this.historyRepository.findOne({
         where,
         withDeleted,
       });
-
-      return game;
     } catch(error) {
       handlePostgresError(error);
     }
+
+    if (!result) throw new NotFoundException('Game not found');
+    return result;
   }
 
-  async update(updateDto: UpdateGameHistoryDto): Promise<boolean> {
+  async update(updateDto: UpdateGameHistoryDto): Promise<void> {
     const { id, user, startedTime } = updateDto;
     if (!id && (!startedTime || user)) throw new BadRequestException('Invalid parameters');
 
@@ -197,14 +182,13 @@ export class GameHistoryService {
 
     try {
       const result = await this.historyRepository.update(game.id, updateDto);
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected <= 0) throw new BadRequestException('Game update failed!');
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async remove(removeDto: RemoveGameHistoryDto): Promise<boolean> {
+  async remove(removeDto: RemoveGameHistoryDto): Promise<void> {
     const findDto: FindGameHistoryDto = {
       id: removeDto.id,
       user: removeDto.user,
@@ -217,13 +201,12 @@ export class GameHistoryService {
 
     try {
       await this.historyRepository.softRemove(game);
-      return true;
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async restore(restoreDto: RemoveGameHistoryDto): Promise<boolean> {
+  async restore(restoreDto: RemoveGameHistoryDto): Promise<void> {
     const findDto: FindGameHistoryDto = {
       id: restoreDto.id,
       user: restoreDto.user,
@@ -235,8 +218,7 @@ export class GameHistoryService {
 
     try {
       const result = await this.historyRepository.restore(game);
-      if (result.affected > 0) return true;
-      return false;
+      if (result.affected > 0) throw new BadRequestException('Error restoring deleted game!');
     } catch(error) {
       handlePostgresError(error);
     }
