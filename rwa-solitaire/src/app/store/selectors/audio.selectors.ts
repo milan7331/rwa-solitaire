@@ -12,3 +12,8 @@ export const selectAudioMuted = createSelector(
     selectAudioState,
     (state: AudioState) => state.audioMuted
 )
+
+export const selectShowAudioControl = createSelector(
+    selectAudioState,
+    (state: AudioState) => state.showAudioControl
+)
