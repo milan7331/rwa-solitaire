@@ -1,9 +1,10 @@
-import { IsNotEmpty } from "class-validator";
-import { User } from "src/resources/user/entities/user.entity";
+import { IsNotEmpty, IsNumber, IsObject } from "class-validator";
 
 export class CreateSavedGameDto {
+    @IsNotEmpty()
     gameState: Record<string, any> = {};
     
     @IsNotEmpty()
-    user: User;
+    @IsNumber()
+    userId: number;
 }

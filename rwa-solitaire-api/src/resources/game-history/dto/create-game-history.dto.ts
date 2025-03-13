@@ -1,5 +1,4 @@
-import { IsDate, IsEnum, IsNotEmpty } from "class-validator";
-import { User } from "src/resources/user/entities/user.entity";
+import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsObject } from "class-validator";
 import { SolitaireDifficulty } from "../entities/game-history.entity";
 
 export class CreateGameHistoryDto {
@@ -12,5 +11,6 @@ export class CreateGameHistoryDto {
         startedTime: Date;
         
         @IsNotEmpty()
-        user: User;
+        @IsNumber()
+        userId: number;
 }

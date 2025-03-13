@@ -1,13 +1,14 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateLeaderboardDto } from './create-leaderboard.dto';
-import { WeeklyLeaderboard } from '../entities/leaderboard-weekly.entity';
-import { MonthlyLeaderboard } from '../entities/leaderboard-monthly.entity';
-import { YearlyLeaderboard } from '../entities/leaderboard-yearly.entity';
-import { IsNumber } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { LeaderboardType } from '../entities/leaderboard.enum';
 
 export class UpdateLeaderboardDto extends PartialType(CreateLeaderboardDto) {
+    @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
 
-    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard = undefined; 
+    @IsOptional()
+    @IsEnum(LeaderboardType)
+    type?: LeaderboardType;
 }

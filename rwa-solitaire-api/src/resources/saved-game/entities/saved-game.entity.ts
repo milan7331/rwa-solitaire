@@ -7,10 +7,10 @@ export class SavedGame {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
-    @Column({ type: 'jsonb', nullable: true, default: {} })
+    @Column({ type: 'jsonb', default: {} })
     gameState: Record<string, any>;
 
     @UpdateDateColumn({ type: 'timestamptz' })
@@ -19,6 +19,6 @@ export class SavedGame {
     @OneToOne(() => User, (user) => user.savedGame)
     user: User;
 
-    @DeleteDateColumn()
+    @DeleteDateColumn({ type: 'timestamptz' })
     deletedAt?: Date;
 }

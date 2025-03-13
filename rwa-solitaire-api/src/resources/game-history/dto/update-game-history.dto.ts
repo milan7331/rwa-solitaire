@@ -1,45 +1,45 @@
 import { SolitaireDifficulty } from '../entities/game-history.entity';
-import { User } from 'src/resources/user/entities/user.entity';
 import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 export class UpdateGameHistoryDto {
     @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
+
+    @IsOptional()
+    @IsNumber()
+    userId?: number;
 
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Max(POSTGRES_MAX_INTEGER)
-    moves?: number = undefined;
+    moves?: number;
 
     @IsOptional()
     @IsBoolean()
-    gameWon?: boolean = undefined;
+    gameWon?: boolean;
 
     @IsOptional()
     @IsBoolean()
-    gameFinished?: boolean = undefined;
+    gameFinished?: boolean;
 
     @IsOptional()
     @IsEnum(SolitaireDifficulty)
-    gameDifficulty?: SolitaireDifficulty = undefined;
+    gameDifficulty?: SolitaireDifficulty;
 
     @IsOptional()
     @IsDate()
-    startedTime?: Date = undefined;
+    startedTime?: Date;
 
     @IsOptional()
     @IsDate()
-    finishedTime?: Date = undefined;
+    finishedTime?: Date;
 
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Max(POSTGRES_MAX_INTEGER)
-    gameDurationInSeconds?: number = undefined;
-
-    @IsOptional()
-    user?: User = undefined;
+    gameDurationInSeconds?: number;
 }

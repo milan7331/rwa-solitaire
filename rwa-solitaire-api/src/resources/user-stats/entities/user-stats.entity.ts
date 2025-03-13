@@ -29,12 +29,12 @@ export class UserStats {
     @Column({ type: 'integer', nullable: true })
     fastestSolveTime: number;
 
-    @UpdateDateColumn({type: 'timestamptz'})
+    @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
   
     @OneToOne(() => User, (user) => user.userStats)
     user: User;
 
-    @DeleteDateColumn()
+    @DeleteDateColumn({ type: 'timestamptz' })
     deletedAt?: Date;
 }

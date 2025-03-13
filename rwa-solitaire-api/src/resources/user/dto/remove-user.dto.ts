@@ -3,17 +3,17 @@ import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from "
 export class RemoveUserDto {
     @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
 
     @IsOptional()
     @IsString()
     @MinLength(6)
-    username?: string = undefined;
+    username?: string;
 
     @IsOptional()
     @IsString()
     @IsEmail()
-    email?: string = undefined;
+    email?: string;
 
     @IsNotEmpty()
     @IsString()

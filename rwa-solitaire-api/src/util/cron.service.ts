@@ -1,8 +1,6 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { MonthlyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-monthly.entity";
-import { WeeklyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-weekly.entity";
-import { YearlyLeaderboard } from "src/resources/leaderboard/entities/leaderboard-yearly.entity";
+import { LeaderboardType } from "src/resources/leaderboard/entities/leaderboard.enum";
 import { LeaderboardService } from "src/resources/leaderboard/leaderboard.service";
 import { UserService } from "src/resources/user/user.service";
 
@@ -21,17 +19,17 @@ export class CronService {
 
     @Cron(CronExpression.EVERY_10_MINUTES, { name: 'weeklyLeaderboardUpdate'})
     private async updateWeeklyLeaderboard(): Promise<void> {
-        await this.leaderboardService.leaderboardRefresh(WeeklyLeaderboard);
+        await this.leaderboardService.leaderboardRefresh(LeaderboardType.WEEKLY);
     }
 
     @Cron(CronExpression.EVERY_HOUR, { name: 'monthlyLeaderboardUpdate'})
     private async updateMonthlyLeaderboard(): Promise<void> {
-        await this.leaderboardService.leaderboardRefresh(MonthlyLeaderboard);
+        await this.leaderboardService.leaderboardRefresh(LeaderboardType.MONTHLY);
     }
 
     @Cron(CronExpression.EVERY_DAY_AT_10AM, { name: 'yearlyLeaderboardUpdate'})
     private async updateYearlyLeaderboard(): Promise<void> {
-        await this.leaderboardService.leaderboardRefresh(YearlyLeaderboard);
+        await this.leaderboardService.leaderboardRefresh(LeaderboardType.YEARLY);
     }
 
     getCleanDateSpan_CurrentWeek(): [Date, Date] {

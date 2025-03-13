@@ -1,8 +1,6 @@
-import { IsArray, IsDate, IsNotEmpty } from "class-validator";
+import { IsArray, IsDate, IsEnum, IsNotEmpty } from "class-validator";
 import { UserData } from "../entities/userdata";
-import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
-import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
-import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";
+import { LeaderboardType } from "../entities/leaderboard.enum";
 
 export class CreateLeaderboardDto {
     @IsNotEmpty()
@@ -10,7 +8,8 @@ export class CreateLeaderboardDto {
     timePeriod: Date;
 
     @IsNotEmpty()
-    type: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard;
+    @IsEnum(LeaderboardType)
+    type: LeaderboardType;
 
     @IsArray()
     top20_averageTime: UserData[] = [];

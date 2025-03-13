@@ -26,8 +26,8 @@ export class UserService {
   ) { }
 
   async create(createDto: CreateUserDto): Promise<void> {
-    const { email, username, password } = createDto;
-    if (!email && !username && !password) throw new BadRequestException('Invalid parameters!');
+    const { email, username, password, firstname, lastname } = createDto;
+    if (!email || !username || !password) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserDto = {
       email,
@@ -53,6 +53,8 @@ export class UserService {
     const newSavedGame = new SavedGame();
     newSavedGame.gameState = {};
 
+    if (firstname) newUser.firstname = firstname;
+    if (lastname) newUser.lastname = lastname;
     newUser.userStats = newStats;
     newUser.gameHistory = newGameHistory;
     newUser.savedGame = newSavedGame;
@@ -66,11 +68,11 @@ export class UserService {
   
   async findOne(findDto: FindUserDto): Promise<User> {
     const { id, username, email, withDeleted, withRelations, password } = findDto;
-    if (!id && !username && !email) throw new BadRequestException('Invalid parameters!');
+    if (id === undefined && !username && !email) throw new BadRequestException('Invalid parameters!');
     let result = null;
 
     const where: any = { };
-    if (id) where.id = id;
+    if (id !== undefined) where.id = id;
     if (username) where.username = username;
     if (email) where.email = email;
 
@@ -98,8 +100,8 @@ export class UserService {
   }
 
   async update(updateDto: UpdateUserDto): Promise<void> {
-    const {id, email, username, password, newPassword } = updateDto;
-    if (!id) throw new BadRequestException('Invalid parameters!');
+    const {id, email, username, password, newPassword, firstname, lastname } = updateDto;
+    if (id === undefined) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserDto = {
       id,
@@ -115,6 +117,8 @@ export class UserService {
     if (email) update.email = email;
     if (username) update.username = username;
     if (newPassword) update.passwordHash = await this.hashService.hashPassword(newPassword);
+    if (firstname) update.firstname = firstname;
+    if (lastname) update.lastname = lastname;
 
     try {
       const result = await this.userRepository.update(user.id, update);
@@ -127,7 +131,7 @@ export class UserService {
   // needs cleanup, chained removal not needed if cascades are set up
   async remove(removeDto: RemoveUserDto): Promise<void> {
     const { id, username, email, password} = removeDto;
-    if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
+    if (id === undefined && !username && !email) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindUserDto = {
       id,
@@ -163,7 +167,7 @@ export class UserService {
   // needs cleanup, chained restore not needed if cascades are set up
   async restore(restoreDto: RemoveUserDto): Promise<void> {
     const { id, username, email, password } = restoreDto;
-    if (!id && !username && !email) throw new BadRequestException('Invalid parameters');
+    if (id === undefined && !username && !email) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindUserDto = {
       id,

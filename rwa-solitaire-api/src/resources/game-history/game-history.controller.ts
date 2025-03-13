@@ -6,7 +6,6 @@ import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
-import { Response } from 'express';
 
 @Controller(['game-history', 'game_history', 'history'])
 export class GameHistoryController {

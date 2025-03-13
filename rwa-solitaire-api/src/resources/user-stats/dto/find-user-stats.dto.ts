@@ -1,13 +1,13 @@
 import { IsBoolean, IsNumber, IsOptional } from "class-validator";
-import { User } from "src/resources/user/entities/user.entity";
 
 export class FindUserStatsDto {
     @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
 
     @IsOptional()
-    user?: User = undefined;
+    @IsNumber()
+    userId?: number;
 
     @IsBoolean()
     withDeleted: boolean = false;

@@ -1,14 +1,16 @@
-import { IsDate, IsNumber } from "class-validator";
-import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
-import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
-import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";
+import { IsDate, IsEnum, IsNumber, IsOptional } from "class-validator";
+import { LeaderboardType } from "../entities/leaderboard.enum";
 
 export class RemoveLeaderboardDto {
+    @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
 
+    @IsOptional()
     @IsDate()
-    timePeriod?: Date = undefined;
+    timePeriod?: Date;
 
-    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard = undefined;
+    @IsOptional()
+    @IsEnum(LeaderboardType)
+    type?: LeaderboardType;
 }

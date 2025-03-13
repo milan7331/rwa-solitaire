@@ -2,32 +2,39 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
 import { SavedGame } from './entities/saved-game.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindSavedGameDto } from './dto/find-saved-game.dto';
 import { RemoveSavedGameDto } from './dto/remove-saved-game.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class SavedGameService {
   constructor(
     @InjectRepository(SavedGame)
     private readonly savedGameRepository: Repository<SavedGame>,
+
+    private readonly userService: UserService,
   ) { }
 
   async create(createDto: CreateSavedGameDto): Promise<void> {
-    if (!createDto.gameState || !createDto.user) throw new BadRequestException('Invalid parameters!');
+    const { gameState, userId } = createDto;
+    if (!gameState || userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindSavedGameDto = {
-      user: createDto.user,
+      userId,
       withDeleted: false
     }
 
     const existingSave = await this.findOne(findDto);
     if (existingSave) throw new ConflictException('Error creating game save, user already has a saved game!');
 
+    const user = this.userService.findOne({ id: userId, withDeleted: false, withRelations: false });
+    if (!user) throw new NotFoundException('Error creating game save - cant find user account!');
+
     try {
-      await this.savedGameRepository.save(createDto);
+      await this.savedGameRepository.save({ gameState, user } as DeepPartial<SavedGame>);
     } catch(error) {
       handlePostgresError(error);
     }
@@ -42,13 +49,13 @@ export class SavedGameService {
   }
 
   async findOne(findDto: FindSavedGameDto): Promise<SavedGame> {
-    const { id, user, withDeleted } = findDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId, withDeleted } = findDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
     let result: SavedGame | null;
     
     const where: any = { }
-    if (id) where.id = id;
-    if (user) where.user = user;
+    if (id !== undefined) where.id = id;
+    if (userId !== undefined) where.userId = userId;
 
     try {
       result = await this.savedGameRepository.findOne({
@@ -64,8 +71,8 @@ export class SavedGameService {
   }
 
   async upsert(upsertDto: UpdateSavedGameDto): Promise<void> {
-    const { id, user } = upsertDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId } = upsertDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     try {
       await this.savedGameRepository.upsert(upsertDto, {
@@ -77,12 +84,12 @@ export class SavedGameService {
   }
 
   async update(updateDto: UpdateSavedGameDto): Promise<void> {
-    const { id, user } = updateDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId } = updateDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
     
     const findDto: FindSavedGameDto = {
       id,
-      user,
+      userId,
       withDeleted: false
     }
 
@@ -98,12 +105,12 @@ export class SavedGameService {
   }
 
   async remove(removeDto: RemoveSavedGameDto): Promise<void> {
-    const { id, user } = removeDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId } = removeDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindSavedGameDto = {
       id,
-      user,
+      userId,
       withDeleted: false
     }
 
@@ -118,12 +125,12 @@ export class SavedGameService {
   }
 
   async restore(restoreDto: RemoveSavedGameDto): Promise<void> {
-    const { id, user } = restoreDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId } = restoreDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindSavedGameDto = {
       id,
-      user,
+      userId,
       withDeleted: true
     }
 
@@ -131,7 +138,7 @@ export class SavedGameService {
     if (!game) throw new NotFoundException('No saved game to restore found!');
 
     try {
-      const result = await this.savedGameRepository.restore(id);
+      const result = await this.savedGameRepository.restore(game.id);
       if (result.affected <= 0) throw new BadRequestException('Error restoring saved game!');
     } catch(error) {
       handlePostgresError(error);

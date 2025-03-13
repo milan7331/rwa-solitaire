@@ -1,14 +1,15 @@
-import { IsBoolean, IsNumber, IsOptional } from "class-validator";
-import { User } from "src/resources/user/entities/user.entity";
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 
 export class FindSavedGameDto {
     @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
 
     @IsOptional()
-    user?: User = undefined;
+    @IsNumber()
+    userId?: number;
 
+    @IsNotEmpty()
     @IsBoolean()
     withDeleted: boolean = false;
 }

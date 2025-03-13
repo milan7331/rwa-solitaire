@@ -1,17 +1,20 @@
-import { IsBoolean, IsDate, IsNumber } from "class-validator"
-import { WeeklyLeaderboard } from "../entities/leaderboard-weekly.entity";
-import { MonthlyLeaderboard } from "../entities/leaderboard-monthly.entity";
-import { YearlyLeaderboard } from "../entities/leaderboard-yearly.entity";
+import { IsBoolean, IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator"
+import { LeaderboardType } from "../entities/leaderboard.enum";
 
 export class FindLeaderboardDto {
+    @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
 
+    @IsOptional()
     @IsDate()
-    timePeriod?: Date = undefined;
+    timePeriod?: Date;
 
-    type?: typeof WeeklyLeaderboard | typeof MonthlyLeaderboard | typeof YearlyLeaderboard = undefined;
+    @IsOptional()
+    @IsEnum(LeaderboardType)
+    type?: LeaderboardType;
 
+    @IsNotEmpty()
     @IsBoolean()
     withDeleted: boolean = false;
 }

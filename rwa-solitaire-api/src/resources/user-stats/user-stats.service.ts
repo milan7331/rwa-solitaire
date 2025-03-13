@@ -2,44 +2,58 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { CreateUserStatsDto } from './dto/create-user-stats.dto';
 import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 
 import { UserStats } from './entities/user-stats.entity';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
+import { UserService } from '../user/user.service';
+import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 @Injectable()
 export class UserStatsService {
   constructor(
     @InjectRepository(UserStats)
     private readonly userStatsRepository: Repository<UserStats>,
+
+    private readonly userService: UserService,
   ) { }
 
   async create(createDto: CreateUserStatsDto): Promise<void> {
-    if (!createDto.user) throw new BadRequestException('Invalid parameters!');
+    if (createDto.userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const existingStats = await this.userStatsRepository.findOne({
-      where: { user: createDto.user }
+      where: {
+        user: { id: createDto.userId }
+      }
     });
     if (existingStats) throw new ConflictException('user-stats already exists for this user!');
+    const user = this.userService.findOne({ id: createDto.userId, withDeleted: false, withRelations: false });
 
     try {
-      await this.userStatsRepository.save(createDto);
+      await this.userStatsRepository.save({
+        gamesPlayed: 0,
+        gamesWon: 0,
+        totalTimePlayed: 0,
+        averageSolveTime: POSTGRES_MAX_INTEGER,
+        fastestSolveTime: POSTGRES_MAX_INTEGER,
+        user
+      } as DeepPartial<UserStats>);
     } catch (error) {
       handlePostgresError(error);
     }
   }
 
   async findOne(findDto: FindUserStatsDto): Promise<UserStats> {
-    const { id, user, withDeleted } = findDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId, withDeleted } = findDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     let result = null;
 
     const where: any = { };
-    if (id) where.id = id;
-    if (user) where.user = user;
+    if (id !== undefined) where.id = id;
+    if (userId !== undefined) where.userId = userId;
 
     try {
       result = await this.userStatsRepository.findOne({
@@ -55,12 +69,12 @@ export class UserStatsService {
   }
 
   async update(updateDto: UpdateUserStatsDto): Promise<void> {
-    const { id, user } = updateDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');;
+    const { id, userId } = updateDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserStatsDto = {
       id,
-      user,
+      userId,
       withDeleted: false
     }
 
@@ -76,12 +90,12 @@ export class UserStatsService {
   }
 
   async remove(removeDto: RemoveUserStatsDto): Promise<void> {
-    const { id, user } = removeDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId } = removeDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
     
     const findDto: FindUserStatsDto = {
       id,
-      user,
+      userId,
       withDeleted: false
     }
 
@@ -96,12 +110,12 @@ export class UserStatsService {
   }
 
   async restore(restoreDto: RemoveUserStatsDto): Promise<void> {
-    const { id, user } = restoreDto;
-    if (!id && !user) throw new BadRequestException('Invalid parameters!');
+    const { id, userId } = restoreDto;
+    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserStatsDto = {
       id,
-      user,
+      userId,
       withDeleted: false
     }
 

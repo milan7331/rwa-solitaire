@@ -23,6 +23,12 @@ export class User {
     @Column({ type: 'text' })
     passwordHash: string;
 
+    @Column({ type: 'text', default: '' })
+    firstname: string;
+
+    @Column({ type: 'text', default: '' })
+    lastname: string;
+
     @OneToOne(() => UserStats, (UserStats) => UserStats.user, { cascade: true, onDelete: 'CASCADE'})
     @JoinColumn()
     userStats: UserStats;
@@ -34,6 +40,6 @@ export class User {
     @JoinColumn()
     savedGame: SavedGame;
 
-    @DeleteDateColumn({ type: 'timestamptz'})
+    @DeleteDateColumn({ type: 'timestamptz' })
     deletedAt?: Date;
 }

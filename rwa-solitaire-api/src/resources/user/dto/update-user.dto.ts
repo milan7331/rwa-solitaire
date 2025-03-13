@@ -3,25 +3,35 @@ import { IsEmail, IsNumber, IsOptional, IsString, MinLength } from 'class-valida
 export class UpdateUserDto {
     @IsOptional()
     @IsNumber()
-    id?: number = undefined;
+    id?: number;
     
     @IsOptional()
     @IsString()
     @IsEmail()
-    email?: string = undefined;
+    email?: string;
 
     @IsOptional()
     @IsString()
     @MinLength(6)
-    username?: string = undefined;
+    username?: string;
 
     @IsOptional()
     @IsString()
     @MinLength(8)
-    password?: string = undefined;
+    password?: string;
 
     @IsOptional()
     @IsString()
     @MinLength(8)
-    newPassword?: string = undefined;
+    newPassword?: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(2)
+    firstname?: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(2)
+    lastname?: string;
 }

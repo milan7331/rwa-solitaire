@@ -1,17 +1,17 @@
 import { IsBoolean, IsDate, IsNumber, IsOptional } from "class-validator";
-import { User } from "src/resources/user/entities/user.entity";
 
 export class FindGameHistoryDto {
         @IsOptional()
         @IsNumber()
-        id?: number = undefined;
+        id?: number;
 
         @IsOptional()
-        user?: User = undefined;
+        @IsNumber()
+        userId?: number;
 
         @IsOptional()
         @IsDate()
-        startedTime?: Date = undefined;
+        startedTime?: Date;
 
         @IsOptional()
         @IsBoolean()

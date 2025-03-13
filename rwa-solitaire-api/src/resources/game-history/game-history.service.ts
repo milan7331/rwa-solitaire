@@ -2,7 +2,6 @@ import { BadRequestException, ConflictException, forwardRef, Inject, Injectable,
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from '../user/entities/user.entity';
 import { GameHistory } from './entities/game-history.entity';
 import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
@@ -12,15 +11,19 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 import { FindUserStatsDto } from '../user-stats/dto/find-user-stats.dto';
-import { Response } from 'express';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class GameHistoryService {
   constructor(
     @InjectRepository(GameHistory)
     private readonly historyRepository: Repository<GameHistory>,
-    @Inject(forwardRef(() => CronService)) private readonly cronService: CronService,
-    private readonly statsService: UserStatsService
+
+    @Inject(forwardRef(() => CronService))
+    private readonly cronService: CronService,
+    
+    private readonly userService: UserService,
+    private readonly statsService: UserStatsService,
   ) {}
 
   // used for leaderboard generation only
@@ -61,12 +64,18 @@ export class GameHistoryService {
   }
   
   async endGame(updateDto: UpdateGameHistoryDto): Promise<void> {
-    if (!updateDto.id && (!updateDto.user || !updateDto.startedTime)) throw new BadRequestException('Invalid parameters!');
+    const { id, userId, startedTime } = updateDto;
+
+    const isNotValidId = id === undefined;
+    const isNotValidTime = isNaN(startedTime.getTime());
+    const isNotValidUserId = userId === undefined;
+
+    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindGameHistoryDto = {
-      id: updateDto.id,
-      user: updateDto.user,
-      startedTime: updateDto.startedTime,
+      id,
+      userId,
+      startedTime,
       withDeleted: false
     }
 
@@ -84,49 +93,64 @@ export class GameHistoryService {
     await this.#updateUserStats(gameInProgress);
   }
   
-  async #updateUserStats(finishedGame: GameHistory): Promise<void> {
-    const { user, gameFinished } = finishedGame;
+  async #updateUserStats(game: GameHistory): Promise<void> {
+    const { user, gameFinished } = game;
     if (!gameFinished) throw new BadRequestException('Game not finished!');
     
     const findUserStatsDto: FindUserStatsDto = {
-      user,
+      userId: user.id,
       withDeleted: false
     }
     const userStats = await this.statsService.findOne(findUserStatsDto);
     if (!userStats) throw new Error('Error finding user stats');
 
-    userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + finishedGame.gameDurationInSeconds) / userStats.gamesPlayed + 1;
-    userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, finishedGame.gameDurationInSeconds);
+    userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + game.gameDurationInSeconds) / userStats.gamesPlayed + 1;
+    userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, game.gameDurationInSeconds);
     userStats.gamesPlayed++;
-    if (finishedGame.gameWon) userStats.gamesWon++;
-    userStats.totalTimePlayed += finishedGame.gameDurationInSeconds;
+    if (game.gameWon) userStats.gamesWon++;
+    userStats.totalTimePlayed += game.gameDurationInSeconds;
   
     this.statsService.update(userStats);
   }
 
   async create(createUserDto: CreateGameHistoryDto): Promise<void> {
-    if (!createUserDto.user || !createUserDto.startedTime) throw new BadRequestException('Invalid parameters!');
+    const { userId, startedTime, gameDifficulty } = createUserDto;
+
+    const isNotValidTime = isNaN(startedTime.getTime());
+    const isNotValidUserId = userId === undefined;
+    const isNotValidDifficulty = gameDifficulty > 1 || gameDifficulty < 0
+
+    if (isNotValidTime || isNotValidUserId || isNotValidDifficulty) throw new BadRequestException('Invalid parameters');
 
     const existingGame = await this.historyRepository.findOne({
       where: {
-        user: createUserDto.user,
-        startedTime: createUserDto.startedTime
+        user: { id: userId },
+        startedTime,
       },
       withDeleted: true
     });
     if (existingGame) throw new ConflictException('This game already exists!');
-    
+
+    const user = await this.userService.findOne({
+      id: userId,
+      withDeleted: false,
+      withRelations: false,
+    });
+    if (!user) throw new NotFoundException('User account required but not found!');
+
     try {
-      await this.historyRepository.save(createUserDto);
+      await this.historyRepository.save({ user, startedTime, gameDifficulty } as GameHistory);
     } catch(error) {
       handlePostgresError(error);
     }
   }
 
-  async findAllForUser(user: User): Promise<GameHistory[]> {
+  async findAllForUser(userId: number): Promise<GameHistory[]> {
     try {
       return await this.historyRepository.find({
-        where: { user: user },
+        where: { 
+          user: { id: userId } 
+        },
         withDeleted: false
       });
     } catch(error) {
@@ -143,15 +167,19 @@ export class GameHistoryService {
   }
 
   async findOne(findDto: FindGameHistoryDto): Promise<GameHistory> {
-    const { id, user, startedTime, withDeleted } = findDto;
+    const { id, userId, startedTime, withDeleted } = findDto;
     let result: GameHistory | null = null;
 
-    if (!id && (!user || !startedTime)) throw new BadRequestException('Invalid parameters');
+    const isNotValidId = id === undefined;
+    const isNotValidTime = isNaN(startedTime.getTime());
+    const isNotValidUserId = userId === undefined;
+
+    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
 
     const where: any = { };
-    if (id) where.id = id;
-    if (user) where.user = user;
-    if (startedTime) where.startedTime = startedTime;
+    if (!isNotValidId) where.id = id;
+    if (!isNotValidUserId) where.user = { id: userId };
+    if (!isNotValidTime) where.startedTime = startedTime;
 
     try {
       result = await this.historyRepository.findOne({
@@ -167,12 +195,17 @@ export class GameHistoryService {
   }
 
   async update(updateDto: UpdateGameHistoryDto): Promise<void> {
-    const { id, user, startedTime } = updateDto;
-    if (!id && (!startedTime || user)) throw new BadRequestException('Invalid parameters');
+    const { id, userId, startedTime } = updateDto;
+
+    const isNotValidId = id === undefined;
+    const isNotValidTime = isNaN(startedTime.getTime());
+    const isNotValidUserId = userId === undefined;
+
+    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
 
     const findDto: FindGameHistoryDto = {
       id,
-      user,
+      userId,
       startedTime,
       withDeleted: false
     }
@@ -189,10 +222,18 @@ export class GameHistoryService {
   }
 
   async remove(removeDto: RemoveGameHistoryDto): Promise<void> {
+    const { id, startedTime, userId } = removeDto;
+    
+    const isNotValidId = id === undefined;
+    const isNotValidTime = isNaN(startedTime.getTime());
+    const isNotValidUserId = userId === undefined;
+
+    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
+
     const findDto: FindGameHistoryDto = {
-      id: removeDto.id,
-      user: removeDto.user,
-      startedTime: removeDto.startedTime,
+      id,
+      userId,
+      startedTime,
       withDeleted: false
     }
 
@@ -207,10 +248,18 @@ export class GameHistoryService {
   }
 
   async restore(restoreDto: RemoveGameHistoryDto): Promise<void> {
+    const { id, startedTime, userId } = restoreDto;
+
+    const isNotValidId = id === undefined;
+    const isNotValidTime = isNaN(startedTime.getTime());
+    const isNotValidUserId = userId === undefined;
+
+    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
+
     const findDto: FindGameHistoryDto = {
-      id: restoreDto.id,
-      user: restoreDto.user,
-      startedTime: restoreDto.startedTime,
+      id,
+      userId,
+      startedTime,
       withDeleted: true
     }
     const game = await this.findOne(findDto);
