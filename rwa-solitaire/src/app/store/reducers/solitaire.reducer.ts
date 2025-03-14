@@ -16,7 +16,7 @@ export const initialSolitaireState: SolitaireState = {
     boards: boardAdapter.getInitialState(),
     winCondition: false,
     difficulty: SolitaireDifficulty.Hard,
-}
+};
 
 export const solitaireReducer = createReducer(
     initialSolitaireState,
@@ -337,7 +337,7 @@ function canDropOnFoundation(src: Card[], dest: Card[], srcIndex: number, founda
 
     // foundation suit check
     const fndIndex = foundation.findIndex(fnd => fnd === dest);
-    if (!fndIndex) return false;
+    if (fndIndex === -1) return false;
     if (fndIndex !== cardToMove.suit) return false;
 
     // ace check
