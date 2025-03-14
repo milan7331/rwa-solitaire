@@ -6,7 +6,7 @@ export const initialAudioState: AudioState = {
     audioVolume: 0.8,
     audioMuted: false,
     showAudioControl: false,
-}
+};
 
 export const audioReducer = createReducer(
     initialAudioState,
@@ -38,4 +38,4 @@ export const audioReducer = createReducer(
         ...state,
         showAudioControl: !state.showAudioControl
     }))
-)
+);

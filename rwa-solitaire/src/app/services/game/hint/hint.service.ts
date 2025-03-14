@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { SolitaireBoard } from '../../models/solitaire/solitaire-board';
-import { SolitaireHints } from '../../models/solitaire/solitaire-hints';
-import { SolitaireMove } from '../../models/solitaire/solitaire-move';
-import { Card, CardNumber } from '../../models/solitaire/card';
+import { SolitaireBoard } from '../../../models/solitaire/solitaire-board';
+import { SolitaireHints } from '../../../models/solitaire/solitaire-hints';
+import { SolitaireMove } from '../../../models/solitaire/solitaire-move';
+import { Card, CardNumber } from '../../../models/solitaire/card';
 
 @Injectable({
   providedIn: 'root'

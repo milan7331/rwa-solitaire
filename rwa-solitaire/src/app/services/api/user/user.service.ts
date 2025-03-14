@@ -1,67 +1,58 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, of } from 'rxjs';
-import { UserState } from '../../../models/state/user.state';
+import { first, map, Observable, of, throwError } from 'rxjs';
+import { UserData } from '../../../models/user/user-data';
+import { GameHistory } from '../../../models/user/game-history';
+import { UserStats } from '../../../models/user/user-stats';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  #apiUrl = environment.apiUrl + '/user';
+  #userUrl = environment.apiUrl + '/user';
+  #statsUrl = environment.apiUrl + '/stats';
+  #historyurl = environment.apiUrl + '/history';
+
 
   constructor(private readonly http: HttpClient) {}
 
   register(
     email: string,
     username: string,
-    password: string
-  ): Observable<boolean> {
-    const url = this.#apiUrl + '/register';
-    const data = { email, username, password };
+    password: string,
+    firstname?: string,
+    lastname?: string,
+  ): Observable<void> {
+    const url = this.#userUrl + '/register';
+    const data: any = { email, username, password };
+    if (firstname) data.firstname = firstname;
+    if (lastname) data.lastname = lastname;
 
-    return this.http.post(url, data, { observe: 'response'}).pipe(
-      map(response => {
-        return response.ok;
-      })
-    )
+    return this.http.post<void>(url, data, {});
   }
 
-  getCompleteUserData(
-    email?: string,
-    username?: string,
-    password?: string,
-    withRelations: boolean = false,
-  ): Observable<UserState | undefined> {
-    if (!email && !username && !password) return of(undefined);
+  getUserData(username: string): Observable<UserData> {
+    if (!username) return throwError(() => new Error('Failed to load user data, input parameters invalid!'));
 
-    const url = this.#apiUrl + '/find-one';
-    const data: any = {};
-    data.withRelations = withRelations;
-    if (email) data.email = email;
-    if (username) data.username = username;
-    if (password) data.password = password;
-
-    this.http.get(url, { withCredentials: true}, )
-
-
-
-    return of(undefined);
-  }
-
-  getUserData() {
+    const url = this.#userUrl + '/find';
     
+    return this.http.get<any>(url, { withCredentials: true, params: { username }});
   }
   
-  getUserStats() {
-    
+  getUserStats(username: string): Observable<UserStats> {
+    if (!username) return throwError(() => new Error('Failed to load user stats, input parameters invalid!'));
+
+    const url = this.#statsUrl + '/find';
+
+    return this.http.get<any>(url, { withCredentials: true, params: { username }});
   }
 
-  getUserGameHistory() {
+  getUserGameHistory(username: string): Observable<GameHistory> {
+    if (!username) return throwError(() => new Error('Failed to load user game history, input parameters invalid!'));
 
-  }
-    
-  getSavedGame() {
+    const url = this.#historyurl + '/get-all-games-user';
 
+    return this.http.get<any>(url, { withCredentials: true, params: { username }});
   }
 }

@@ -10,4 +10,4 @@ export const rootReducer: ActionReducerMap<AppState> = {
     solitaireState: solitaireReducer,
     userState: userReducer,
     leaderboardsState: leaderboardsReducer,
-}
+};

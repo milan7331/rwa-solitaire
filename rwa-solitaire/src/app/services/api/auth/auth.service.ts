@@ -12,34 +12,22 @@ export class AuthService {
 
   constructor(private readonly http: HttpClient) {}
 
-  login(username: string, password: string): Observable<boolean> {
+  login(username: string, password: string): Observable<void> {
     const url = this.#apiUrl + '/login';
     const data = { username, password };
 
-    return this.http.post(url, data, { withCredentials: true, observe: 'response' }).pipe(
-      map(response => {
-        return response.ok;
-      })
-    );
+    return this.http.post<void>(url, data, { withCredentials: true });
   }
 
-  logout(): Observable<boolean> {
+  logout(): Observable<void> {
     const url = this.#apiUrl + '/logout';
 
-    return this.http.post(url, {}, { withCredentials: true, observe: 'response' }).pipe(
-      map(response => {
-        return response.ok;
-      })
-    );
+    return this.http.delete<void>(url, { withCredentials: true });
   }
 
-  validateSession(): Observable<boolean> {
+  validateSession(): Observable<void> {
     const url = this.#apiUrl + '/validate-session';
 
-    return this.http.post(url, {}, { withCredentials: true, observe: 'response' }).pipe(
-      map(response => {
-        return response.ok
-      })
-    );
+    return this.http.post<void>(url, {}, { withCredentials: true });
   }
 }

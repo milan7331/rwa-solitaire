@@ -4,18 +4,15 @@ export const AuthActions = createActionGroup({
     source: 'Auth',
     events: {
         'Log in': props<{ username: string, password: string }>(),
-        'Log in success': emptyProps(),
-        'Log in failure': props<{ message: string }>(),
-
-        'Register': emptyProps(),
-        'Register success': emptyProps(),
-        'Register failure': emptyProps(),
+        'Log in success': props<{ username: string }>(),
+        'Log in failure': emptyProps(),
 
         'Logout': emptyProps(),
-        'Logout Success': emptyProps(),
-        'Logout Failure': props<{ message: string }>(),
+        'Logout success': emptyProps(),
+        'Logout failure': emptyProps(),
 
-        'Validate Session': emptyProps(),
-        'Validate Session Success': emptyProps(),
+        'Validate session': emptyProps(),
+        'Validate session success': props<{ username: string }>(),
+        'Validate session failure': emptyProps(),
     }
 });
