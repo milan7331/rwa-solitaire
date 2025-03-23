@@ -1,7 +1,7 @@
 import { createActionGroup, emptyProps, props } from "@ngrx/store";
 
 export const audioActions = createActionGroup({
-    source: 'Volume Control',
+    source: 'Volume Control Component',
     events: {
         'Set Volume': props<{value: number}>(),
         'Mute': emptyProps(),
@@ -12,4 +12,4 @@ export const audioActions = createActionGroup({
         'Hide audio controls': emptyProps(),
         'Toggle audio controls': emptyProps(),
     }
-})
+});

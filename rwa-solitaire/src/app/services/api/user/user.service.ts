@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { first, map, Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { UserData } from '../../../models/user/user-data';
 import { GameHistory } from '../../../models/user/game-history';
 import { UserStats } from '../../../models/user/user-stats';

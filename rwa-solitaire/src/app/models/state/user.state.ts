@@ -6,7 +6,7 @@ import { GameHistory } from "../user/game-history";
 import { SavedGame } from "../user/saved-game";
 
 export interface UserState {
-    isLoggedIn: boolean;
+    loginValid: boolean;
 
     userData: UserData;
     userStats: UserStats;

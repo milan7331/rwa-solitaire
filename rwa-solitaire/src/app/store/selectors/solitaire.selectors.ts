@@ -1,7 +1,6 @@
 import { createFeatureSelector, createSelector } from "@ngrx/store";
 import { SolitaireState } from "../../models/state/solitaire.state";
 import { boardAdapter } from "../reducers/solitaire.reducer";
-import { SolitaireDifficulty } from "../../models/solitaire/solitaire-difficulty";
 
 const selectSolitaireState = createFeatureSelector<SolitaireState>('solitaireState');
 

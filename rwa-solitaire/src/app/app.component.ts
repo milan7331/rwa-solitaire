@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { TopBarComponent } from "./components/standalone/top-bar/top-bar.component";
+import { Store } from '@ngrx/store';
+import { sessionActions } from './store/actions/auth.actions';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +15,14 @@ import { TopBarComponent } from "./components/standalone/top-bar/top-bar.compone
   styleUrl: './app.component.scss',
   standalone: true
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'rwa-solitaire';
+
+  constructor(
+    private readonly store: Store,
+  ) {}
+
+  ngOnInit(): void {
+    this.store.dispatch(sessionActions.validateSession());
+  }
 }
