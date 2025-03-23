@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from 'src/resources/user/user.service';
@@ -17,15 +17,30 @@ export class AuthService {
     async validateUser(username: string, password: string): Promise<User | null> {
         const findUserDto: FindUserDto = {
             username,
-            password: password,
+            password,
             withDeleted: false,
             withRelations: false,
-        }
+        };
 
         const user = await this.userService.findOne(findUserDto);
         
         if (!user) return null;
         return { ...user, passwordHash: '' } as User;
+    }
+
+    async validateSession(username: string, res: Response): Promise<void> {
+        const findUserDto: FindUserDto = {
+            username: username,
+            password: '',
+            withDeleted: false,
+            withRelations: false,
+        };
+
+        const user = await this.userService.findOne(findUserDto);
+        if (!user) throw new NotFoundException('User with said username not found!');
+
+        res.statusCode = 200;
+        res.statusMessage = 'Session valid!';
     }
 
     async login(req: Request, res: Response): Promise<void> {
