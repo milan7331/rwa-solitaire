@@ -1,0 +1,9 @@
+<mat-card>
+    <mat-card-content>
+        <div>Games played: {{ (stats$ | async)?.gamesPlayed }}</div>    
+        <div>Games won: {{ (stats$ | async)?.gamesWon }}</div>
+        <div>Time played: {{ (stats$ | async)?.totalTimePlayed }}</div>
+        <div>Average time: {{ (stats$ | async)?.averageSolveTime }}</div>
+        <div>Best time: {{ (stats$ | async)?.fastestSolveTime }}</div>
+    </mat-card-content>
+</mat-card>

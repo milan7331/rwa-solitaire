@@ -6,7 +6,7 @@ import { UserData } from "../../models/user/user-data";
 import { UserStats } from "../../models/user/user-stats";
 import { SavedGame } from "../../models/user/saved-game";
 import { loginActions, logoutActions, sessionActions } from "../actions/auth.actions";
-import { dashboardActions } from "../actions/user.actions";
+import { userEditActions, userMenuActions } from "../actions/user.actions";
 
 export const gameHistoryAdapter: EntityAdapter<GameHistory> = createEntityAdapter<GameHistory>({
     // promeniti da se sortira po datumu? i da je id nešto drugo nakon što zapravo dodam modele
@@ -55,13 +55,13 @@ export const userReducer = createReducer(
             },
         };
     }),
-    on(dashboardActions.getUserDataSuccess, (state, data) => {
+    on(userEditActions.getUserDataSuccess, (state, data) => {
         return {
             ...state,
             userData: data,
         }
     }),
-    on(dashboardActions.getUserStatsSuccess, (state, stats) => {
+    on(userMenuActions.getUserStatsSuccess, (state, stats) => {
         if (!checkUserStatsValid(stats)) return state;
 
         return {

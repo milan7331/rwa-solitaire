@@ -6,7 +6,7 @@ import { SolitaireComponent } from './components/pages/solitaire/solitaire.compo
 import { LoginComponent } from './components/pages/login/login.component';
 import { RegisterComponent } from './components/pages/register/register.component';
 import { AboutComponent } from './components/standalone/about/about.component';
-import { UserDashComponent } from './components/pages/user-dash/user-dash.component';
+import { MenuComponent } from './components/pages/menu/menu.component';
 
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
@@ -14,7 +14,7 @@ export const routes: Routes = [
     { path: 'leaderboards', component: LeaderboardsComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'dashboard', component: UserDashComponent },
+    { path: 'menu', component: MenuComponent },
     { path: 'about', component: AboutComponent },
     { path: '', redirectTo: 'home', pathMatch: 'full'},
     { path: '**', component: PageNotFoundComponent },

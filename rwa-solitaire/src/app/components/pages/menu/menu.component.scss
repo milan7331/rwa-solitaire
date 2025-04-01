@@ -1,0 +1,46 @@
+:host {
+    flex: 1 1 auto;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    .spacer {
+        flex: 1 1 auto;
+    }
+
+    mat-card {
+        min-width: 40rem;
+        width: 40%;
+
+
+        mat-card-content {
+                display: flex;
+                flex-flow: column nowrap;
+                justify-content: flex-start;
+                align-items: stretch;
+                row-gap: 2vh;
+
+            .new-game-buttons {
+                display: flex;
+                flex-flow: row nowrap;
+                justify-content: flex-start;
+                align-items: center;    
+                column-gap: 2vh;
+
+                * {
+                    flex: 1 1 auto;
+                }
+
+                :first-child {
+                    flex-grow: 4;
+                }
+            }
+        }
+    }
+}

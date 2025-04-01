@@ -4,7 +4,7 @@ import { Store } from "@ngrx/store";
 import { catchError, map, switchMap, throttleTime, of, EMPTY, exhaustMap } from "rxjs";
 import { loginValid } from "../../utils/operators/login-valid";
 import { withUsername } from "../../utils/operators/with-username";
-import { dashboardActions, registerActions } from "../actions/user.actions";
+import { userEditActions, userMenuActions, userRegisterActions } from "../actions/user.actions";
 import { inject, Injectable } from "@angular/core";
 
 @Injectable()
@@ -15,7 +15,7 @@ export class UserEffects {
 
     registerUser$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(registerActions.register),
+            ofType(userRegisterActions.register),
             exhaustMap((action) =>
                 this.userService.register(
                     action.email,
@@ -24,7 +24,7 @@ export class UserEffects {
                     action.firstname,
                     action.lastname
                 ).pipe(
-                    map(() => registerActions.registerSuccess()),
+                    map(() => userRegisterActions.registerSuccess()),
                     catchError(error => {
                         console.error(error);
                         return EMPTY;
@@ -36,13 +36,13 @@ export class UserEffects {
 
     getUserData$ = createEffect(() => 
         this.actions$.pipe(
-            ofType(dashboardActions.getUserData),
+            ofType(userEditActions.getUserData),
             throttleTime(1000),
             loginValid(this.store),
             withUsername(this.store),
             switchMap((username) => 
                 this.userService.getUserData(username).pipe(
-                    map(data => dashboardActions.getUserDataSuccess(data)),
+                    map(data => userEditActions.getUserDataSuccess(data)),
                     catchError(error => {
                         console.error(error);
                         return EMPTY;
@@ -54,13 +54,13 @@ export class UserEffects {
 
     getUserStats$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(dashboardActions.getUserStats),
+            ofType(userMenuActions.getUserStats),
             throttleTime(1000),
             loginValid(this.store),
             withUsername(this.store),
             switchMap((username) =>
                 this.userService.getUserStats(username).pipe(
-                    map(stats => dashboardActions.getUserStatsSuccess(stats)),
+                    map(stats => userMenuActions.getUserStatsSuccess(stats)),
                     catchError(error => {
                         console.error(error);
                         return EMPTY;
