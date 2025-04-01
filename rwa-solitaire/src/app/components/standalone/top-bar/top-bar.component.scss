@@ -1,11 +1,12 @@
 @use '@angular/material' as mat;
 
-.top-bar-container {
+:host {
     overflow: hidden;
 }
 
-.top-bar {
+mat-toolbar {
     display: flex;
+    border-radius: 12px;
 
     @include mat.toolbar-overrides((
         container-background-color: var(--mat-sys-primary-container),

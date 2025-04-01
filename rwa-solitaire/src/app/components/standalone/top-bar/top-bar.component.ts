@@ -1,21 +1,16 @@
 import { Component } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
 import { AudioService } from '../../../services/app/audio/audio.service';
 import { ThemeService } from '../../../services/app/theme/theme.service';
-import { AboutComponent } from '../about/about.component';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-top-bar',
   imports: [
-    MatCardModule,
     MatToolbarModule,
-    MatButtonToggleModule,
     MatIconModule,
     MatButtonModule,
   ],
