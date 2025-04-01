@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatListModule } from '@angular/material/list';
 
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
-import { Router } from '@angular/router';
 import { AudioService } from '../../../services/app/audio/audio.service';
 import { BgAnimationComponent } from "../../standalone/bg-animation/bg-animation.component";
 
@@ -16,7 +19,10 @@ import { BgAnimationComponent } from "../../standalone/bg-animation/bg-animation
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    BgAnimationComponent
+    MatDividerModule,
+    BgAnimationComponent,
+    MatButtonToggleModule,
+    MatListModule,
 ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

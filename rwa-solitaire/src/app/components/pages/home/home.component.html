@@ -1,12 +1,25 @@
 <app-bg-animation></app-bg-animation>
-<mat-card class="home-card">
+<mat-card>
     <mat-card-content>
-        <div class="title">RWA Solitaire</div>
-        <p>This project was developed for the Razvoj Web Aplikacija course and presents a modern take on the classic Solitaire game. Built using modern web development technologies.</p>
-        <div class="label">QUICK PLAY</div>
-        <div class="quick-play">
-            <button mat-fab extended (click)="loadSolitairePage(difficulty.Easy)">Easy</button>
-            <button mat-fab extended (click)="loadSolitairePage(difficulty.Hard)">Hard</button>
+        <div class="card-content-left">
+            <span class="title">Welcome to RWA Solitaire</span>
+            <p class="info">This project was developed for the Razvoj Web Aplikacija course and presents a modern take on the classic Solitaire game. Built using modern web development technologies.</p>
+        </div>
+        <mat-divider vertical="true"></mat-divider>
+        <div class="card-content-right">
+            <span>Quickplay</span>
+            <button mat-fab extended (click)="loadSolitairePage(difficulty.Easy)">
+                <mat-icon>star</mat-icon>
+                <mat-icon>star_outline</mat-icon>
+                <mat-icon>star_outline</mat-icon>
+                Easy
+            </button>
+            <button mat-fab extended (click)="loadSolitairePage(difficulty.Hard)">
+                <mat-icon>star</mat-icon>
+                <mat-icon>star</mat-icon>
+                <mat-icon>star</mat-icon>
+                Hard
+            </button>
         </div>
     </mat-card-content>
 </mat-card>
