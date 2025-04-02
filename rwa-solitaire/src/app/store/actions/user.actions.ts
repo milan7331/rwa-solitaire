@@ -28,3 +28,12 @@ export const userRegisterActions = createActionGroup({
         'Register failure': emptyProps(),
     }
 });
+
+export const userSavedGameActions = createActionGroup({
+    source: 'Menu page | continue saved game ',
+    events: {
+        'Load saved game': emptyProps(),
+        'Load saved game success': props<any>(), // dodati solitaire board ili nešto slično
+        'Load saved game failure': emptyProps(),
+    }
+})

@@ -34,7 +34,7 @@ export class HomeComponent {
   constructor(
     private readonly router: Router,
     private readonly audio: AudioService,
-  ) { }
+  ) {}
  
   loadSolitairePage(difficulty: SolitaireDifficulty) {
     this.router.navigate(['/solitaire'], { state: {difficulty} });

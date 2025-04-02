@@ -3,14 +3,14 @@
 <div class="spacer"></div>
 <mat-card>
     <mat-card-content>
-        <button mat-fab extended>Continue</button>
+        <button mat-fab extended (click)="continueGame()">Continue</button>
         <div class="new-game-buttons">
-            <button mat-fab extended>Start new game</button>
-            <button mat-fab extended>Difficulty: Hard</button>
+            <button mat-fab extended (click)="loadSolitairePage()">Start new game</button>
+            <button mat-fab extended (click)="changeDifficulty()">Difficulty: {{ SolitaireDifficulty[this.difficulty] }}</button>
         </div>
-        <button mat-fab extended>Leaderboards</button>
-        <button mat-fab extended>Edit profile</button>
-        <button mat-fab extended>Log out</button>
+        <button mat-fab extended (click)="loadLeaderboardsPage()">Leaderboards</button>
+        <button mat-fab extended (click)="loadEditProfilePage()">Edit profile</button>
+        <button mat-fab extended (click)="logout()">Log out</button>
     </mat-card-content>
 </mat-card>
 <div class="spacer"></div>
