@@ -25,6 +25,40 @@ export class UserService {
     private readonly hashService: HashService
   ) { }
 
+  async isUsernameAvailable(username: string): Promise<void> {
+    let user: User | null;
+
+    try {
+      user = await this.userRepository.findOne({
+        where: { username },
+        withDeleted: true,
+        select: ['id'],
+      });
+    } catch(error) {
+      handlePostgresError(error);
+    }
+
+    if (user) throw new BadRequestException('Username already in use!');
+    return;
+  }
+  
+  async isEmailAvailable(email: string): Promise<void> {
+    let user: User | null;
+
+    try {
+      user = await this.userRepository.findOne({
+        where: { email },
+        withDeleted: true,
+        select: ['id'],
+      });
+    } catch(error) {
+      handlePostgresError(error);
+    }
+
+   if (user) throw new BadRequestException('Email already in use!');
+   return;
+  }
+
   async create(createDto: CreateUserDto): Promise<void> {
     const { email, username, password, firstname, lastname } = createDto;
     if (!email || !username || !password) throw new BadRequestException('Invalid parameters!');

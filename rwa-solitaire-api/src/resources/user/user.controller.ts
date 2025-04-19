@@ -11,6 +11,18 @@ import { FindUserDto } from './dto/find-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('is-username-available')
+  @Get('is_username_available')
+  async checkUsername(@Query() username: string) {
+    return await this.userService.isUsernameAvailable(username);
+  }
+
+  @Get('is-email-available')
+  @Get('is_email_available')
+  async checkEmail(@Query() email: string) {
+    return await this.userService.isEmailAvailable(email);
+  }
+
   @Post('register')
   @Post('create')
   @Public()
