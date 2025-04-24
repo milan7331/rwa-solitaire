@@ -1,22 +1,29 @@
 import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, ValidationErrors } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule, ProgressSpinnerMode } from '@angular/material/progress-spinner';
 
 import { BgAnimationComponent } from '../../standalone/bg-animation/bg-animation.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { createPatternValidator } from '../../../utils/validators/regex-validator/regex.factory';
+import { LOGIN_RULES_PASSWORD, LOGIN_RULES_USERNAME } from '../../../utils/validators/regex-validator/regex-login.rules';
+import { RegexValidationRule } from '../../../models/validation/regex-rule';
 
 @Component({
   selector: 'app-login',
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
     MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     BgAnimationComponent
   ],
   templateUrl: './login.component.html',
@@ -24,19 +31,56 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true
 })
 export class LoginComponent {
-  passwordVisible: boolean;
+  showPassword: boolean;
+  showErrors: boolean;
+  showLoading: boolean;
+  
   loginForm: FormGroup;
 
-  constructor() {
-    this.passwordVisible = true;
+  get username() { return this.loginForm.get('username'); }
+  get password() { return this.loginForm.get('password'); }
 
-    this.loginForm = new FormGroup({
-      username: new FormControl('', [Validators.required, Validators.minLength(6)]),
-      password: new FormControl('', [Validators.required, Validators.minLength(8)])
+  constructor(
+    private readonly formBuilder: FormBuilder
+  ) {
+    this.showPassword = true;
+    this.showErrors = false;
+    this.showLoading = false;
+
+    this.loginForm = this.formBuilder.group({
+      username: ['', [createPatternValidator(LOGIN_RULES_USERNAME)], []],
+      password: ['', [createPatternValidator(LOGIN_RULES_PASSWORD)], []],
     });
   }
 
+  onSubmit(): void {
+    this.loginForm.markAllAsTouched();
+
+    console.log(this.username?.errors);
+
+    if (this.loginForm.invalid) {
+      this.showErrors = true;
+      return;
+    }
+
+    this.showErrors = false;
+    this.showLoading = true;
+
+    //const { username, password } = this.loginForm.value;
+    //console.log('Login atempted with: ', { username, password });
+
+    this.showLoading = false;
+  }
+
   togglePasswordVisibility = () => {
-    this.passwordVisible = !this.passwordVisible;
+    this.showPassword = !this.showPassword;
+  }
+
+  // returns the first error message
+  getErrorMessage(errors: ValidationErrors | null | undefined): string {
+    if (!errors) return '';
+
+    const firstError: RegexValidationRule | null | undefined = Object.values(errors)[0];
+    return firstError?.message ?? 'Invalid input';
   }
 }

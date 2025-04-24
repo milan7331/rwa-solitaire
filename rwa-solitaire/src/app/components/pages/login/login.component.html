@@ -1,19 +1,27 @@
 <app-bg-animation></app-bg-animation>
-<mat-card class="login-card">
+<mat-card>
     <mat-card-content>
-        <form [formGroup]="loginForm">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <mat-form-field>
                 <mat-label>Username</mat-label>
-                <input matInput>
+                <input matInput formControlName="username" maxlength="32">
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(username?.errors)}} }
+                </mat-error>               
             </mat-form-field>
             <mat-form-field>
-                    <mat-label>Password</mat-label>
-                    <input matInput [type]="passwordVisible ? 'password' : 'text'">
-                    <button mat-icon-button matSuffix (click)="togglePasswordVisibility()">
-                        <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
-                    </button>
+                <mat-label>Password</mat-label>
+                <input matInput formControlName="password" [type]="showPassword ? 'password' : 'text'" maxlength="64">
+                <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+                    <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(password?.errors)}} }
+                </mat-error>
             </mat-form-field>
+            <button mat-fab extended type="submit" [disabledInteractive]="showLoading">
+                @if (showLoading) { <mat-spinner></mat-spinner> } @else { Log In }
+            </button>
         </form>
-        <button mat-fab extended>Log In</button>
     </mat-card-content>
 </mat-card>
