@@ -12,6 +12,7 @@ import { BgAnimationComponent } from '../../standalone/bg-animation/bg-animation
 import { createPatternValidator } from '../../../utils/validators/regex-validator/regex.factory';
 import { LOGIN_RULES_PASSWORD, LOGIN_RULES_USERNAME } from '../../../utils/validators/regex-validator/regex-login.rules';
 import { RegexValidationRule } from '../../../models/validation/regex-rule';
+import { of, switchMap, timer } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -56,8 +57,6 @@ export class LoginComponent {
   onSubmit(): void {
     this.loginForm.markAllAsTouched();
 
-    console.log(this.username?.errors);
-
     if (this.loginForm.invalid) {
       this.showErrors = true;
       return;
@@ -66,9 +65,15 @@ export class LoginComponent {
     this.showErrors = false;
     this.showLoading = true;
 
+    setTimeout(() => {
+      this.loadingEnd();
+    }, 5000);
+
     //const { username, password } = this.loginForm.value;
     //console.log('Login atempted with: ', { username, password });
+  }
 
+  loadingEnd(): void {
     this.showLoading = false;
   }
 
