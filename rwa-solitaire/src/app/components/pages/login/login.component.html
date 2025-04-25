@@ -1,6 +1,10 @@
 <app-bg-animation></app-bg-animation>
 <mat-card>
+    <mat-card-header>
+        <mat-card-title>Log in</mat-card-title>
+    </mat-card-header>
     <mat-card-content>
+        <mat-divider></mat-divider>
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <mat-form-field>
                 <mat-label>Username</mat-label>
@@ -11,7 +15,7 @@
             </mat-form-field>
             <mat-form-field>
                 <mat-label>Password</mat-label>
-                <input matInput formControlName="password" [type]="showPassword ? 'password' : 'text'" maxlength="64">
+                <input matInput formControlName="password" [type]="showPassword ? 'text' : 'password'" maxlength="64">
                 <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
                     <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
@@ -23,5 +27,10 @@
                 @if (showLoading) { <mat-spinner diameter="30"></mat-spinner> } @else { Log In }
             </button>
         </form>
+        <mat-divider></mat-divider>
+        <div>
+            Don't have an account?
+            <a href="/register">Register</a>
+        </div>
     </mat-card-content>
 </mat-card>

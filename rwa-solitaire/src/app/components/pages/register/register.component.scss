@@ -24,8 +24,15 @@
             flex-wrap: nowrap;
             justify-content: flex-start;
             align-items: stretch;
+
+            div {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+            }
         }
-        
+
         a {
             color: var(--mat-sys-on-primary-container);
         }
