@@ -10,5 +10,5 @@
     <button mat-button class="ml-05" (click)="loadLeaderboardsPage()"><mat-icon>leaderboard</mat-icon>Leaderboards</button>
     <button mat-button class="ml-05" (click)="loadAboutPage()"><mat-icon>info</mat-icon>About</button>
     <button mat-icon-button class="ml-05 icon-btn" (click)="toggleDarkMode()"><mat-icon>dark_mode</mat-icon></button>
-    <button mat-icon-button class="ml-05 icon-btn" (click)="toggleAudioControl($event)"><mat-icon>{{ volumeIcon$ | async }}</mat-icon></button>
+    <button mat-icon-button class="ml-05 icon-btn" (click)="toggleAudioControl($event)" id="volume-button"><mat-icon>{{ volumeIcon$ | async }}</mat-icon></button>
 </mat-toolbar>

@@ -3,12 +3,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
 
 import { AudioService } from '../../../services/app/audio/audio.service';
 import { selectAudioVolume, selectAudioVolumeIcon } from '../../../store/selectors/audio.selectors';
@@ -18,13 +18,13 @@ import { audioActions } from '../../../store/actions/audio.actions';
   selector: 'app-audio-control',
   imports: [
     CommonModule,
-    MatDialogModule,
     MatButtonModule,
     MatMenuModule,
     MatTooltipModule,
     MatSliderModule,
     MatIconModule,
     MatCardModule,
+    MatInputModule,
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss',
