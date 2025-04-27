@@ -1,6 +1,7 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import { WindowService } from '../../../services/app/window/window.service';
-import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-bg-animation',
@@ -10,20 +11,19 @@ import { Subject, takeUntil } from 'rxjs';
   standalone: true
 })
 export class BgAnimationComponent implements OnInit, AfterViewInit {
-  #destroy$: Subject<void>;
-
   // Note: background animations are set to work with fixed dimensions -> font-size 30px & 60 px margin
   suits = '♠♥♦♣';
   elements: string = '';
   elementCount: { x: number, y: number } = { x: 40, y: 30 };
 
-  constructor(private readonly winService: WindowService) {
-    this.#destroy$ = new Subject<void>();
-  }
+  constructor(
+    private readonly winService: WindowService,
+    private readonly destroyRef: DestroyRef,
+  ) {}
 
   ngOnInit(): void {
     this.winService.windowSize$
-      .pipe(takeUntil(this.#destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((win) => {
         this.elementCount = this.#getBgElementCount(win.width, win.height);
         this.elements = this.#fillBgElementsArray(this.elementCount);

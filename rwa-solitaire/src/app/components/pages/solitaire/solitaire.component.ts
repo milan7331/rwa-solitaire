@@ -1,12 +1,13 @@
-import { Component, OnDestroy, OnInit, HostBinding } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostBinding, DestroyRef } from '@angular/core';
 import { CommonModule, Location, NgTemplateOutlet } from '@angular/common';
 import { Store } from '@ngrx/store';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DragDropModule, CdkDragDrop, Point } from '@angular/cdk/drag-drop';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Subject, takeUntil, filter } from 'rxjs';
 
 import { selectBoard } from '../../../store/selectors/solitaire.selectors';
 import { solitaireActions } from '../../../store/actions/solitaire.actions';
@@ -42,7 +43,7 @@ import { GameControlComponent } from "../../standalone/game-control/game-control
   styleUrl: './solitaire.component.scss',
   standalone: true
 })
-export class SolitaireComponent implements OnInit, OnDestroy {    
+export class SolitaireComponent implements OnInit {    
   difficulty: SolitaireDifficulty;
   
   board: SolitaireBoard | null;
@@ -51,10 +52,9 @@ export class SolitaireComponent implements OnInit, OnDestroy {
   hiddenCards: Card[];
   hiddenCardsIndex: number;
   
-  #destroy$: Subject<void>;
   #clickOffset: Point;
 
-  @HostBinding('class.light-mode')
+  @HostBinding('class.light-mode') // ???
   get lightModeClassBinding() {
     return this.themeService.lightMode();
   } 
@@ -66,6 +66,7 @@ export class SolitaireComponent implements OnInit, OnDestroy {
     private readonly hintService: HintService,
     private readonly timerService: TimerService,
     private readonly themeService: ThemeService,
+    private readonly destroyRef: DestroyRef,
   ) {
     this.difficulty = this.#getGameDifficultyFromRoute();
     
@@ -75,7 +76,6 @@ export class SolitaireComponent implements OnInit, OnDestroy {
     this.hiddenCards = [];
     this.hiddenCardsIndex = 20;
     
-    this.#destroy$ = new Subject<void>();
     this.#clickOffset = { x: 0, y: 0 } as Point;
   }
 
@@ -84,17 +84,12 @@ export class SolitaireComponent implements OnInit, OnDestroy {
     const board$ = this.store.select(selectBoard);
 
     board$.pipe(
-      takeUntil(this.#destroy$),
+      takeUntilDestroyed(this.destroyRef),
       filter(board => board !== undefined)
     ).subscribe((board) => {
       this.board = board;
       this.hints = this.hintService.getHints(board);
     });
-  }
-
-  ngOnDestroy(): void {
-    this.#destroy$.next();
-    this.#destroy$.complete();
   }
 
   drawCards(): void {

@@ -1,6 +1,7 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, of, Subject, takeUntil } from 'rxjs';
+import { Observable, of} from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Store } from '@ngrx/store';
 
@@ -26,8 +27,7 @@ import { selectGameDifficultyState, selectUndoAvailability } from '../../../stor
   styleUrl: './game-control.component.scss',
   standalone: true
 })
-export class GameControlComponent implements OnInit, OnDestroy {
-  #destroy$: Subject<void>;
+export class GameControlComponent implements OnInit {
   #difficulty$: Observable<SolitaireDifficulty>;
   undoAvailable$: Observable<boolean>;
 
@@ -38,9 +38,9 @@ export class GameControlComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly store: Store,
-    private readonly audioService: AudioService
+    private readonly audioService: AudioService,
+    private readonly destroyRef: DestroyRef,
   ) {
-    this.#destroy$ = new Subject<void>();
     this.#difficulty$ = of(SolitaireDifficulty.Hard);
     this.undoAvailable$ = of(false);
 
@@ -54,13 +54,8 @@ export class GameControlComponent implements OnInit, OnDestroy {
     this.undoAvailable$ = this.store.select(selectUndoAvailability);
 
     this.#difficulty$
-      .pipe(takeUntil(this.#destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(diff => this.#difficulty = diff);
-  }
-
-  ngOnDestroy(): void {
-    this.#destroy$.next();
-    this.#destroy$.complete();
   }
 
   public startNewGame(): void {

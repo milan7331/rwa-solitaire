@@ -1,21 +1,20 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, debounceTime, fromEvent, Observable, Subject, takeUntil } from 'rxjs';
+import { DestroyRef, Injectable } from '@angular/core';
+import { BehaviorSubject, debounceTime, fromEvent, Observable } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WindowService implements OnDestroy {
-  #destroy$: Subject<void>;
-  
+export class WindowService {  
   #windowSize: BehaviorSubject<{ width: number; height: number }>;
   #cursorPosition: BehaviorSubject<{ x: number, y: number }>;
   
   windowSize$: Observable<{ width: number; height: number }>;
   cursorPosition$: Observable<{ x: number, y: number }>;
 
-  constructor() {
-    this.#destroy$ = new Subject<void>();
-
+  constructor(
+    private readonly destroyRef: DestroyRef,
+  ) {
     this.#windowSize = new BehaviorSubject({ width: window.innerWidth, height: window.innerHeight });
     this.#cursorPosition = new BehaviorSubject({ x: 0, y: 0 });
 
@@ -27,7 +26,7 @@ export class WindowService implements OnDestroy {
 
   #initialize() {
     fromEvent(window, 'resize')
-      .pipe(debounceTime(100), takeUntil(this.#destroy$))
+      .pipe(debounceTime(100), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.#windowSize.next({
           width: window.innerWidth,
@@ -36,17 +35,12 @@ export class WindowService implements OnDestroy {
       });
 
     fromEvent<MouseEvent>(window, 'mousemove')
-      .pipe(takeUntil(this.#destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event: MouseEvent) => {
         this.#cursorPosition.next({
           x: event.clientX,
           y: event.clientY
         });
       });
-  }
-
-  ngOnDestroy(): void {
-    this.#destroy$.next();
-    this.#destroy$.complete();
   }
 }

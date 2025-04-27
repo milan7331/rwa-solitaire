@@ -27,6 +27,11 @@ export class TimerService implements OnDestroy{
     );
   }
 
+  ngOnDestroy(): void {
+    this.#removeTimerSubscription();
+    this.#timer$.complete();
+  }
+
   start(): void {
     if (this.#timerSubscription === null) {
       this.#startTime = Date.now();
@@ -73,10 +78,5 @@ export class TimerService implements OnDestroy{
     }
 
     return false;
-  }
-
-  ngOnDestroy(): void {
-    this.#removeTimerSubscription();
-    this.#timer$.complete();
   }
 }
