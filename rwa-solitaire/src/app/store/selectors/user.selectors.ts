@@ -3,7 +3,7 @@ import { UserState } from "../../models/state/user.state";
 
 const selectUserState = createFeatureSelector<UserState>('userState');
 
-export const selectUserloginValid = createSelector(
+export const selectUserLoginValid = createSelector(
     selectUserState,
     (state) => state.loginValid
 );

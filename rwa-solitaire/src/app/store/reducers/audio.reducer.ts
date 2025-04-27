@@ -5,7 +5,6 @@ import { audioActions } from "../actions/audio.actions";
 export const initialAudioState: AudioState = {
     audioVolume: 0.8,
     audioMuted: false,
-    showAudioControl: false,
 };
 
 export const audioReducer = createReducer(
@@ -26,16 +25,4 @@ export const audioReducer = createReducer(
         ...state,
         audioMuted: !state.audioMuted
     })),
-    on(audioActions.showAudioControls, (state) => ({
-        ...state,
-        showAudioControl: true
-    })),
-    on(audioActions.hideAudioControls, (state) => ({
-        ...state,
-        showAudioControl: false
-    })),
-    on(audioActions.toggleAudioControls, (state) => ({
-        ...state,
-        showAudioControl: !state.showAudioControl
-    }))
 );

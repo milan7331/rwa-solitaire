@@ -7,9 +7,5 @@ export const audioActions = createActionGroup({
         'Mute': emptyProps(),
         'Unmute': emptyProps(),
         'Toggle Mute': emptyProps(),
-
-        'Show audio controls': emptyProps(),
-        'Hide audio controls': emptyProps(),
-        'Toggle audio controls': emptyProps(),
     }
 });

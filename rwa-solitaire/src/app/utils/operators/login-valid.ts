@@ -1,10 +1,10 @@
 import { Store } from "@ngrx/store";
 import { filter, map, Observable, withLatestFrom } from "rxjs";
-import { selectUserloginValid } from "../../store/selectors/user.selectors";
+import { selectUserLoginValid } from "../../store/selectors/user.selectors";
 
 export const loginValid = (store: Store) => <T>(source: Observable<T>) =>
     source.pipe(
-        withLatestFrom(store.select(selectUserloginValid)),
+        withLatestFrom(store.select(selectUserLoginValid)),
         filter(([_, loginValid]) => loginValid),
         map(([action]) => action),
     );

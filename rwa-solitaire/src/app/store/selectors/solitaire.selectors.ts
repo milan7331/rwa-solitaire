@@ -17,7 +17,7 @@ export const selectGameEndConditionState = createSelector(
 export const selectGameDifficultyState = createSelector(
     selectSolitaireState,
     (state: SolitaireState) => state.difficulty
-)
+);
 
 export const selectBoard = createSelector(
     selectBoardsState,
