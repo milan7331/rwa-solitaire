@@ -1,1 +1,9 @@
-<p>audio-control works!</p>
+<mat-card>
+    <mat-card-content>
+        <button mat-icon-button (click)="toggleMute()" ><mat-icon>{{ volumeIcon$ | async }}</mat-icon></button>
+        <mat-slider min="0.00" max="1.00" step="0.05">
+            <input matSliderThumb [value]="audioVolume$ | async" (valueChange)="changeVolume($event)">
+        </mat-slider>
+    </mat-card-content>
+</mat-card>
+

@@ -13,6 +13,7 @@ import { BgAnimationComponent } from '../../standalone/bg-animation/bg-animation
 import { createPatternValidator } from '../../../utils/validators/regex-validator/regex.factory';
 import { RegexValidationRule } from '../../../models/validation/regex-rule';
 import { RULES_REGISTER_EMAIL, RULES_REGISTER_FIRSTNAME, RULES_REGISTER_LASTNAME, RULES_REGISTER_PASSWORD, RULES_REGISTER_USERNAME } from '../../../utils/validators/regex-validator/regex-register.rules';
+import { AudioService } from '../../../services/app/audio/audio.service';
 
 @Component({
   selector: 'app-register',
@@ -46,7 +47,8 @@ export class RegisterComponent {
   get lastName() { return this.registerForm.get('lastName'); }
 
   constructor(
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly audio: AudioService,
   ) {
     this.showPassword = false;
     this.showErrors = false;
@@ -62,6 +64,7 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
+    this.audio.play_buttonPress();
     this.registerForm.markAsTouched();
 
     if (this.registerForm.invalid) {
@@ -79,6 +82,7 @@ export class RegisterComponent {
   }
 
   togglePasswordVisibility = () => {
+    this.audio.play_buttonPress();
     this.showPassword = !this.showPassword;
   }
 

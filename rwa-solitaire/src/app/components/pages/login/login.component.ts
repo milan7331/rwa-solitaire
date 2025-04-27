@@ -13,6 +13,7 @@ import { createPatternValidator } from '../../../utils/validators/regex-validato
 import { LOGIN_RULES_PASSWORD, LOGIN_RULES_USERNAME } from '../../../utils/validators/regex-validator/regex-login.rules';
 import { RegexValidationRule } from '../../../models/validation/regex-rule';
 import { MatDividerModule } from '@angular/material/divider';
+import { AudioService } from '../../../services/app/audio/audio.service';
 
 @Component({
   selector: 'app-login',
@@ -43,7 +44,8 @@ export class LoginComponent {
   get password() { return this.loginForm.get('password'); }
 
   constructor(
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
+    private readonly audio: AudioService,
   ) {
     this.showPassword = false;
     this.showErrors = false;
@@ -56,6 +58,7 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
+    this.audio.play_buttonPress();
     this.loginForm.markAllAsTouched();
 
     if (this.loginForm.invalid) {
@@ -79,6 +82,7 @@ export class LoginComponent {
   }
 
   togglePasswordVisibility = () => {
+    this.audio.play_buttonPress();
     this.showPassword = !this.showPassword;
   }
 
