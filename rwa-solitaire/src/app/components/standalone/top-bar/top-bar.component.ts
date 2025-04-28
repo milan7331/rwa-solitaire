@@ -107,7 +107,6 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   #initOverlay(): void {
     const button = this.host.nativeElement.querySelector('#volume-button');
-    console.log(button);
     const positionStrategy = this.overlay.position()
       .flexibleConnectedTo(button)
       .withPositions([
@@ -132,6 +131,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
     });
 
     merge(
+      this.#overlayRef.outsidePointerEvents(),
       this.#overlayRef.backdropClick(),
       this.#overlayRef.keydownEvents().pipe(filter(ev => ev.key === 'Escape')),
     ).pipe(

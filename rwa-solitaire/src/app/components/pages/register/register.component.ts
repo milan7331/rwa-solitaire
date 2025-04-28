@@ -9,7 +9,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 
-import { BgAnimationComponent } from '../../standalone/bg-animation/bg-animation.component';
 import { createPatternValidator } from '../../../utils/validators/regex-validator/regex.factory';
 import { RegexValidationRule } from '../../../models/validation/regex-rule';
 import { RULES_REGISTER_EMAIL, RULES_REGISTER_FIRSTNAME, RULES_REGISTER_LASTNAME, RULES_REGISTER_PASSWORD, RULES_REGISTER_USERNAME } from '../../../utils/validators/regex-validator/regex-register.rules';
@@ -27,7 +26,6 @@ import { AudioService } from '../../../services/app/audio/audio.service';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    BgAnimationComponent,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',

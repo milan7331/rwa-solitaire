@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Store } from '@ngrx/store';
 
 import { TopBarComponent } from "./components/standalone/top-bar/top-bar.component";
-import { Store } from '@ngrx/store';
+import { BgAnimationComponent } from './components/standalone/bg-animation/bg-animation.component';
 import { sessionActions } from './store/actions/auth.actions';
 
 @Component({
@@ -10,6 +11,7 @@ import { sessionActions } from './store/actions/auth.actions';
   imports: [
     RouterOutlet,
     TopBarComponent,
+    BgAnimationComponent,
 ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -1,21 +1,20 @@
 import { Component } from '@angular/core';
-import { BgAnimationComponent } from '../../standalone/bg-animation/bg-animation.component';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+
 import { UserStatsComponent } from "../../standalone/user-stats/user-stats.component";
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
-import { Router } from '@angular/router';
 import { AudioService } from '../../../services/app/audio/audio.service';
-import { Store } from '@ngrx/store';
 import { logoutActions } from '../../../store/actions/auth.actions';
 
 @Component({
   selector: 'app-menu',
   imports: [
-    BgAnimationComponent,
     MatCardModule,
     MatButtonModule,
     MatListModule,

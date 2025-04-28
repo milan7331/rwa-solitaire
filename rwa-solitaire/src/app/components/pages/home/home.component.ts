@@ -10,7 +10,6 @@ import { MatListModule } from '@angular/material/list';
 
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { AudioService } from '../../../services/app/audio/audio.service';
-import { BgAnimationComponent } from "../../standalone/bg-animation/bg-animation.component";
 
 @Component({
   selector: 'app-home',
@@ -20,7 +19,6 @@ import { BgAnimationComponent } from "../../standalone/bg-animation/bg-animation
     MatButtonModule,
     MatIconModule,
     MatDividerModule,
-    BgAnimationComponent,
     MatButtonToggleModule,
     MatListModule,
 ],

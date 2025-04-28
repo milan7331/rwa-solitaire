@@ -1,3 +1,5 @@
-@for (element of elements; track $index) {
-    <div class="bg-element">{{ element }}</div>
+@if (onExcludedRoute === false) {
+    @for (element of elements; track $index) {
+        <div class="bg-element">{{ element }}</div>
+    }
 }

@@ -8,7 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { BgAnimationComponent } from '../../standalone/bg-animation/bg-animation.component';
 import { createPatternValidator } from '../../../utils/validators/regex-validator/regex.factory';
 import { LOGIN_RULES_PASSWORD, LOGIN_RULES_USERNAME } from '../../../utils/validators/regex-validator/regex-login.rules';
 import { RegexValidationRule } from '../../../models/validation/regex-rule';
@@ -27,7 +26,6 @@ import { AudioService } from '../../../services/app/audio/audio.service';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    BgAnimationComponent
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
