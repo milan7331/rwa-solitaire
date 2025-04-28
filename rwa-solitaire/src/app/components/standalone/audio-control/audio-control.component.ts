@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { AudioService } from '../../../services/app/audio/audio.service';
 import { selectAudioVolume, selectAudioVolumeIcon } from '../../../store/selectors/audio.selectors';
 import { audioActions } from '../../../store/actions/audio.actions';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-audio-control',
@@ -28,6 +29,13 @@ import { audioActions } from '../../../store/actions/audio.actions';
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss',
+  animations: [
+    trigger('overlayAnimation', [
+      state('void', style({ opacity: 0, transform: 'translateY(-10px)'})),
+      state('*', style({ opacity: 1, transform: 'translateY(0)'})),
+      transition('void <=> *', animate('200ms ease-in-out')),
+    ])
+  ],
   standalone: true
 })
 export class AudioControlComponent implements OnDestroy, OnInit {
