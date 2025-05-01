@@ -17,7 +17,7 @@ export class FindLeaderboardDto {
     @IsOptional()
     @Transform(({ value }) => parseInt(value, 10))
     @IsEnum(LeaderboardType, { message: 'Invalid type. Valid options are: WEEKLY (0), MONTHLY (1) and YEARLY (2)' })
-    type?: LeaderboardType;
+    leaderboardType?: LeaderboardType;
 
     @IsOptional()
     @IsBoolean({ message: ' withDeleted must be a boolean' })

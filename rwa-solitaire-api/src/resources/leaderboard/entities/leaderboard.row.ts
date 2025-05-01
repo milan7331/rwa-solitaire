@@ -1,4 +1,4 @@
-export interface UserData {
+export interface LeaderboardRow {
   username: string;
   totalGames: number;
   leastMoves: number;

@@ -20,21 +20,21 @@ export class LeaderboardController {
   @Get('load-weekly')
   @Get('load_weekly')
   async loadWeeklyLeaderboards(@Query() getDto: GetLeaderboardDto) {
-    getDto.type = LeaderboardType.WEEKLY;
+    getDto.leaderboardType = LeaderboardType.WEEKLY;
     return await this.leaderboardService.loadLeaderboards(getDto);
   }
 
   @Get('load-monthly')
   @Get('load_monthly')
   async loadMonthlyLeaderboards(@Query() getDto: GetLeaderboardDto) {
-    getDto.type = LeaderboardType.MONTHLY;
+    getDto.leaderboardType = LeaderboardType.MONTHLY;
     return await this.leaderboardService.loadLeaderboards(getDto);
   }
 
   @Get('load-yearly')
   @Get('load_yearly')
   async loadYearlyLeaderboards(@Query() getDto: GetLeaderboardDto) {
-    getDto.type = LeaderboardType.YEARLY;
+    getDto.leaderboardType = LeaderboardType.YEARLY;
     return await this.leaderboardService.loadLeaderboards(getDto);
   }
 

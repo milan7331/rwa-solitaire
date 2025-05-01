@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { UserData } from "../entities/userdata";
+import { LeaderboardRow } from "./leaderboard.row";
 
 @Entity()
 export abstract class Leaderboard {
@@ -17,16 +17,16 @@ export abstract class Leaderboard {
     timePeriod: Date;
 
     @Column({ type: 'jsonb', default: []})
-    top20_averageTime: UserData[];
+    top20_averageTime: LeaderboardRow[];
 
     @Column({ type: 'jsonb', default: []})
-    top20_bestTime: UserData[];
+    top20_bestTime: LeaderboardRow[];
 
     @Column({ type: 'jsonb', default: []})
-    top20_numberOfMoves: UserData[];
+    top20_numberOfMoves: LeaderboardRow[];
 
     @Column({ type: 'jsonb', default: []})
-    top20_gamesPlayed: UserData[];
+    top20_gamesPlayed: LeaderboardRow[];
 
     @DeleteDateColumn({ type: 'timestamptz' })
     deletedAt: Date;

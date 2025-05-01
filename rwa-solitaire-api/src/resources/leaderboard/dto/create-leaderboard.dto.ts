@@ -1,7 +1,7 @@
 import { Transform } from "class-transformer";
 import { IsArray, IsDate, IsEnum, IsNotEmpty } from "class-validator";
 
-import { UserData } from "../entities/userdata";
+import { LeaderboardRow } from "../entities/leaderboard.row";
 import { LeaderboardType } from "../entities/leaderboard.enum";
 
 export class CreateLeaderboardDto {
@@ -13,18 +13,18 @@ export class CreateLeaderboardDto {
     @Transform(({ value }) => parseInt(value, 10))
     @IsNotEmpty({ message: 'type is required (enum LeaderboardType)' })
     @IsEnum(LeaderboardType, { message: 'Invalid type. Valid options are: WEEKLY (0), MONTHLY (1) and YEARLY (2)' })
-    type: LeaderboardType;
+    leaderboardType: LeaderboardType;
 
     // UserData dtos omitted, as this is not going to be used over the network, only for mock data generation...
     @IsArray({ message: 'top20_averageTime must be an array' })
-    top20_averageTime: UserData[] = [];
+    top20_averageTime: LeaderboardRow[] = [];
 
     @IsArray({ message: 'top20_bestTime must be an array' })
-    top20_bestTime: UserData[] = [];
+    top20_bestTime: LeaderboardRow[] = [];
 
     @IsArray({ message: 'top20_numberOfMoves must be an array' })
-    top20_numberOfMoves: UserData[] = [];
+    top20_numberOfMoves: LeaderboardRow[] = [];
 
     @IsArray({ message: 'top20_gamesPlayed must be an array' })
-    top20_gamesPlayed: UserData[] = [];
+    top20_gamesPlayed: LeaderboardRow[] = [];
 }
