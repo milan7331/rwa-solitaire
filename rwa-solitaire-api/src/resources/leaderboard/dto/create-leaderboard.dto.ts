@@ -1,8 +1,9 @@
 import { Transform } from "class-transformer";
 import { IsArray, IsDate, IsEnum, IsNotEmpty } from "class-validator";
 
-import { LeaderboardRow } from "../entities/leaderboard.row";
+import { UserData } from "../entities/userdata";
 import { LeaderboardType } from "../entities/leaderboard.enum";
+import { LeaderboardRow } from "../entities/leaderboard.row";
 
 export class CreateLeaderboardDto {
     @Transform(({ value }) => new Date(value)) // Auto-transform string/ISO dates to Date object
@@ -15,7 +16,6 @@ export class CreateLeaderboardDto {
     @IsEnum(LeaderboardType, { message: 'Invalid type. Valid options are: WEEKLY (0), MONTHLY (1) and YEARLY (2)' })
     leaderboardType: LeaderboardType;
 
-    // UserData dtos omitted, as this is not going to be used over the network, only for mock data generation...
     @IsArray({ message: 'top20_averageTime must be an array' })
     top20_averageTime: LeaderboardRow[] = [];
 
