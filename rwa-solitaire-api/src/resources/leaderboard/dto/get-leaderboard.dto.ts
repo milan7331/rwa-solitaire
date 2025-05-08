@@ -10,14 +10,14 @@ export class GetLeaderboardDto {
     @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'take must be a valid number' })
     @Min(20, { message: 'take must be greater or equal to 10' })
     @Max(POSTGRES_MAX_INTEGER, { message: 'take must not be greater or equal to ' + POSTGRES_MAX_INTEGER })
-    take: number = 20;
+    take: number = 10;
 
     @Transform(({ value }) => parseInt(value, 10)) // Auto-transform string numbers
     @IsNotEmpty({ message: 'page is required'})
     @IsNumber({ allowInfinity: false, allowNaN: false}, { message: 'page must be a valid number'})
     @Min(0, { message: 'page must be greater or equal to 0' })
     @Max(POSTGRES_MAX_INTEGER, { message: 'page must not be greater or equal to ' + POSTGRES_MAX_INTEGER })
-    page: number = 0;
+    skip: number = 0;
 
     @Transform(({ value }) => parseInt(value, 10))
     @IsNotEmpty({ message: 'type is required'})

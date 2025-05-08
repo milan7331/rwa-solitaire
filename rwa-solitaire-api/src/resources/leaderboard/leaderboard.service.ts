@@ -52,11 +52,11 @@ export class LeaderboardService {
   }
 
   async loadLeaderboards(getDto: GetLeaderboardDto): Promise<Leaderboard[]> {
-    const { leaderboardType, take, page } = getDto;
+    const { leaderboardType, take, skip } = getDto;
     
     const repo = this.#getRepository(leaderboardType);
     
-    return this.#getLeaderboardPages(repo, take, page);
+    return this.#getLeaderboardPages(repo, take, skip);
   }
 
   async create(createDto: CreateLeaderboardDto): Promise<void> {
