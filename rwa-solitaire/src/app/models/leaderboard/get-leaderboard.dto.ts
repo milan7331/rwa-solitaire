@@ -2,6 +2,6 @@ import { LeaderboardType } from "./leaderboard.enum";
 
 export interface GetLeaderboardDto {
     take: number,
-    page: number,
+    skip: number,
     leaderboardType: LeaderboardType,
 }
