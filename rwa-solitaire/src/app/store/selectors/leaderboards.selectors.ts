@@ -2,6 +2,7 @@ import { createFeatureSelector, createSelector } from "@ngrx/store";
 import { LeaderboardsState } from "../../models/state/leaderboards.state";
 import { LeaderboardType } from "../../models/leaderboard/leaderboard.enum";
 import { leaderboardsAdapter } from "../reducers/leaderboards.reducer";
+import { Leaderboard } from "../../models/leaderboard/leaderboard";
 
 const selectLeaderboardsState = createFeatureSelector<LeaderboardsState>('leaderboardsState');
 
@@ -20,6 +21,8 @@ const selectYearlyLeaderboardState = createSelector(
     (state: LeaderboardsState) => state.yearly
 );
 
+
+// entity selectors
 const {
     selectAll: selectAllWeekly,
     selectTotal: selectTotalWeekly,
@@ -35,24 +38,11 @@ const {
     selectTotal: selectTotalYearly,
 } = leaderboardsAdapter.getSelectors(selectYearlyLeaderboardState);
 
-const selectDisplayedLeaderboardType = createSelector(
+
+// main selectors
+export const selectLeaderboardType = createSelector(
     selectLeaderboardsState,
     (state: LeaderboardsState) => state.displayedLeaderboardType
-)
-
-export const selectWeeklyLeaderboardPageCount = createSelector(
-    selectLeaderboardsState,
-    (state: LeaderboardsState) => state.weeklyPageCount
-);
-
-export const selectMonthlyLeaderboardPageCount = createSelector(
-    selectLeaderboardsState,
-    (state: LeaderboardsState) => state.monthlyPageCount
-);
-
-export const selectYearlyLeaderboardPageCount = createSelector(
-    selectLeaderboardsState,
-    (state: LeaderboardsState) => state.yearlyPageCount
 );
 
 export const selectPageIndex = createSelector(
@@ -60,39 +50,61 @@ export const selectPageIndex = createSelector(
     (state: LeaderboardsState) => state.pageIndex
 );
 
-export const selectLeaderboard = createSelector(
+export const selectLeaderboardLoading = createSelector(
+    selectLeaderboardsState,
+    (state: LeaderboardsState) => state.loading
+)
+
+export const selectLeaderboardPageCount = createSelector(
+    selectLeaderboardsState,
+    selectLeaderboardType,
+    (state, displayedType) => {
+        switch(displayedType) {
+            case LeaderboardType.WEEKLY: return state.weeklyPageCount;
+            case LeaderboardType.MONTHLY: return state.monthlyPageCount;
+            case LeaderboardType.YEARLY: return state.yearlyPageCount;
+            default: return 0;
+        }
+    }
+);
+
+const selectLeaderboard = createSelector(
     selectAllWeekly,
     selectAllMonthly,
     selectAllYearly,
-    selectDisplayedLeaderboardType,
+    selectLeaderboardType,
     (weekly, monthly, yearly, displayedType) => {
         switch (displayedType) {
             case LeaderboardType.WEEKLY: return weekly;
             case LeaderboardType.MONTHLY: return monthly;
             case LeaderboardType.YEARLY: return yearly;
-            default: return undefined;
+            default: return [];
         };
     } 
 );
 
-export const selectLeaderboardIsLoading = createSelector(
+const selectLeaderboardTotal = createSelector(
+    selectLeaderboardType,
     selectTotalWeekly,
     selectTotalMonthly,
     selectTotalYearly,
-    selectPageIndex,
-    selectDisplayedLeaderboardType,
-    (weeklyInStore, monthlyInStore, yearlyInStore, currentIndex, displayedType) => {
+    (totalWeekly, totalMonthly, totalYearly, displayedType) => {
         switch (displayedType) {
-            case LeaderboardType.WEEKLY: {
-                return currentIndex >= weeklyInStore ? true : false;
-            }
-            case LeaderboardType.MONTHLY: {
-                return currentIndex >= monthlyInStore ? true : false;
-            }
-            case LeaderboardType.YEARLY: {
-                return currentIndex >= yearlyInStore ? true : false;
-            }
-            default: return false;
-        };
+            case LeaderboardType.WEEKLY: return totalWeekly;
+            case LeaderboardType.MONTHLY: return totalMonthly;
+            case LeaderboardType.YEARLY: return totalYearly;
+            default: return 0;
+        }
+    }
+);
+
+export const selectLeaderboardPage = createSelector(
+    selectLeaderboard,
+    selectLeaderboardLoading,
+    selectLeaderboardTotal,
+    selectPageIndex,
+    (leaderboard, loading, total, index) => {
+        if (index >= total && loading) return { timePeriod: new Date(), top20_averageTime: [], top20_bestTime: [], top20_gamesPlayed: [], top20_numberOfMoves: [] } as Leaderboard;
+        return leaderboard[index];
     }
 );

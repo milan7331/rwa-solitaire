@@ -34,14 +34,15 @@ export const leaderboardsActions = createActionGroup({
 
         // used when the navigation actions above request a page that is not yet loaded into store
         'LoadAdditionalPages': props<{
-            pageIndex: number,
             leaderboardType: LeaderboardType,
+            pageCount: number,
         }>(),
         'LoadAdditionalPagesSuccess': props<{
-            leaderboard: Leaderboard[],
-            pageCount: number,
             leaderboardType: LeaderboardType,
+            pageCount: number,
+            pages: Leaderboard[],
         }>(),
         'LoadAdditionalPagesFailure': emptyProps(),
+        'ToggleLoading': emptyProps(),
     }
 });

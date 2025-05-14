@@ -31,9 +31,7 @@ export const selectBoard = createSelector(
 
 export const selectCurrentMoveNumber = createSelector(
     selectBoard,
-    (board) => {
-        return (board !== undefined) ? board.moveNumber : 0;
-    }
+    (board) => (board !== undefined) ? board.moveNumber : 0
 );
 
 const { selectTotal: selectBoardsTotal } = boardAdapter.getSelectors(selectBoardsState);
