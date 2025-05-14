@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, HostBinding, DestroyRef } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { CommonModule, Location, NgTemplateOutlet } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs';
@@ -66,7 +66,6 @@ export class SolitaireComponent implements OnInit {
     private readonly hintService: HintService,
     private readonly timerService: TimerService,
     private readonly themeService: ThemeService,
-    private readonly destroyRef: DestroyRef,
   ) {
     this.difficulty = this.#getGameDifficultyFromRoute();
     
@@ -84,7 +83,7 @@ export class SolitaireComponent implements OnInit {
     const board$ = this.store.select(selectBoard);
 
     board$.pipe(
-      takeUntilDestroyed(this.destroyRef),
+      takeUntilDestroyed(),
       filter(board => board !== undefined)
     ).subscribe((board) => {
       this.board = board;

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, of} from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -39,7 +39,6 @@ export class GameControlComponent implements OnInit {
   constructor(
     private readonly store: Store,
     private readonly audioService: AudioService,
-    private readonly destroyRef: DestroyRef,
   ) {
     this.#difficulty$ = of(SolitaireDifficulty.Hard);
     this.undoAvailable$ = of(false);
@@ -54,7 +53,7 @@ export class GameControlComponent implements OnInit {
     this.undoAvailable$ = this.store.select(selectUndoAvailability);
 
     this.#difficulty$
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntilDestroyed())
       .subscribe(diff => this.#difficulty = diff);
   }
 

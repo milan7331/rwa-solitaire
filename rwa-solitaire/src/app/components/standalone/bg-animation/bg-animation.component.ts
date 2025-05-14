@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WindowService } from '../../../services/app/window/window.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter, takeUntil } from 'rxjs';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-bg-animation',

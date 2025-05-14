@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject, debounceTime, fromEvent, Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -12,9 +12,7 @@ export class WindowService {
   windowSize$: Observable<{ width: number; height: number }>;
   cursorPosition$: Observable<{ x: number, y: number }>;
 
-  constructor(
-    private readonly destroyRef: DestroyRef,
-  ) {
+  constructor() {
     this.#windowSize = new BehaviorSubject({ width: window.innerWidth, height: window.innerHeight });
     this.#cursorPosition = new BehaviorSubject({ x: 0, y: 0 });
 
@@ -26,7 +24,7 @@ export class WindowService {
 
   #initialize() {
     fromEvent(window, 'resize')
-      .pipe(debounceTime(100), takeUntilDestroyed(this.destroyRef))
+      .pipe(debounceTime(100), takeUntilDestroyed())
       .subscribe(() => {
         this.#windowSize.next({
           width: window.innerWidth,
@@ -35,7 +33,7 @@ export class WindowService {
       });
 
     fromEvent<MouseEvent>(window, 'mousemove')
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntilDestroyed())
       .subscribe((event: MouseEvent) => {
         this.#cursorPosition.next({
           x: event.clientX,
