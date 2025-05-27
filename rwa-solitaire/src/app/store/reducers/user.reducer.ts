@@ -12,7 +12,7 @@ export const gameHistoryAdapter: EntityAdapter<GameHistory> = createEntityAdapte
     // promeniti da se sortira po datumu? i da je id nešto drugo nakon što zapravo dodam modele
 });
 
-export const initialUserState: UserState = {
+const initialUserState: UserState = {
     loginValid: false,
     userData: getInitialUserData(),
     userStats: getInitialUserStats(),
@@ -20,9 +20,8 @@ export const initialUserState: UserState = {
     savedGame: getInitialSavedGame(), 
 };
 
-export const userReducer = createReducer(
-    initialUserState,
-    on(loginActions.logInSuccess, (state, { username }) => {
+const loginHandlers = [
+    on(loginActions.logInSuccess, (state: UserState, { username }) => {
         return {
             ...state,
             loginValid: true,
@@ -32,20 +31,23 @@ export const userReducer = createReducer(
             },
         };
     }),
-    on(loginActions.logInFailure, (state) => {
+    on(loginActions.logInFailure, (state: UserState) => {
         return {
             ...state,
             loginValid: false,
         };
     }),
-    on(logoutActions.logoutSuccess, (state) => {
+    on(logoutActions.logoutSuccess, (state: UserState) => {
         return {
             ...state,
             loginValid: false,
             userData: getInitialUserData(),
         };
     }),
-    on(sessionActions.validateSessionSuccess, (state, { username }) => {
+];
+
+const sessionHandlers = [
+    on(sessionActions.validateSessionSuccess, (state: UserState, { username }) => {
         return {
             ...state,
             loginValid: true,
@@ -55,21 +57,34 @@ export const userReducer = createReducer(
             },
         };
     }),
-    on(userEditActions.getUserDataSuccess, (state, data) => {
+];
+
+const userDataHandlers = [
+    on(userEditActions.getUserDataSuccess, (state: UserState, data) => {
         return {
             ...state,
             userData: data,
         }
     }),
-    on(userMenuActions.getUserStatsSuccess, (state, stats) => {
+];
+
+const userStatsHandlers = [
+    on(userMenuActions.getUserStatsSuccess, (state: UserState, stats) => {
         if (!checkUserStatsValid(stats)) return state;
 
         return {
             ...state,
             userStats: stats,
         }
-    })
+    }),
+];
 
+export const userReducer = createReducer(
+    initialUserState,
+    ...loginHandlers,
+    ...sessionHandlers,
+    ...userDataHandlers,
+    ...userStatsHandlers,
 );
 
 function getInitialUserData(): UserData {

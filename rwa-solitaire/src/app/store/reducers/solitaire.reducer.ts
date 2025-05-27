@@ -12,15 +12,14 @@ export const boardAdapter: EntityAdapter<SolitaireBoard> = createEntityAdapter<S
     sortComparer: (a, b) => a.moveNumber - b.moveNumber
 });
 
-export const initialSolitaireState: SolitaireState = {
+const initialSolitaireState: SolitaireState = {
     boards: boardAdapter.getInitialState(),
     winCondition: false,
     difficulty: SolitaireDifficulty.Hard,
 };
 
-export const solitaireReducer = createReducer(
-    initialSolitaireState,
-    on(solitaireActions.startNewGame, (state, {difficulty}) => {
+const gameHandlers = [
+    on(solitaireActions.startNewGame, (state: SolitaireState, {difficulty}) => {
         const newWinCondition: boolean = false;
         const newBoard = setUpInitialBoard();
         
@@ -31,7 +30,7 @@ export const solitaireReducer = createReducer(
             difficulty: difficulty,
         } as SolitaireState;
     }),
-    on(solitaireActions.restartGame, (state) => {
+    on(solitaireActions.restartGame, (state: SolitaireState) => {
         if (state.boards.ids.length < 2) return state;
 
         const startBoard = state.boards.entities[0];
@@ -43,7 +42,21 @@ export const solitaireReducer = createReducer(
             winCondition: false
         } as SolitaireState;
     }),
-    on(solitaireActions.drawCards, (state) => {
+    on(solitaireActions.undo, (state: SolitaireState) => {
+        if (state.boards.ids.length < 2) return state;
+        const currentBoard = findCurrentBoard(state);
+        if (currentBoard === undefined) return state;
+
+        return {
+            ...state,
+            boards: boardAdapter.removeOne(currentBoard!.moveNumber, state.boards),
+            winCondition: false
+        } as SolitaireState;
+    }),
+];
+
+const cardsHandlers = [
+    on(solitaireActions.drawCards, (state: SolitaireState) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined)  return state;
         if (currentBoard.deckStock.length === 0 && currentBoard.deckWaste.length === 0) return state;
@@ -67,7 +80,10 @@ export const solitaireReducer = createReducer(
             boards: boardAdapter.addOne(newBoard, state.boards)
         } as SolitaireState;
     }),
-    on(solitaireActions.dropOnFoundation, (state, {src, dest, srcIndex}) => {
+];
+
+const dropHandlers = [
+    on(solitaireActions.dropOnFoundation, (state: SolitaireState, {src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
         if (!canDropOnFoundation(src, dest, srcIndex, currentBoard.foundation)) return state;
@@ -88,7 +104,7 @@ export const solitaireReducer = createReducer(
             winCondition: checkWinCondition(updatedBoard),
         } as SolitaireState;
     }),
-    on(solitaireActions.dropOnTableau, (state, {src, dest, srcIndex}) => {
+    on(solitaireActions.dropOnTableau, (state: SolitaireState, {src, dest, srcIndex}) => {
         const currentBoard: SolitaireBoard | undefined = findCurrentBoard(state);
         if (currentBoard === undefined) return state;
 
@@ -110,18 +126,13 @@ export const solitaireReducer = createReducer(
             winCondition: checkWinCondition(updatedBoard)
         } as SolitaireState;
     }),
-    on(solitaireActions.undo, (state) => {
-        if (state.boards.ids.length < 2) return state;
-        const currentBoard = findCurrentBoard(state);
-        if (currentBoard === undefined) return state;
+];
 
-        return {
-            ...state,
-            boards: boardAdapter.removeOne(currentBoard!.moveNumber, state.boards),
-            winCondition: false
-        } as SolitaireState;
-    })
-
+export const solitaireReducer = createReducer(
+    initialSolitaireState,
+    ...gameHandlers,
+    ...cardsHandlers,
+    ...dropHandlers,
 );
 
 function generateCard(suit: CardSuit, number: CardNumber): Card {

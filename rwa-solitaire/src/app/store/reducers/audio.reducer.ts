@@ -2,27 +2,35 @@ import { createReducer, on } from "@ngrx/store";
 import { AudioState } from "../../models/state/audio.state";
 import { audioActions } from "../actions/audio.actions";
 
-export const initialAudioState: AudioState = {
+const initialAudioState: AudioState = {
     audioVolume: 0.8,
     audioMuted: false,
 };
 
+const volumeChangeHandlers = [
+    on(audioActions.setVolume, (state: AudioState, { value }) => ({
+        ...state,
+        audioVolume: Math.max(0.00, Math.min(value, 1.00)),
+    })),
+];
+
+const  muteHandlers = [
+    on(audioActions.mute, (state: AudioState) => ({
+        ...state,
+        audioMuted: true,
+    })),
+    on(audioActions.unmute, (state: AudioState) => ({
+        ...state,
+        audioMuted: false,
+    })),
+    on(audioActions.toggleMute, (state: AudioState) => ({
+        ...state,
+        audioMuted: !state.audioMuted,
+    })),
+];
+
 export const audioReducer = createReducer(
     initialAudioState,
-    on(audioActions.setVolume, (state, { value }) => ({
-        ...state,
-        audioVolume: Math.max(0.00, Math.min(value, 1.00))
-    })),
-    on(audioActions.mute, (state) => ({
-        ...state,
-        audioMuted: true
-    })),
-    on(audioActions.unmute, (state) => ({
-        ...state,
-        audioMuted: false
-    })),
-    on(audioActions.toggleMute, (state) => ({
-        ...state,
-        audioMuted: !state.audioMuted
-    })),
+    ...volumeChangeHandlers,    
+    ...muteHandlers,
 );

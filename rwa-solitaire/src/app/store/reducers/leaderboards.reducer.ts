@@ -10,7 +10,7 @@ export const leaderboardsAdapter: EntityAdapter<Leaderboard> = createEntityAdapt
     sortComparer: (a: Leaderboard, b: Leaderboard) => b.timePeriod.getTime() - a.timePeriod.getTime(),
 });
 
-export const initialLeaderboardsState: LeaderboardsState = {
+const initialLeaderboardsState: LeaderboardsState = {
     weekly: leaderboardsAdapter.getInitialState(),
     monthly: leaderboardsAdapter.getInitialState(),
     yearly: leaderboardsAdapter.getInitialState(),
@@ -25,12 +25,11 @@ export const initialLeaderboardsState: LeaderboardsState = {
     loading: true,
 }
 
-export const leaderboardsReducer = createReducer(
-    initialLeaderboardsState,
-    on(leaderboardsActions.initializeLeaderboards, (state) => {
+const initializeLeaderboardsHandlers = [
+    on(leaderboardsActions.initializeLeaderboards, (state: LeaderboardsState) => {
         return { ...state, loading: true };
     }),
-    on(leaderboardsActions.initializeLeaderboardsSuccess, (state, { weekly, monthly, yearly, weeklyPageCount, monthlyPageCount, yearlyPageCount }) => {
+    on(leaderboardsActions.initializeLeaderboardsSuccess, (state: LeaderboardsState, { weekly, monthly, yearly, weeklyPageCount, monthlyPageCount, yearlyPageCount }) => {
         return {
             weekly: leaderboardsAdapter.setAll(weekly, state.weekly),
             monthly: leaderboardsAdapter.setAll(monthly, state.monthly),
@@ -44,18 +43,13 @@ export const leaderboardsReducer = createReducer(
         } as LeaderboardsState;
     }),
     on(leaderboardsActions.initializeLeaderboardsFailure, () => initialLeaderboardsState),
-    on(leaderboardsActions.refreshPageCountSuccess, (state, { weeklyPageCount, monthlyPageCount, yearlyPageCount }) => {
-        return {
-            ...state,
-            weeklyPageCount,
-            monthlyPageCount,
-            yearlyPageCount,
-        } as LeaderboardsState;
-    }),
-    on(leaderboardsActions.loadAdditionalPages, (state) => {
+];
+
+const loadAdditionalPagesHandlers = [
+    on(leaderboardsActions.loadAdditionalPages, (state: LeaderboardsState) => {
         return { ...state, loading: true };
     }),
-    on(leaderboardsActions.loadAdditionalPagesSuccess, (state, { leaderboardType, pageCount, pages}) => {
+    on(leaderboardsActions.loadAdditionalPagesSuccess, (state: LeaderboardsState, { leaderboardType, pageCount, pages }) => {
         pages.forEach(p => console.log(p.timePeriod));
         switch (leaderboardType) {
             case LeaderboardType.WEEKLY: {
@@ -72,19 +66,22 @@ export const leaderboardsReducer = createReducer(
             }
         }
     }),
-    on(leaderboardsActions.loadAdditionalPagesFailure, (state) => {
+    on(leaderboardsActions.loadAdditionalPagesFailure, (state: LeaderboardsState) => {
         return { ...state, loading: false };
     }),
-    on(leaderboardsActions.showNextPage, (state) => {
+];
+
+const pageChangeHandlers = [
+on(leaderboardsActions.showNextPage, (state: LeaderboardsState) => {
         return updateStatePageIndex_Pure(state, state.pageIndex + 1);
     }),
-    on(leaderboardsActions.showPreviousPage, (state) => {
+    on(leaderboardsActions.showPreviousPage, (state: LeaderboardsState) => {
         return updateStatePageIndex_Pure(state, state.pageIndex - 1);
     }),
-    on(leaderboardsActions.showFirstPage, (state) => {
+    on(leaderboardsActions.showFirstPage, (state: LeaderboardsState) => {
         return updateStatePageIndex_Pure(state, 0);
     }),
-    on(leaderboardsActions.showLastPage, (state) => {
+    on(leaderboardsActions.showLastPage, (state: LeaderboardsState) => {
         switch (state.displayedLeaderboardType) {
             case LeaderboardType.WEEKLY: {
                 return updateStatePageIndex_Pure(state, state.weeklyPageCount - 1);
@@ -98,22 +95,49 @@ export const leaderboardsReducer = createReducer(
             default: return state;
         }
     }),
-    on(leaderboardsActions.setPageIndex, (state, { index }) => {
+    on(leaderboardsActions.setPageIndex, (state: LeaderboardsState, { index }) => {
         return updateStatePageIndex_Pure(state, index);
     }),
-    on(leaderboardsActions.resetPageIndex, (state) => {
+    on(leaderboardsActions.resetPageIndex, (state: LeaderboardsState) => {
         return { ...state, pageIndex: 0 } as LeaderboardsState;
     }),
-    on(leaderboardsActions.toggleLoading, (state) => {
-        return { ...state, loading: !state.loading } as LeaderboardsState;
+];
+
+const leaderboardTypeChangeHandlers = [
+    on(leaderboardsActions.changeLeaderboardType, (state: LeaderboardsState, { leaderboardType }) => {
+        if (state.displayedLeaderboardType === leaderboardType) return state;
+        return { ...state, displayedLeaderboardType: leaderboardType } as LeaderboardsState;
     }),
-    on(leaderboardsActions.changeLeaderboardType, (state, { leaderboardType: LeaderboardType}) => {
-        if (state.displayedLeaderboardType === LeaderboardType) return state;
-        return { ...state, displayedLeaderboardType: LeaderboardType } as LeaderboardsState;
-    }),
-    on(leaderboardsActions.resetLeaderboardType, (state)=> {
+    on(leaderboardsActions.resetLeaderboardType, (state: LeaderboardsState) => {
         return { ...state, displayedLeaderboardType: LeaderboardType.WEEKLY } as LeaderboardsState;
     }),
+];
+
+const pageCountChangeHandlers = [
+    on(leaderboardsActions.refreshPageCountSuccess, (state: LeaderboardsState, { weeklyPageCount, monthlyPageCount, yearlyPageCount }) => {
+        return {
+            ...state,
+            weeklyPageCount,
+            monthlyPageCount,
+            yearlyPageCount,
+        } as LeaderboardsState;
+    }),
+];
+
+const leaderboardsLoadingHandlers = [
+    on(leaderboardsActions.toggleLoading, (state: LeaderboardsState) => {
+        return { ...state, loading: !state.loading } as LeaderboardsState;
+    }),
+];
+
+export const leaderboardsReducer = createReducer(
+    initialLeaderboardsState,
+    ...initializeLeaderboardsHandlers,
+    ...loadAdditionalPagesHandlers,
+    ...pageChangeHandlers,
+    ...leaderboardTypeChangeHandlers,
+    ...pageCountChangeHandlers,
+    ...leaderboardsLoadingHandlers,
 );
 
 function updateStatePageIndex_Pure(state: LeaderboardsState, newIndex: number): LeaderboardsState {
