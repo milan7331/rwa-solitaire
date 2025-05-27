@@ -8,6 +8,8 @@ export const leaderboardsActions = createActionGroup({
         // used for navigation from the paginator
         'ShowNextPage': emptyProps(),
         'ShowPreviousPage': emptyProps(),
+        'ShowFirstPage': emptyProps(),
+        'ShowLastPage': emptyProps(),
         'SetPageIndex': props<{ index: number }>(),
         'ResetPageIndex': emptyProps(),
 
@@ -43,6 +45,11 @@ export const leaderboardsActions = createActionGroup({
             pages: Leaderboard[],
         }>(),
         'LoadAdditionalPagesFailure': emptyProps(),
+
+        // visual info
         'ToggleLoading': emptyProps(),
+
+        'ChangeLeaderboardType': props<{ leaderboardType: LeaderboardType}>(),
+        'ResetLeaderboardType': emptyProps(),
     }
 });

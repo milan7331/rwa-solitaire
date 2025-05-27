@@ -56,7 +56,8 @@ export const leaderboardsReducer = createReducer(
         return { ...state, loading: true };
     }),
     on(leaderboardsActions.loadAdditionalPagesSuccess, (state, { leaderboardType, pageCount, pages}) => {
-        switch (state.displayedLeaderboardType) {
+        pages.forEach(p => console.log(p.timePeriod));
+        switch (leaderboardType) {
             case LeaderboardType.WEEKLY: {
                 return { ...state, weekly: leaderboardsAdapter.setAll(pages, state.weekly), weeklyPageCount: pageCount, loading: false } as LeaderboardsState;
             }
@@ -80,6 +81,23 @@ export const leaderboardsReducer = createReducer(
     on(leaderboardsActions.showPreviousPage, (state) => {
         return updateStatePageIndex_Pure(state, state.pageIndex - 1);
     }),
+    on(leaderboardsActions.showFirstPage, (state) => {
+        return updateStatePageIndex_Pure(state, 0);
+    }),
+    on(leaderboardsActions.showLastPage, (state) => {
+        switch (state.displayedLeaderboardType) {
+            case LeaderboardType.WEEKLY: {
+                return updateStatePageIndex_Pure(state, state.weeklyPageCount - 1);
+            }
+            case LeaderboardType.MONTHLY: {
+                return updateStatePageIndex_Pure(state, state.monthlyPageCount - 1);
+            }
+            case LeaderboardType.YEARLY: {
+                return updateStatePageIndex_Pure(state, state.yearlyPageCount - 1);
+            }
+            default: return state;
+        }
+    }),
     on(leaderboardsActions.setPageIndex, (state, { index }) => {
         return updateStatePageIndex_Pure(state, index);
     }),
@@ -89,18 +107,25 @@ export const leaderboardsReducer = createReducer(
     on(leaderboardsActions.toggleLoading, (state) => {
         return { ...state, loading: !state.loading } as LeaderboardsState;
     }),
+    on(leaderboardsActions.changeLeaderboardType, (state, { leaderboardType: LeaderboardType}) => {
+        if (state.displayedLeaderboardType === LeaderboardType) return state;
+        return { ...state, displayedLeaderboardType: LeaderboardType } as LeaderboardsState;
+    }),
+    on(leaderboardsActions.resetLeaderboardType, (state)=> {
+        return { ...state, displayedLeaderboardType: LeaderboardType.WEEKLY } as LeaderboardsState;
+    }),
 );
 
 function updateStatePageIndex_Pure(state: LeaderboardsState, newIndex: number): LeaderboardsState {
     switch (state.displayedLeaderboardType) {
         case LeaderboardType.WEEKLY: {
-            return { ...state, pageIndex: Math.max(0, Math.min(newIndex, state.weeklyPageCount)) } as LeaderboardsState;
+            return { ...state, pageIndex: Math.max(0, Math.min(newIndex, state.weeklyPageCount - 1)) } as LeaderboardsState;
         }
         case LeaderboardType.MONTHLY: {
-            return { ...state, pageIndex: Math.max(0, Math.min(newIndex, state.monthlyPageCount)) } as LeaderboardsState;
+            return { ...state, pageIndex: Math.max(0, Math.min(newIndex, state.monthlyPageCount - 1)) } as LeaderboardsState;
         }
         case LeaderboardType.YEARLY: {
-            return { ...state, pageIndex: Math.max(0, Math.min(newIndex, state.yearlyPageCount)) } as LeaderboardsState;
+            return { ...state, pageIndex: Math.max(0, Math.min(newIndex, state.yearlyPageCount - 1)) } as LeaderboardsState;
         }
         default: {
             return state;
