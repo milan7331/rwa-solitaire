@@ -1,26 +1,19 @@
 @use '@angular/material' as mat;
 
-:host {
-    overflow: hidden;
-    z-index: 100;
-}
-
-mat-toolbar {
-    display: flex;
-    border-radius: 12px;
-
-    @include mat.toolbar-overrides((
-        container-background-color: var(--mat-sys-primary-container),
-        container-text-color: var(--mat-sys-on-primary-container),
-    ));
-}
-
-.transparent-backdrop {
-    background: transparent;
+:host {  
+    mat-toolbar {
+        display: flex;
+        border-radius: 12px;
+    
+        @include mat.toolbar-overrides((
+            container-background-color: var(--mat-sys-primary-container),
+            container-text-color: var(--mat-sys-on-primary-container),
+        ));
+    }
 }
 
 .title-btn {
-    font: var(----mat-sys-display-medium);
+    font-size: large;
 }
 
 .icon-btn {
