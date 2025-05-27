@@ -1,0 +1,68 @@
+@use '@angular/material' as mat;
+
+:host {
+    height: 100%;
+    width: fit-content;
+
+    box-sizing: border-box;
+    opacity: 85%;
+
+    flex: 1 1 auto;
+    align-self: center;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+    row-gap: 2vh;
+}
+
+.flex-spacer {
+    flex: 1 1 auto;
+    min-width: 25rem;
+}
+
+.top-card {
+    mat-card-content {
+        height: fit-content;
+    
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: stretch;
+        column-gap: 1vh;
+
+    }
+
+    @include mat.fab-overrides((
+        container-color: var(--mat-sys-surface-container),
+        foreground-color: var(--mat-sys-on-surface-container),
+    ));
+}
+
+.bottom-card {
+    mat-card-content {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        align-items: center;
+        //column-gap: 1vh;
+    }
+}
+
+.selected-button {
+    @include mat.fab-overrides((
+        container-color: var(--mat-sys-primary-container),
+        foreground-color: var(--mat-sys-on-primary-container),
+    ));
+}
+
+.visual-button {
+    @include mat.fab-overrides((
+        disabled-state-foreground-color: var(--mat-sys-on-primary-container),
+    ));
+}

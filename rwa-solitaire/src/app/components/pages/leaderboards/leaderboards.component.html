@@ -1,1 +1,31 @@
-<p>leaderboards works!</p>
+<ng-template #typeButton let-type="type" let-selectedType="selectedType">
+    @if (type === selectedType) {
+        <button mat-fab extended class="selected-button" (click)="changeLeaderboardType(type)">
+            <mat-icon>done</mat-icon>{{ getLeaderboardText(type) }} leaderboard
+        </button>
+    } @else {
+        <button mat-fab extended (click)="changeLeaderboardType(type)">
+            {{ getLeaderboardText(type) }}
+        </button>
+    }
+</ng-template>
+
+<mat-card appearance="outlined" class="top-card">
+    <mat-card-content>
+        @for (type of leaderboardTypeValues; track type) {
+            <ng-container [ngTemplateOutlet]="typeButton" [ngTemplateOutletContext]="{ type: type, selectedType: (leaderboardType$ | async) }"></ng-container>
+        }
+        <div class="flex-spacer"></div>
+        <button mat-fab extended disabled class="visual-button">{{ leaderboardTimePeriod$ | async }}</button>
+    </mat-card-content>
+</mat-card>
+<app-leaderboard-display></app-leaderboard-display>
+<mat-card appearance="outlined" class="bottom-card">
+    <mat-card-content>
+        <button mat-icon-button [disabled]="leaderboardPageIndex === 0" (click)="loadFistPage()"><mat-icon>first_page</mat-icon></button>
+        <button mat-icon-button [disabled]="leaderboardPageIndex === 0" (click)="loadPreviousPage()"><mat-icon>navigate_before</mat-icon></button>
+        <button mat-fab extended disabled class="visual-button">{{ 1 + leaderboardPageIndex }}/{{ leaderboardPageCount }}</button>
+        <button mat-icon-button [disabled]="leaderboardPageIndex >= (leaderboardPageCount - 1)" (click)="loadNextPage()"><mat-icon>navigate_next</mat-icon></button>
+        <button mat-icon-button [disabled]="leaderboardPageIndex >= (leaderboardPageCount - 1)" (click)="loadLastPage()"><mat-icon>last_page</mat-icon></button>
+    </mat-card-content>
+</mat-card>

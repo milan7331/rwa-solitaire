@@ -1,0 +1,86 @@
+<mat-card appearance="outlined">
+    <mat-card-content>
+        <div class="content-container">
+            @if (leaderboardPage$ | async; as page)  {
+                <div>
+                    <table mat-table [dataSource]="page.top20_averageTime">
+                        <ng-container matColumnDef="header">
+                            <th mat-header-cell *matHeaderCellDef colspan="3">Average time</th>
+                        </ng-container>
+                        <ng-container matColumnDef="position">
+                            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+                        </ng-container>
+                
+                        <ng-container matColumnDef="username">
+                            <td mat-cell *matCellDef="let element"> {{ element.username }} </td>
+                        </ng-container>
+                
+                        <ng-container matColumnDef="avgTime">
+                            <td mat-cell *matCellDef="let element"> {{ element.score }} </td>
+                        </ng-container>
+                    
+                        <tr mat-header-row *matHeaderRowDef="['header']; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['position', 'username', 'avgTime']"></tr>
+                    </table>
+                </div>
+                <div>
+                    <table mat-table [dataSource]="page.top20_bestTime">
+                        <ng-container matColumnDef="header">
+                            <th mat-header-cell *matHeaderCellDef colspan="3">Best time</th>
+                        </ng-container>
+                        <ng-container matColumnDef="position">
+                            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+                        </ng-container>
+                
+                        <ng-container matColumnDef="username">
+                            <td mat-cell *matCellDef="let element"> {{ element.username }} </td>
+                        </ng-container>
+                
+                        <ng-container matColumnDef="bestTime">
+                            <td mat-cell *matCellDef="let element"> {{ element.score }} </td>
+                        </ng-container>
+                
+                        <tr mat-header-row *matHeaderRowDef="['header']; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['position', 'username', 'bestTime']"></tr>
+                    </table>
+                </div>
+                <div>
+                <table mat-table [dataSource]="page.top20_gamesPlayed">
+                    <ng-container matColumnDef="header">
+                        <th mat-header-cell *matHeaderCellDef colspan="3">Games played</th>
+                    </ng-container>
+                    <ng-container matColumnDef="position">
+                        <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="username">
+                        <td mat-cell *matCellDef="let element"> {{ element.username }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="games">
+                        <td mat-cell *matCellDef="let element"> {{ element.score }} </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['header']; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['position', 'username', 'games']"></tr>
+                </table>
+                </div>
+                <div>
+                    <table mat-table [dataSource]="page.top20_numberOfMoves">
+                        <ng-container matColumnDef="header">
+                            <th mat-header-cell *matHeaderCellDef colspan="3">Fewest moves</th>
+                        </ng-container>
+                        <ng-container matColumnDef="position">
+                            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+                        </ng-container>    
+                        <ng-container matColumnDef="username">
+                            <td mat-cell *matCellDef="let element"> {{ element.username }} </td>
+                        </ng-container>    
+                        <ng-container matColumnDef="moves">
+                            <td mat-cell *matCellDef="let element"> {{ element.score }} </td>
+                        </ng-container>    
+                        <tr mat-header-row *matHeaderRowDef="['header']; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['position', 'username', 'moves']"></tr>
+                    </table> 
+                </div>
+            } @else { <div class="empty-leaderboards">No leaderboards found!</div> }
+        </div>
+    </mat-card-content>
+</mat-card>
