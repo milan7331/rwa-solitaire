@@ -105,6 +105,40 @@ export const selectLeaderboardPage = createSelector(
     selectPageIndex,
     (leaderboard, loading, total, index) => {
         if (index >= total && loading) return { timePeriod: new Date(), top20_averageTime: [], top20_bestTime: [], top20_gamesPlayed: [], top20_numberOfMoves: [] } as Leaderboard;
+        console.log(leaderboard[index]);
         return leaderboard[index];
     }
+);
+
+export const selectTimePeriod = createSelector(
+    selectLeaderboardPage,
+    selectLeaderboardType,
+    (page, type) => {
+        if (!page) return 'No leaderboards found!';
+
+        const startDate = new Date(page.timePeriod);
+        let endDate = new Date(startDate);
+
+        switch (type) {
+            case LeaderboardType.WEEKLY: {
+                endDate.setUTCDate(startDate.getUTCDate() + 6);
+                break;
+            }
+            case LeaderboardType.MONTHLY: {
+                endDate.setUTCMonth(startDate.getUTCMonth() + 1);
+                endDate.setUTCDate(0);
+                break;
+            }
+            case LeaderboardType.YEARLY: {
+                endDate.setUTCFullYear(startDate.getFullYear() + 1);
+                endDate.setUTCDate(0);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    } 
 );
