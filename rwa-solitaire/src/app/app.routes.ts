@@ -5,7 +5,7 @@ import { LeaderboardsComponent } from './components/pages/leaderboards/leaderboa
 import { SolitaireComponent } from './components/pages/solitaire/solitaire.component';
 import { LoginComponent } from './components/pages/login/login.component';
 import { RegisterComponent } from './components/pages/register/register.component';
-import { AboutComponent } from './components/standalone/about/about.component';
+import { AboutComponent } from './components/pages/about/about.component';
 import { MenuComponent } from './components/pages/menu/menu.component';
 
 export const routes: Routes = [

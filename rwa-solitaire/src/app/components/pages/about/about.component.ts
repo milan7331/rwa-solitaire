@@ -25,6 +25,7 @@ constructor(
   ) { }
 
   goBack(): void {
+    this.audio.play_buttonPress();
     const referrer = document.referrer;
     const currentDomain = window.location.origin;
 
@@ -33,7 +34,6 @@ constructor(
     } else {
       this.router.navigate(['']);
     }
-    this.audio.play_buttonPress();
   }
   
 }
