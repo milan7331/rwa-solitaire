@@ -39,18 +39,18 @@ export class MenuComponent {
   }
 
   continueGame(): void {
-    // dispatch za load u store i onda start game
     this.audio.play_buttonPress();
+    // dispatch za load u store i onda start game
   }
 
   loadSolitairePage(): void {
-    this.router.navigate(['solitaire'], { state: { difficulty: this.difficulty }});
     this.audio.play_buttonPress();
+    this.router.navigate(['solitaire'], { state: { difficulty: this.difficulty }});
   }
 
   loadLeaderboardsPage(): void {
-    this.router.navigate(['leaderboards']);
     this.audio.play_buttonPress();
+    this.router.navigate(['leaderboards']);
   }
 
   loadEditProfilePage(): void {
@@ -65,8 +65,8 @@ export class MenuComponent {
   }
 
   changeDifficulty(): void {
-    this.difficulty = (this.difficulty === 0) ? 1 : 0;
     this.audio.play_buttonPress();
+    this.difficulty = (this.difficulty === 0) ? 1 : 0;
   }
 
 }

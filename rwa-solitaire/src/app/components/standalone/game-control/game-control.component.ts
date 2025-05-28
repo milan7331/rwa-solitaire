@@ -59,28 +59,28 @@ export class GameControlComponent implements OnInit {
   }
 
   public startNewGame(): void {
-    this.store.dispatch(solitaireActions.startNewGame({ difficulty: this.#difficulty ?? SolitaireDifficulty.Hard }));
     this.audioService.play_buttonPress();
+    this.store.dispatch(solitaireActions.startNewGame({ difficulty: this.#difficulty ?? SolitaireDifficulty.Hard }));
   }
 
   public restartGame(): void {
-    this.store.dispatch(solitaireActions.restartGame());
     this.audioService.play_buttonPress();
+    this.store.dispatch(solitaireActions.restartGame());
   }
 
   public undoMove(): void {
+    this.audioService.play_undo();
     this.store.dispatch(solitaireActions.undo());
-    this.audioService.play_buttonPress();
   }
 
   public getHints(): void {
-    this.hintButtonPressed.emit();
     this.audioService.play_buttonPress();
+    this.hintButtonPressed.emit();
   }
 
   public changeDifficulty(): void {
+    this.audioService.play_buttonPress();
     const newDiff = this.#difficulty === SolitaireDifficulty.Hard ? SolitaireDifficulty.Easy : SolitaireDifficulty.Hard; 
     this.store.dispatch(solitaireActions.startNewGame({ difficulty: newDiff }));
-    this.audioService.play_buttonPress();
   }
 }

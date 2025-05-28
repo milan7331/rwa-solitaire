@@ -35,7 +35,7 @@ export class HomeComponent {
   ) {}
  
   loadSolitairePage(difficulty: SolitaireDifficulty) {
-    this.router.navigate(['/solitaire'], { state: {difficulty} });
     this.audio.play_buttonPress();
+    this.router.navigate(['/solitaire'], { state: {difficulty} });
   }
 }

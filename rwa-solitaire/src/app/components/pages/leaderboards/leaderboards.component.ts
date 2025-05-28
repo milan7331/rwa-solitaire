@@ -13,6 +13,7 @@ import { selectLeaderboardType, selectPageIndex, selectLeaderboardPageCount, sel
 import { Leaderboard } from '../../../models/leaderboard/leaderboard';
 import { LeaderboardType } from '../../../models/leaderboard/leaderboard.enum';
 import { LeaderboardDisplayComponent } from "../../standalone/leaderboard-display/leaderboard-display.component";
+import { AudioService } from '../../../services/app/audio/audio.service';
 
 @Component({
   selector: 'app-leaderboards',
@@ -49,13 +50,14 @@ export class LeaderboardsComponent implements  OnInit, AfterViewInit {
   constructor(
     private readonly store: Store,
     private readonly destroyRef: DestroyRef,
+    private readonly audio: AudioService,
   ) {
     this.leaderboardType$ = of(LeaderboardType.WEEKLY);
     this.leaderboardType = LeaderboardType.WEEKLY;
-    
+
     this.leaderboardPage$ = of(this.#createEmptyLeaderboard(15));
     this.leaderboardPage = this.#createEmptyLeaderboard(15);
-   
+
     this.leaderboardPageCount$ = of(0);
     this.leaderboardPageCount = 0;
 
@@ -70,7 +72,7 @@ export class LeaderboardsComponent implements  OnInit, AfterViewInit {
     this.leaderboardType$ = this.store.select(selectLeaderboardType);
     this.leaderboardType$.pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe((type) => 
+    ).subscribe((type) =>
       this.leaderboardType = type
     );
 
@@ -79,15 +81,13 @@ export class LeaderboardsComponent implements  OnInit, AfterViewInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((lb) => {
       this.leaderboardPage = {...lb};
-      //console.log(this.leaderboardPage);
-      }
-    );
+    });
 
     this.leaderboardPageCount$ = this.store.select(selectLeaderboardPageCount);
     this.leaderboardPageCount$.pipe(
-      takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef)
     ).subscribe((count) =>
-      this.leaderboardPageCount = count
+        this.leaderboardPageCount = count
     );
 
     this.leaderboardPageIndex$ = this.store.select(selectPageIndex);
@@ -104,32 +104,34 @@ export class LeaderboardsComponent implements  OnInit, AfterViewInit {
       this.leaderboardTimePeriod = period
     );
   }
-  
+
   ngAfterViewInit(): void {
     this.#createMockData();
   }
 
   changeLeaderboardType(type: LeaderboardType) {
+    this.audio.play_buttonPress();
     this.store.dispatch(leaderboardsActions.changeLeaderboardType({ leaderboardType: type }));
   }
-  
+
   loadNextPage(): void {
+    this.audio.play_buttonPress();
     this.store.dispatch(leaderboardsActions.showNextPage());
-    console.log(this.leaderboardPage);
   }
+
   loadPreviousPage(): void {
+    this.audio.play_buttonPress();
     this.store.dispatch(leaderboardsActions.showPreviousPage());
   }
 
   loadFistPage(): void {
+    this.audio.play_buttonPress();
     this.store.dispatch(leaderboardsActions.showFirstPage());
-        console.log(this.leaderboardPage);
-
   }
 
   loadLastPage(): void {
+    this.audio.play_buttonPress();
     this.store.dispatch(leaderboardsActions.showLastPage());
-    console.log(this.leaderboardPage);
   }
 
   getLeaderboardText(type: LeaderboardType): string {
@@ -138,7 +140,6 @@ export class LeaderboardsComponent implements  OnInit, AfterViewInit {
     if (type === LeaderboardType.YEARLY) return 'Yearly';
     return '';
   }
-
 
   #createMockData(): void {
     let mockPagesW: Leaderboard[] = [];
