@@ -1,3 +1,15 @@
+<ng-template cdkConnectedOverlay
+[cdkConnectedOverlayOrigin]="trigger"
+[cdkConnectedOverlayOpen]="audioControlIsOpen"
+[cdkConnectedOverlayHasBackdrop]="true"
+[cdkConnectedOverlayDisposeOnNavigation]="true"
+(backdropClick)="handleAudioOverlayClose()"
+(overlayOutsideClick)="handleAudioOverlayClose()"
+(overlayKeydown)="handleEscapeKeyOverlay($event)"
+(detach)="handleAudioOverlayClose()">
+    <app-audio-control [@overlayAnimation]></app-audio-control>
+</ng-template>
+
 <mat-toolbar>
     <button mat-button class="title-btn" (click)="loadHomePage()">RWA Solitaire</button>
     <span class="top-bar-spacer"></span>
@@ -10,5 +22,5 @@
     <button mat-button class="ml-05" (click)="loadLeaderboardsPage()"><mat-icon>leaderboard</mat-icon>Leaderboards</button>
     <button mat-button class="ml-05" (click)="loadAboutPage()"><mat-icon>info</mat-icon>About</button>
     <button mat-icon-button class="ml-05 icon-btn" (click)="toggleDarkMode()"><mat-icon>dark_mode</mat-icon></button>
-    <button mat-icon-button class="ml-05 icon-btn" (click)="toggleAudioControl($event)" id="volume-button"><mat-icon>{{ volumeIcon$ | async }}</mat-icon></button>
+    <button mat-icon-button class="ml-05 icon-btn" (click)="toggleAudioControl()" cdkOverlayOrigin #trigger="cdkOverlayOrigin"><mat-icon>{{ volumeIcon$ | async }}</mat-icon></button>
 </mat-toolbar>

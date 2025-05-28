@@ -13,7 +13,6 @@ import { MatInputModule } from '@angular/material/input';
 import { AudioService } from '../../../services/app/audio/audio.service';
 import { selectAudioVolume, selectAudioVolumeIcon } from '../../../store/selectors/audio.selectors';
 import { audioActions } from '../../../store/actions/audio.actions';
-import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-audio-control',
@@ -29,17 +28,9 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
   ],
   templateUrl: './audio-control.component.html',
   styleUrl: './audio-control.component.scss',
-  animations: [
-    trigger('overlayAnimation', [
-      state('void', style({ opacity: 0, transform: 'translateY(-10px)'})),
-      state('*', style({ opacity: 1, transform: 'translateY(0)'})),
-      transition('void <=> *', animate('200ms ease-in-out')),
-    ])
-  ],
-  standalone: true
+  standalone: true,
 })
-export class AudioControlComponent implements OnDestroy, OnInit {
-  #destroy$: Subject<void>;
+export class AudioControlComponent implements OnInit {
   volumeIcon$: Observable<string>;
   audioVolume$: Observable<number>;
 
@@ -47,7 +38,6 @@ export class AudioControlComponent implements OnDestroy, OnInit {
     private store: Store,
     private audio: AudioService,
   ) {
-    this.#destroy$ = new Subject<void>();
     this.volumeIcon$ = of('volume_up');
     this.audioVolume$ = of(0.8);
   }
@@ -55,11 +45,6 @@ export class AudioControlComponent implements OnDestroy, OnInit {
   ngOnInit(): void {
     this.volumeIcon$ = this.store.select(selectAudioVolumeIcon);
     this.audioVolume$ = this.store.select(selectAudioVolume);
-  }
-
-  ngOnDestroy(): void {
-    this.#destroy$.next();
-    this.#destroy$.complete();
   }
 
   changeVolume(value: number): void {
