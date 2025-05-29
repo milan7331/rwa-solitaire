@@ -47,7 +47,7 @@ export const selectLeaderboardType = createSelector(
 
 export const selectPageIndex = createSelector(
     selectLeaderboardsState,
-    (state: LeaderboardsState) => state.pageIndex
+    (state: LeaderboardsState) => state.pageIndex?? 0
 );
 
 export const selectLeaderboardLoading = createSelector(
@@ -100,12 +100,8 @@ const selectLeaderboardTotal = createSelector(
 
 export const selectLeaderboardPage = createSelector(
     selectLeaderboard,
-    selectLeaderboardLoading,
-    selectLeaderboardTotal,
     selectPageIndex,
-    (leaderboard, loading, total, index) => {
-        if (index >= total && loading) return { timePeriod: new Date(), top20_averageTime: [], top20_bestTime: [], top20_gamesPlayed: [], top20_numberOfMoves: [] } as Leaderboard;
-        console.log(leaderboard[index]);
+    (leaderboard, index) => {
         return leaderboard[index];
     }
 );

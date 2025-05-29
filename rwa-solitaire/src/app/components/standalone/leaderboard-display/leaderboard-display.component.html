@@ -80,7 +80,11 @@
                         <tr mat-row *matRowDef="let row; columns: ['position', 'username', 'moves']"></tr>
                     </table> 
                 </div>
-            } @else { <div class="empty-leaderboards">No leaderboards found!</div> }
+            } @else {
+                <div class="empty-container">
+                    No leaderboards found!
+                </div>
+            }
         </div>
     </mat-card-content>
 </mat-card>
