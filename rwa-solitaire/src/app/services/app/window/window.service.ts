@@ -1,16 +1,21 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, debounceTime, fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, debounceTime, fromEvent, merge, Observable, startWith } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { WindowSize } from './window-size';
+import { CursorPosition } from './cursor-position';
+
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class WindowService {  
-  #windowSize: BehaviorSubject<{ width: number; height: number }>;
-  #cursorPosition: BehaviorSubject<{ x: number, y: number }>;
+  #windowSize: BehaviorSubject<WindowSize>;
+  #cursorPosition: BehaviorSubject<CursorPosition>;
   
-  windowSize$: Observable<{ width: number; height: number }>;
-  cursorPosition$: Observable<{ x: number, y: number }>;
+  windowSize$: Observable<WindowSize>;
+  cursorPosition$: Observable<CursorPosition>;
 
   constructor() {
     this.#windowSize = new BehaviorSubject({ width: window.innerWidth, height: window.innerHeight });
@@ -19,26 +24,32 @@ export class WindowService {
     this.windowSize$ = this.#windowSize.asObservable();
     this.cursorPosition$ = this.#cursorPosition.asObservable();
   
-    this.#initialize();
+    this.#initializeWindowResizing();
+    this.#initializeMouseTracking();
   }
 
-  #initialize() {
-    fromEvent(window, 'resize')
-      .pipe(debounceTime(100), takeUntilDestroyed())
-      .subscribe(() => {
-        this.#windowSize.next({
-          width: window.innerWidth,
-          height: window.innerHeight
-        });
-      });
+  #initializeWindowResizing() {
+    merge(
+      fromEvent(window, 'resize'),
+      fromEvent(document, 'visibilitychange'),
+      fromEvent(document, 'fullscreenchange'),
+      fromEvent(document, 'webkitfullscreenchange'),
+      fromEvent(document, 'msfullscreenchange'),
+    ).pipe(
+      startWith(0),
+      debounceTime(100),
+    ).subscribe(() => {
+      this.#windowSize.next({ width: window.innerWidth, height: window.innerHeight });
+    });
+  }
 
+  #initializeMouseTracking() {
     fromEvent<MouseEvent>(window, 'mousemove')
-      .pipe(takeUntilDestroyed())
-      .subscribe((event: MouseEvent) => {
-        this.#cursorPosition.next({
-          x: event.clientX,
-          y: event.clientY
-        });
+    .subscribe((event: MouseEvent) => {
+      this.#cursorPosition.next({
+        x: event.clientX,
+        y: event.clientY
       });
+    });
   }
 }
