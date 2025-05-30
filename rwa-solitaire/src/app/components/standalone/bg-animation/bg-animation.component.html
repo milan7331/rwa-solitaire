@@ -1,5 +1,8 @@
-@if (onExcludedRoute === false) {
+@if (renderAnimation) {
     @for (element of elements; track $index) {
-        <div class="bg-element">{{ element }}</div>
+        <div class="bg-element" 
+        [style.--animation-duration]="element.duration + 's'"
+        [style.--animation-delay]="element.delay + 's'"
+        >{{ element.character }}</div>
     }
 }

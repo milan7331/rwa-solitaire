@@ -1,4 +1,7 @@
 :host {
+    --element-size: 30px;
+    --element-gap: 120px;
+
     position: absolute;
     width: 100vw;
     height: 100vh;
@@ -7,28 +10,31 @@
     top: 0;
     left: 0;
 
+    padding: 4vh;
     padding-top: calc(64px + 4vh);
-    padding-left: 60px;
-    padding-right: 60px;
     box-sizing: border-box;
 
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items: center;
-    align-content: space-evenly;
-    gap: 120px;
+    align-content: space-between;
+    gap: var(--element-gap);
 
 
     .bg-element {
-        font-size: 30px;
+        --animation-duration: 8s;
+        --animation-delay: 0s;
+
+        font-size: var(--element-size);
         user-select: none;
         color: var(--mat-sys-primary);
         opacity: 0;
 
         animation-name: glimmer;
-        animation-duration: 8s;
+        animation-duration: var(--animation-duration);
+        animation-delay: var(--animation-delay);
         animation-iteration-count: infinite;
         animation-direction: alternate;
         animation-timing-function: ease-in;

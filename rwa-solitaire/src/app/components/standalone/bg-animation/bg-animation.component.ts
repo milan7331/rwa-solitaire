@@ -1,9 +1,11 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, DestroyRef, ElementRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WindowService } from '../../../services/app/window/window.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, startWith } from 'rxjs';
+import { BgElement } from './bg-element';
+import { WindowSize } from '../../../services/app/window/window-size';
 
 @Component({
   selector: 'app-bg-animation',
@@ -13,95 +15,88 @@ import { filter } from 'rxjs';
   standalone: true
 })
 export class BgAnimationComponent implements OnInit, AfterViewInit {
-  // Note: background animations are set to work with fixed dimensions -> font-size 30px & 60 px margin
-  suits = '♠♥♦♣';
-  elements: string = '';
-  elementCount: { x: number, y: number } = { x: 40, y: 30 };
+  // Note: background animations are set to work with fixed element dimensions set in the constructor
+  suits: string;
+  elements: BgElement[];
+  elementSize: number;
+  elementGap: number;
 
   #excludedRoutes: string[] = ['solitaire'];
-  onExcludedRoute: boolean = false;
-
-  
+  renderAnimation: boolean;
 
   constructor(
     private readonly router: Router,
-    private readonly host: ElementRef,
+    private readonly elementRef: ElementRef,
     private readonly destroyRef: DestroyRef,
     private readonly winService: WindowService,
-  ) {}
+    private readonly cdr: ChangeDetectorRef,
+  ) {
+    this.suits  = '♠♥♦♣';
+    this.elements = [];
+    this.elementSize = 30;
+    this.elementGap = 120;
+    this.renderAnimation = false;
+  }
 
   ngOnInit(): void {
-    this.winService.windowSize$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((win) => {
-        this.elementCount = this.#getBgElementCount(win.width, win.height);
-        this.elements = this.#fillBgElementsArray(this.elementCount);
-        this.#setRandomAnimationTimings();
+    this.winService.windowSize$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      startWith({ width: 1920, height: 1080 } as WindowSize)
+    ).subscribe((win) => {
+        this.elements = this.#getBgElements(win);
+        this.cdr.detectChanges();       
       });
 
     this.router.events.pipe(
       takeUntilDestroyed(this.destroyRef),
       filter(event => event instanceof NavigationEnd)
-    ).subscribe(() =>
-      this.#removeBgAnimation()
-    )
+    ).subscribe(() => {
+      this.renderAnimation = !this.#checkExcludedRouteActive();
+    });
   }
 
   ngAfterViewInit(): void {
-    this.#setRandomAnimationTimings();
-    this.#removeBgAnimation();
+    this.#setBgElementSizing();
   }
 
-  #getBgElementCount(xRes: number, yRes: number): { x: number, y: number } {
-    if (xRes < 200 || yRes < 200) return { x:40, y:30 };
-
-    let xNum = Math.floor((xRes - 120) / 150);
-    if (xNum % 4 === 0) xNum++;
-    let yNum = Math.floor((yRes - 120) / 150);
-    if (yNum % 4 === 0) yNum++;
-
-    return { x:xNum, y:yNum }
+  #getBgElements(windowSize: WindowSize): BgElement[] {
+    const elementCount = this.#getBgElementCount(windowSize);
+    return Array.from({length: elementCount}, () => this.#generateRandomBgElement());
   }
 
-  #fillBgElementsArray(elementCount: {x: number, y: number}): string {
-    const result = Math.floor((elementCount.x * elementCount.y) / 4);
-    const rest = (elementCount.x * elementCount.y) % 4;
+  #getBgElementCount(res: WindowSize): number {
+    if (res.width < 200 || res.height < 200) return 10;
 
-    let newElements = this.suits.repeat(result);
-    newElements = newElements.concat(this.suits.slice(0, rest));
+    let xNum = Math.floor(res.width / (this.elementSize + this.elementGap));
+    let yNum = Math.floor(res.height / (this.elementSize + this.elementGap));
 
-    return newElements;
+    return xNum * yNum;
   }
 
-  #setRandomAnimationTimings(): void {
-    const nativeElement = this.host.nativeElement;
-    if (nativeElement === null || nativeElement === undefined) return;
+  #generateRandomBgElement(): BgElement {
+    const character = this.suits[Math.floor(Math.random() * this.suits.length)];
+    const duration = Math.floor(Math.random() * 35) + 5;
+    const delay = Math.floor(Math.random() * (duration * 0.8));
 
-    const elements = this.host.nativeElement.querySelectorAll('div.bg-element') as HTMLElement[];
-
-    elements.forEach(el => {
-      const element = el as HTMLElement;
-
-      const duration = Math.floor(Math.random() * 35) + 5;
-      const delay = Math.floor(Math.random() * (duration * 0.8));
-
-      element.style.animationDuration = duration + 's';
-      element.style.animationDelay = '-' + delay + 's';
-    })
+    return { character, duration, delay };
   }
-  
-  #removeBgAnimation(): void {
-    this.onExcludedRoute = this.#checkExcludedRouteActive();
+
+  #setBgElementSizing(): void {
+    const host = this.elementRef.nativeElement as HTMLElement;
+    if (!host) return;
+
+    host.style.setProperty('--element-size', `${this.elementSize}px`);
+    host.style.setProperty('--element-gap', `${this.elementGap}px`);
   }
 
   #checkExcludedRouteActive(): boolean {
-    return this.#excludedRoutes.some((route) => {
-      return this.router.isActive(route, {
+    return this.#excludedRoutes.some((route) =>
+      this.router.isActive(route, {
         paths: 'exact',
         queryParams: 'ignored',
         fragment: 'ignored',
         matrixParams: 'ignored',
-      });
-    });
+      })
+    );
   }  
 }
