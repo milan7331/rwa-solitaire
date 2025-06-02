@@ -9,7 +9,8 @@ import { loginActions, logoutActions, sessionActions } from "../actions/auth.act
 import { userEditActions, userMenuActions } from "../actions/user.actions";
 
 export const gameHistoryAdapter: EntityAdapter<GameHistory> = createEntityAdapter<GameHistory>({
-    // promeniti da se sortira po datumu? i da je id nešto drugo nakon što zapravo dodam modele
+    selectId: (game) => game.id,
+    sortComparer: (a: GameHistory, b: GameHistory) => b.finishedTime.getTime() - a.finishedTime.getTime(),
 });
 
 const initialUserState: UserState = {
