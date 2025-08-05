@@ -31,15 +31,15 @@ import { ScheduleModule } from '@nestjs/schedule';
         database: configService.get<string>('DB_NAME'),
         logging: false,
         autoLoadEntities: true,
-        synchronize: true, // prepraviti kasnije!!!
+        synchronize: true, // prepraviti kasnije!!!!!!!!!!!!!!!!!!!!!!
       })
     }),
     ScheduleModule.forRoot(),
     AuthModule,
     GameHistoryModule,
     LeaderboardModule,
-    SavedGameModule, 
-    UserModule, 
+    SavedGameModule,
+    UserModule,
     UserStatsModule,
     UtilModule
   ],

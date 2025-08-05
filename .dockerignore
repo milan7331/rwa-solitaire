@@ -1,0 +1,31 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+
+# Environment-specific files
+.env
+!.env.example
+*.local
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Git-related files
+.git
+.gitignore
+
+# Editor-specific files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Other
+.angular/

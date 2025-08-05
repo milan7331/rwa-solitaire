@@ -1,27 +1,47 @@
-# Node modules
+# Node and build output
 node_modules
+dist
+out-tsc
+.angular
+.cache
+.tmp
 
-# Build output
-dist/
+# Testing & Coverage
+coverage
+jest
+cypress
+cypress/screenshots
+cypress/videos
+reports
+playwright-report
+.vite
+.vitepress
 
-# Environment-specific files
-.env
-*.local
-
-# Logs
+# Environment & log files
+*.env*
+!*.env.production  # Only allow production env file
+!.env.example
 *.log
+*.tsbuildinfo
 
-# Temporary files
-*.tmp
+# IDE & OS-specific files
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.swp
 
-# Git-related files
+# Version control
 .git
 .gitignore
 
-# Editor-specific files
-.vscode/
-.idea/
+# Docker files
+Dockerfile
+Dockerfile.*
+docker-compose.yml
+docker-compose*.yml
 
-# OS-specific files
-.DS_Store
-Thumbs.db
+# Miscellaneous
+*.bak
+*.old
+*.tmp

@@ -1,64 +1,68 @@
+name: rwa
+
+# todo: remove public network access
+
 services:
+  rwa-solitaire:
+    container_name: rwa-solitaire
+    build:
+      context: ./rwa-solitaire
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    :networks:
+      - public-network
+      - internal-network
+    volumes:
+      - ./rwa-solitaire:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - rwa-solitaire-db
+      - rwa-solitaire-api
+    restart: unless-stopped
+    env_file:
+      - ./rwa-solitaire/.env
+    command: ng serve --host 0.0.0.0 --port 4200 --poll 2000
 
-    solitaire-frontend:
-        container_name: rwa-frontend
-        build: 
-            context: ./rwa-solitaire
-            dockerfile: Dockerfile
-        ports:
-            - "4200:4200"
-        volumes:
-            - type: bind
-              source: ./rwa-solitaire
-              target: /usr/src/app
-              read_only: true
-            # - ./rwa-solitaire:/usr/src/app
-            # - node_modules_cache:/usr/src/app/node_modules
-        depends_on:
-            - solitaire-db
-            - solitaire-backend
-        restart: no
-        stdin_open: true
-        tty: true
-        command: ng serve --host 0.0.0.0 --port 4200 # --poll 1000
+  rwa-solitaire-api:
+    container_name: rwa-solitaire-api
+    build:
+      context: ./rwa-solitaire-api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+    - public-network
+    - internal-network
+    volumes:
+      - ./rwa-solitaire-api:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - rwa-solitaire-db
+    restart: unless-stopped
+    env_file:
+      - ./rwa-solitaire-api/.env
+    command: nest start --watch
 
-    solitaire-backend:
-        container_name: rwa-backend
-        build:
-            context: ./rwa-solitaire-api
-            dockerfile: Dockerfile
-        ports:
-            - "3000:3000"
-        volumes:
-            - type: bind
-              source: ./rwa-solitaire-api
-              target: /usr/src/app
-              #read_only: true
-            # - dist-volume:/usr/src/app/dist # Separate volume for build output
-        depends_on:
-            - solitaire-db
-        restart: no
-        stdin_open: true
-        tty: true
-        command: nest start --watch 
+  rwa-solitaire-db:
+    container_name: rwa-solitaire-db
+    image: postgres:17-alpine
+    networks:
+    - public-network
+    - internal-network
+    env_file:
+      - ./.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
-    solitaire-db:
-        container_name: rwa-db
-        image: postgres:17-bookworm
-        restart: always
-        environment:
-            POSTGRES_USER: rwa-user
-            POSTGRES_PASSWORD: rwa-password
-            POSTGRES_DB: rwa-db
-        ports:
-            - "5432:5432"
-        volumes:
-            - postgres-data:/var/lib/postgresql/data
+networks:
+  public-network:
+    driver: bridge
 
-
-
+  internal-network:
+    driver: bridge
+    internal: true
 
 volumes:
-    #node_modules_cache:
-    dist-volume:
-    postgres-data:
+  postgres_data:
