@@ -1,17 +1,17 @@
-import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { GameHistory } from './entities/game-history.entity';
 import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
-import { CronService } from 'src/util/cron.service';
 import { UserStatsService } from '../user-stats/user-stats.service';
 import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindGameHistoryDto } from './dto/find-game-history.dto';
 import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 import { FindUserStatsDto } from '../user-stats/dto/find-user-stats.dto';
 import { UserService } from '../user/user.service';
+import { DateCalculationService } from 'src/util/date-calculation.service';
 
 @Injectable()
 export class GameHistoryService {
@@ -19,8 +19,7 @@ export class GameHistoryService {
     @InjectRepository(GameHistory)
     private readonly historyRepository: Repository<GameHistory>,
 
-    @Inject(forwardRef(() => CronService))
-    private readonly cronService: CronService,
+    private readonly dateService: DateCalculationService,
     
     private readonly userService: UserService,
     private readonly statsService: UserStatsService,
@@ -28,21 +27,21 @@ export class GameHistoryService {
 
   // used for leaderboard generation only
   async getAllGamesFromThisWeek(): Promise<[GameHistory[], Date]> {
-    const [weekStartDate, weekEndDate] = this.cronService.getCleanDateSpan_CurrentWeek();
+    const [weekStartDate, weekEndDate] = this.dateService.getCleanDateSpan_CurrentWeek();
     const games = await this.#getAllGamesFromTimeSpan(weekStartDate, weekEndDate);
     return [games, weekStartDate];
   }
   
   // used for leaderboard generation only
   async getAllGamesFromThisMonth(): Promise<[GameHistory[], Date]> {
-    const [monthStartDate, monthEndDate] = this.cronService.getCleanDateSpan_CurrentMonth();
+    const [monthStartDate, monthEndDate] = this.dateService.getCleanDateSpan_CurrentMonth();
     const games = await this.#getAllGamesFromTimeSpan(monthStartDate, monthEndDate);
     return [games, monthStartDate];
   }
   
   // used for leaderboard generation only
   async getAllGamesFromThisYear(): Promise<[GameHistory[], Date]> {
-    const [yearStartDate, yearEndDate] = this.cronService.getCleanDateSpan_CurrentYear();
+    const [yearStartDate, yearEndDate] = this.dateService.getCleanDateSpan_CurrentYear();
     const games = await this.#getAllGamesFromTimeSpan(yearStartDate, yearEndDate);
     return [games, yearStartDate];
   }

@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,7 +10,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from 'src/resources/user/user.module';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/jwt.guard';
-import { HashService } from './hash.service';
 
 @Module({
   imports: [
@@ -18,22 +17,21 @@ import { HashService } from './hash.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('NEST_JWT_SECRET'),
         global: true,
         signOptions: {
           expiresIn: '24h',
         },
       })
     }),
-    forwardRef(() => UserModule),
-    PassportModule
+    PassportModule,
+    UserModule,
   ],
   controllers: [
     AuthController
   ],
   providers: [
     AuthService,
-    HashService,
     LocalStrategy,
     JwtStrategy,
     {
@@ -44,7 +42,6 @@ import { HashService } from './hash.service';
   exports: [
     AuthService,
     JwtModule,
-    HashService
   ]
 })
 export class AuthModule {}

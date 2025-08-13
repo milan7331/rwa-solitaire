@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException, 
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, LessThan, Repository } from 'typeorm';
 
-import { HashService } from 'src/auth/hash.service';
+import { HashService } from './hash.service';
 import { SavedGame } from '../saved-game/entities/saved-game.entity';
 import { UserStats } from '../user-stats/entities/user-stats.entity';
 import { GameHistory } from '../game-history/entities/game-history.entity';
@@ -20,9 +20,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository:Repository<User>,
-
     private readonly dataSource: DataSource,
-    private readonly hashService: HashService
+    private readonly hashService: HashService,
   ) { }
 
   async isUsernameAvailable(username: string): Promise<void> {

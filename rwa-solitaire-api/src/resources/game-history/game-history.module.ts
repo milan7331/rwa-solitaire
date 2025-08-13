@@ -1,16 +1,18 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { GameHistoryService } from './game-history.service';
 import { GameHistoryController } from './game-history.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameHistory } from './entities/game-history.entity';
 import { UserStatsModule } from '../user-stats/user-stats.module';
 import { UtilModule } from 'src/util/util.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([GameHistory]),
+    UserModule,
     UserStatsModule,
-    forwardRef(() => UtilModule)
+    UtilModule,
   ],
   controllers: [GameHistoryController],
   providers: [GameHistoryService],

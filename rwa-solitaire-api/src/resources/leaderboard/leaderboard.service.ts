@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -23,7 +23,6 @@ import { LeaderboardRow } from "./entities/leaderboard.row";
 export class LeaderboardService {
   
   constructor(
-    @Inject(forwardRef(() => GameHistoryService))
     private readonly historyService: GameHistoryService,
 
     @InjectRepository(WeeklyLeaderboard)
