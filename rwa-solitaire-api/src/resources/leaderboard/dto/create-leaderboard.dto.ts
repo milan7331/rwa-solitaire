@@ -1,7 +1,6 @@
 import { Transform } from "class-transformer";
 import { IsArray, IsDate, IsEnum, IsNotEmpty } from "class-validator";
 
-import { UserData } from "../entities/userdata";
 import { LeaderboardType } from "../entities/leaderboard.enum";
 import { LeaderboardRow } from "../entities/leaderboard.row";
 

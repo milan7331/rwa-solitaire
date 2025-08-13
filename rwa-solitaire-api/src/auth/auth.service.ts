@@ -13,7 +13,7 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    // find one also checks for password matching, no need to call the hashService derictly
+    // find one also checks for password matching, no need to call the hashService manually
     async validateUser(username: string, password: string): Promise<User | null> {
         const findUserDto: FindUserDto = {
             username,
@@ -23,7 +23,7 @@ export class AuthService {
         };
 
         const user = await this.userService.findOne(findUserDto);
-        
+
         if (!user) return null;
         return { ...user, passwordHash: '' } as User;
     }

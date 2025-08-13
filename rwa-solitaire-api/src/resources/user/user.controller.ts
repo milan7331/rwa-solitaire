@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { Public } from 'src/auth/auth.decorators';
@@ -13,12 +13,14 @@ export class UserController {
 
   @Get('is-username-available')
   @Get('is_username_available')
+  @Public()
   async checkUsername(@Query() username: string) {
     return await this.userService.isUsernameAvailable(username);
   }
 
   @Get('is-email-available')
   @Get('is_email_available')
+  @Public()
   async checkEmail(@Query() email: string) {
     return await this.userService.isEmailAvailable(email);
   }

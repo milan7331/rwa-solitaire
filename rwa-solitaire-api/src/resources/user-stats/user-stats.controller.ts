@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, HttpStatus, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query } from '@nestjs/common';
 import { UserStatsService } from './user-stats.service';
 import { CreateUserStatsDto } from './dto/create-user-stats.dto';
 import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
