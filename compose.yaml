@@ -1,7 +1,5 @@
 name: rwa
 
-# todo: remove public network access
-
 services:
   rwa-solitaire:
     container_name: rwa-solitaire
@@ -10,18 +8,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4200:4200"
-    :networks:
+    networks:
       - public-network
       - internal-network
     volumes:
       - ./rwa-solitaire:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
-      - rwa-solitaire-db
       - rwa-solitaire-api
     restart: unless-stopped
-    env_file:
-      - ./rwa-solitaire/.env
     command: ng serve --host 0.0.0.0 --port 4200 --poll 2000
 
   rwa-solitaire-api:
@@ -32,8 +27,8 @@ services:
     ports:
       - "3000:3000"
     networks:
-    - public-network
-    - internal-network
+      - public-network # for dev purposes
+      - internal-network
     volumes:
       - ./rwa-solitaire-api:/usr/src/app
       - /usr/src/app/node_modules
@@ -41,15 +36,16 @@ services:
       - rwa-solitaire-db
     restart: unless-stopped
     env_file:
-      - ./rwa-solitaire-api/.env
+      - ./.env
     command: nest start --watch
 
   rwa-solitaire-db:
     container_name: rwa-solitaire-db
     image: postgres:17-alpine
     networks:
-    - public-network
-    - internal-network
+     - internal-network
+    ports:
+     - 5432:5432
     env_file:
       - ./.env
     volumes:
@@ -59,7 +55,6 @@ services:
 networks:
   public-network:
     driver: bridge
-
   internal-network:
     driver: bridge
     internal: true
