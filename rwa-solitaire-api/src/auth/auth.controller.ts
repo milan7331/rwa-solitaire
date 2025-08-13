@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseGuards, Get, Res, Delete, Query } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards, Res, Delete, Query } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -31,16 +31,10 @@ export class AuthController {
     async validateSession(
         @Query() username: string,
         @Res({ passthrough: true }) res: Response
-    ) {        
+    ) {
         // global jwt auth guard does the cookie validation,
         // this metod executes only if the cookie is valid,
         // then checks for a valid username
         return this.authService.validateSession(username, res);
-    }
-
-    @Public()
-    @Get()
-    async test() {
-        return 'API works as intended';
     }
 }

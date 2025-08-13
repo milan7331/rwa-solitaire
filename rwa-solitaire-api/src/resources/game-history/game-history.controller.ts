@@ -25,11 +25,11 @@ export class GameHistoryController {
     await this.gameHistoryService.endGame(updateDto);
   }
 
-  // @Get('get-all-games-user')
-  // @Get('get_all_games_user')
-  // async getAllGames(@Query() user: User) {
-  //   return await this.gameHistoryService.findAllForUser(user);
-  // }
+  @Get('get-all-games-user')
+  @Get('get_all_games_user')
+  async getAllGames(@Query() username: string) {
+    return await this.gameHistoryService.findAllForUser(username);
+  }
 
   @Post('create')
   async create(@Body() createDto: CreateGameHistoryDto) {

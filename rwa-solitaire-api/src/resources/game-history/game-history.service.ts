@@ -144,11 +144,11 @@ export class GameHistoryService {
     }
   }
 
-  async findAllForUser(userId: number): Promise<GameHistory[]> {
+  async findAllForUser(username: string): Promise<GameHistory[]> {
     try {
       return await this.historyRepository.find({
-        where: { 
-          user: { id: userId } 
+        where: {
+          user: { username: username }
         },
         withDeleted: false
       });

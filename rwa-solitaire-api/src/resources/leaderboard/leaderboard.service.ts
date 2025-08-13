@@ -21,7 +21,7 @@ import { LeaderboardRow } from "./entities/leaderboard.row";
 
 @Injectable()
 export class LeaderboardService {
-  
+
   constructor(
     private readonly historyService: GameHistoryService,
 
@@ -30,7 +30,7 @@ export class LeaderboardService {
 
     @InjectRepository(MonthlyLeaderboard)
     private readonly monthlyRepository: Repository<MonthlyLeaderboard>,
-    
+
     @InjectRepository(YearlyLeaderboard)
     private readonly yearlyRepository: Repository<YearlyLeaderboard>,
   ) {}
@@ -52,9 +52,9 @@ export class LeaderboardService {
 
   async loadLeaderboards(getDto: GetLeaderboardDto): Promise<Leaderboard[]> {
     const { leaderboardType, take, skip } = getDto;
-    
+
     const repo = this.#getRepository(leaderboardType);
-    
+
     return this.#getLeaderboardPages(repo, take, skip);
   }
 
@@ -73,9 +73,9 @@ export class LeaderboardService {
     }
     const existingLeaderboard = await this.findOne(findDto);
     if (existingLeaderboard) throw new ConflictException('Leaderboard already exists for this time period!');
-    
+
     const repository = this.#getRepository(leaderboardType);
-    
+
     try {
       await repository.save(createDto);
     } catch(error) {
@@ -160,7 +160,7 @@ export class LeaderboardService {
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
 
     const repository = this.#getRepository(leaderboardType);
-    
+
     try {
       const result = await repository.update(leaderboard.id, updateDto);
       if (result.affected <= 0) throw new BadRequestException('Leaderboard update failed!');
@@ -186,7 +186,7 @@ export class LeaderboardService {
     }
     const leaderboard = await this.findOne(findDto);
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
-    
+
     const repository = this.#getRepository(leaderboardType);
 
     try {
@@ -198,7 +198,7 @@ export class LeaderboardService {
 
   async restore(restoreDto: RemoveLeaderboardDto): Promise<void> {
     const { id, timePeriod, leaderboardType } = restoreDto;
-    
+
     const isNotValidId = id === undefined;
     const isNotValidTime = isNaN(timePeriod.getTime());
     const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
@@ -211,7 +211,7 @@ export class LeaderboardService {
       leaderboardType,
       withDeleted: true
     }
-    
+
     const leaderboard = await this.findOne(findDto);
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
 
@@ -250,7 +250,7 @@ export class LeaderboardService {
       userStats.totalDuration += game.gameDurationInSeconds;
       userStats.bestTime = Math.min(userStats.bestTime, game.gameDurationInSeconds);
     }
-    
+
     return Array.from(userData.values());
   }
 
@@ -268,13 +268,13 @@ export class LeaderboardService {
     userData.forEach(user => {
       // Insert into bestTime ranking
       this.#insertIntoTop20(top20_bestTime, { username: user.username, score: user.bestTime }, (a, b) => a.score - b.score);
-  
+
       // Insert into averageTime ranking
       this.#insertIntoTop20(top20_averageTime, { username: user.username, score: this.#calculateAverage(user) }, (a, b) => a.score - b.score);
-  
+
       // Insert into moveCount ranking
       this.#insertIntoTop20(top20_numberOfMoves, { username: user.username, score: user.leastMoves }, (a, b) => a.score - b.score);
-  
+
       // Insert into gamesPlayed ranking
       this.#insertIntoTop20(top20_gamesPlayed, { username: user.username, score: user.totalGames }, (a, b) => b.score - a.score);
     });
@@ -303,12 +303,12 @@ export class LeaderboardService {
         break;
       }
     }
-  
+
     // If user is not inserted and ranking has space, push to the end
     if (!inserted && ranking.length < 20) {
       ranking.push(entry);
     }
-  
+
     // Ensure ranking does not exceed 20 entries
     if (ranking.length > 20) {
       ranking.pop();
@@ -337,17 +337,17 @@ export class LeaderboardService {
       handlePostgresError(error);
     }
   }
-  
+
   async #getLeaderboardPages(
     repo: Repository<Leaderboard>,
     take: number = 10,
     skip: number = 0,
   ): Promise<Leaderboard[]> {
     if (!repo) throw new BadRequestException('Invalid parameters!');
-        
+
     const count = await this.#getLeaderboardCount(repo);
     if (take + skip > count) skip = count - take;
-      
+
     if (take < 1) take = 1;      
     if (skip < 0) skip = 0;
 
