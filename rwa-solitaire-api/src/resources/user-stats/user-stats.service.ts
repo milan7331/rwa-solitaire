@@ -29,7 +29,9 @@ export class UserStatsService {
       }
     });
     if (existingStats) throw new ConflictException('user-stats already exists for this user!');
+
     const user = this.userService.findOne({ id: createDto.userId, withDeleted: false, withRelations: false });
+    if (!user) throw new NotFoundException('user-stats cant be created for non existing user!');
 
     try {
       await this.userStatsRepository.save({
@@ -45,7 +47,7 @@ export class UserStatsService {
     }
   }
 
-  async findOne(findDto: FindUserStatsDto): Promise<UserStats> {
+  async findOne(findDto: FindUserStatsDto): Promise<UserStats | null> {
     const { id, userId, withDeleted } = findDto;
     if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
 
@@ -64,7 +66,6 @@ export class UserStatsService {
       handlePostgresError(error);
     }
 
-    if (!result) throw new NotFoundException('User stats not found!');
     return result;
   }
 

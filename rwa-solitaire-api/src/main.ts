@@ -9,7 +9,12 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://localhost:4200'
+      'https://localhost:4200',
+      // docker
+      'http://rwa-solitaire:4200',
+      'https://rwa-solitaire:4200',
+      'http://rwa-solitaire-db:5432',
+      'https://rwa-solitaire-db:5432',
     ],
     credentials: true
   });

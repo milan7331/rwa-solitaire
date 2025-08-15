@@ -98,8 +98,8 @@ export class UserService {
       handlePostgresError(error);
     }
   }
-  
-  async findOne(findDto: FindUserDto): Promise<User> {
+
+  async findOne(findDto: FindUserDto): Promise<User | null> {
     const { id, username, email, withDeleted, withRelations, password } = findDto;
     if (id === undefined && !username && !email) throw new BadRequestException('Invalid parameters!');
     let result = null;
@@ -119,16 +119,14 @@ export class UserService {
       handlePostgresError(error);
     }
 
-    if (!result) throw new NotFoundException('User not found!');
-
-    // if password was provided, verify it before returning
-    // works like a "more secure" version this way
-    if (password) {
+    // if password was provided, verify it before returning; works like a "more secure" version this way
+    if (password && result) {
       const passwordValid = await this.hashService.verifyPassword(result.passwordHash, password);
       if (!passwordValid) throw new UnauthorizedException('User password doesnt match!');
     }
-    
-    result.passwordHash = '';
+
+    if (result) result.passwordHash = '';
+
     return result;
   }
 
@@ -142,7 +140,7 @@ export class UserService {
       withDeleted: false,
       withRelations: false
     }
-    
+
     const user = await this.findOne(findDto);
     if (!user)  throw new NotFoundException('User to update not found!');
 

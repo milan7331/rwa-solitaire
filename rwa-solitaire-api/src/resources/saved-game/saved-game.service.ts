@@ -48,7 +48,7 @@ export class SavedGameService {
     }
   }
 
-  async findOne(findDto: FindSavedGameDto): Promise<SavedGame> {
+  async findOne(findDto: FindSavedGameDto): Promise<SavedGame | null> {
     const { id, userId, withDeleted } = findDto;
     if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
     let result: SavedGame | null;
@@ -66,7 +66,6 @@ export class SavedGameService {
       handlePostgresError(error);
     }
 
-    if (!result) throw new NotFoundException('Saved game not found!');
     return result;
   }
 

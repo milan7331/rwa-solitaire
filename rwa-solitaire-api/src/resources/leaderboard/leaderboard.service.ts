@@ -83,7 +83,7 @@ export class LeaderboardService {
     }
   }
 
-  async findOne(findDto: FindLeaderboardDto): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard> {
+  async findOne(findDto: FindLeaderboardDto): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
     const {id, timePeriod, leaderboardType, withDeleted } = findDto;
     let result = null;
 
@@ -106,8 +106,7 @@ export class LeaderboardService {
     } catch(error) {
       handlePostgresError(error);
     }
-
-    if (!result) throw new NotFoundException('Leaderboard not found');
+    
     return result;
   }
 

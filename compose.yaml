@@ -10,7 +10,6 @@ services:
       - "4200:4200"
     networks:
       - public-network
-      - internal-network
     volumes:
       - ./rwa-solitaire:/usr/src/app
       - /usr/src/app/node_modules
@@ -27,7 +26,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - public-network # for dev purposes
+      - public-network # for dev purposes remove later
       - internal-network
     volumes:
       - ./rwa-solitaire-api:/usr/src/app
@@ -43,7 +42,8 @@ services:
     container_name: rwa-solitaire-db
     image: postgres:17-alpine
     networks:
-     - internal-network
+      - public-network # for dev purposes remove later
+      - internal-network
     ports:
      - 5432:5432
     env_file:

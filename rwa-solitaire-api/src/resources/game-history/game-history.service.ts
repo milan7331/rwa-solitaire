@@ -165,7 +165,7 @@ export class GameHistoryService {
     }
   }
 
-  async findOne(findDto: FindGameHistoryDto): Promise<GameHistory> {
+  async findOne(findDto: FindGameHistoryDto): Promise<GameHistory | null> {
     const { id, userId, startedTime, withDeleted } = findDto;
     let result: GameHistory | null = null;
 
@@ -189,7 +189,6 @@ export class GameHistoryService {
       handlePostgresError(error);
     }
 
-    if (!result) throw new NotFoundException('Game not found');
     return result;
   }
 
