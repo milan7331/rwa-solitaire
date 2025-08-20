@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToOne, PrimaryGe
 
 @Entity()
 export class SavedGame {
-    
+
     @PrimaryGeneratedColumn()
     id: number;
 

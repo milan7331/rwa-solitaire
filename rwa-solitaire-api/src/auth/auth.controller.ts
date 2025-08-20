@@ -24,7 +24,7 @@ export class AuthController {
         return this.authService.logout(res);
     }
 
-    @Post(['validate-session', 'validate_session'])
+    @Post(['validate-session/:username', 'validate_session/:username'])
     async validateSession(
         @Param('username') username: string,
         @Res({ passthrough: true }) res: Response

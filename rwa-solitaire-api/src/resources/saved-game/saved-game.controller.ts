@@ -24,11 +24,6 @@ export class SavedGameController {
     return await this.savedGameService.findOne(findDto);
   }
 
-  @Patch(['upsert', 'save'])
-  async upsert(@Body() updateDto: UpdateSavedGameDto) {
-    return await this.savedGameService.upsert(updateDto);
-  }
-
   @Patch('update')
   async update(@Body() updateDto: UpdateSavedGameDto) {
     return await this.savedGameService.update(updateDto);

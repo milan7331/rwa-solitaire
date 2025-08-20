@@ -6,7 +6,7 @@ export class UpdateUserDto {
     @Transform(({ value }) => parseInt(value, 10)) // Auto-transform string numbers
     @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'id must be a valid number' })
     id?: number;
-    
+
     @IsOptional()
     @Transform(({ value }) => value?.trim().toLowerCase())
     @IsString({ message: 'email must be a string' })

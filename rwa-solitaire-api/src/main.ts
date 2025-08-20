@@ -20,7 +20,15 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   app.use(helmet());
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    // forbidNonWhitelisted: true,
+    transform: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+      excludeExtraneousValues: false,
+    }
+  }));
   await app.listen(process.env.NEST_PORT ?? 3000);
 }
 bootstrap();

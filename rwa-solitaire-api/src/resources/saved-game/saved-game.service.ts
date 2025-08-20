@@ -52,10 +52,10 @@ export class SavedGameService {
     const { id, userId, withDeleted } = findDto;
     if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
     let result: SavedGame | null;
-    
+
     const where: any = { }
     if (id !== undefined) where.id = id;
-    if (userId !== undefined) where.userId = userId;
+    if (userId !== undefined) where.user =  { id: userId };
 
     try {
       result = await this.savedGameRepository.findOne({
@@ -69,34 +69,20 @@ export class SavedGameService {
     return result;
   }
 
-  async upsert(upsertDto: UpdateSavedGameDto): Promise<void> {
-    const { id, userId } = upsertDto;
-    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
-
-    try {
-      await this.savedGameRepository.upsert(upsertDto, {
-        conflictPaths: ['user'],
-      });
-    } catch(error) {
-      handlePostgresError(error);
-    }
-  }
-
   async update(updateDto: UpdateSavedGameDto): Promise<void> {
     const { id, userId } = updateDto;
     if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
-    
+
     const findDto: FindSavedGameDto = {
       id,
       userId,
       withDeleted: false
     }
-
     const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to update found!');
 
     try {
-      const result = await this.savedGameRepository.update(game.id, updateDto);
+      const result = await this.savedGameRepository.update(game.id, { gameState: updateDto.gameState });
       if (result.affected <= 0) throw new BadRequestException('Error updating saved game!');
     } catch(error) {
       handlePostgresError(error);

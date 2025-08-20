@@ -1,12 +1,18 @@
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { IsNumber, IsObject, IsOptional } from 'class-validator';
 
-import { CreateSavedGameDto } from './create-saved-game.dto';
-
-export class UpdateSavedGameDto extends PartialType(CreateSavedGameDto) {
+export class UpdateSavedGameDto {
     @IsOptional()
     @Transform(({ value }) => parseInt(value, 10)) // Auto-transform string numbers
     @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'id must be a valid number' })
     id?: number;
+
+    @IsOptional()
+    @IsObject({ message: 'gamestate must be a plain object' })
+    gameState?: Record<string, any> = {};
+
+    @IsOptional()
+    @Transform(({ value }) => parseInt(value, 10))
+    @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'userId must be a valid number' })
+    userId?: number;
 }

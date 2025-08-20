@@ -155,7 +155,7 @@ export class UserService {
     }
   }
 
-  // needs cleanup, chained removal not needed if cascades are set up
+  // chained removal not needed if cascades are set up
   async remove(removeDto: RemoveUserDto): Promise<void> {
     const { id, username, email, password} = removeDto;
     if (id === undefined && !username && !email) throw new BadRequestException('Invalid parameters');
@@ -171,27 +171,35 @@ export class UserService {
     const user = await this.findOne(findDto);
     if (!user)  throw new NotFoundException('User to remove not found!');
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      await queryRunner.manager.softRemove(user);
-      await queryRunner.manager.softRemove(user.savedGame);
-      await queryRunner.manager.softRemove(user.userStats);
-      for (let i in user.gameHistory) {
-        await queryRunner.manager.softRemove(user.gameHistory[i]);
-      }
-      await queryRunner.commitTransaction();
+      await this.userRepository.softRemove(user);
     } catch(error) {
-      await queryRunner.rollbackTransaction();
       handlePostgresError(error);
-    } finally {
-      await queryRunner.release();
     }
+
+    // chained removal not needed if cascades are set up
+
+    // const queryRunner = this.dataSource.createQueryRunner();
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+
+    // try {
+    //   await queryRunner.manager.softRemove(user);
+    //   await queryRunner.manager.softRemove(user.savedGame);
+    //   await queryRunner.manager.softRemove(user.userStats);
+    //   for (let i in user.gameHistory) {
+    //     await queryRunner.manager.softRemove(user.gameHistory[i]);
+    //   }
+    //   await queryRunner.commitTransaction();
+    // } catch(error) {
+    //   await queryRunner.rollbackTransaction();
+    //   handlePostgresError(error);
+    // } finally {
+    //   await queryRunner.release();
+    // }
   }
 
-  // needs cleanup, chained restore not needed if cascades are set up
+
   async restore(restoreDto: RemoveUserDto): Promise<void> {
     const { id, username, email, password } = restoreDto;
     if (id === undefined && !username && !email) throw new BadRequestException('Invalid parameters');
@@ -261,7 +269,7 @@ export class UserService {
       return await this.userRepository.find({
         withDeleted: true,
         where: { deletedAt: LessThan(ThirtyDaysAgo)},
-        relations: ['GameHistory', 'UserStats', 'savedGame']
+        relations: ['gameHistory', 'userStats', 'savedGame']
       });
     } catch(error) {
       handlePostgresError(error);

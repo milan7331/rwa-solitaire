@@ -9,7 +9,6 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
 import { UserService } from '../user/user.service';
-import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 @Injectable()
 export class UserStatsService {
@@ -21,25 +20,26 @@ export class UserStatsService {
   ) { }
 
   async create(createDto: CreateUserStatsDto): Promise<void> {
+    const { userId, gamesPlayed, gamesWon, totalTimePlayed, averageSolveTime, fastestSolveTime } = createDto;
     if (createDto.userId === undefined) throw new BadRequestException('Invalid parameters!');
 
     const existingStats = await this.userStatsRepository.findOne({
       where: {
-        user: { id: createDto.userId }
+        user: { id: userId }
       }
     });
     if (existingStats) throw new ConflictException('user-stats already exists for this user!');
 
-    const user = this.userService.findOne({ id: createDto.userId, withDeleted: false, withRelations: false });
+    const user = await this.userService.findOne({ id: createDto.userId, withDeleted: false, withRelations: false });
     if (!user) throw new NotFoundException('user-stats cant be created for non existing user!');
 
     try {
       await this.userStatsRepository.save({
-        gamesPlayed: 0,
-        gamesWon: 0,
-        totalTimePlayed: 0,
-        averageSolveTime: POSTGRES_MAX_INTEGER,
-        fastestSolveTime: POSTGRES_MAX_INTEGER,
+        gamesPlayed,
+        gamesWon,
+        totalTimePlayed,
+        averageSolveTime,
+        fastestSolveTime,
         user
       } as DeepPartial<UserStats>);
     } catch (error) {
@@ -55,7 +55,7 @@ export class UserStatsService {
 
     const where: any = { };
     if (id !== undefined) where.id = id;
-    if (userId !== undefined) where.userId = userId;
+    if (userId !== undefined) where.user = { id: userId };
 
     try {
       result = await this.userStatsRepository.findOne({
@@ -93,7 +93,7 @@ export class UserStatsService {
   async remove(removeDto: RemoveUserStatsDto): Promise<void> {
     const { id, userId } = removeDto;
     if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
-    
+
     const findDto: FindUserStatsDto = {
       id,
       userId,
@@ -102,7 +102,7 @@ export class UserStatsService {
 
     const stats = await this.findOne(findDto);
     if (!stats) throw new NotFoundException('No user-stats to remove found!');
-    
+
     try {
       await this.userStatsRepository.softRemove(stats);
     } catch (error) {
@@ -117,14 +117,14 @@ export class UserStatsService {
     const findDto: FindUserStatsDto = {
       id,
       userId,
-      withDeleted: false
+      withDeleted: true
     }
 
     const stats = await this.findOne(findDto);
     if (!stats) throw new NotFoundException('No user-stats to restore found!');
-    
+
     try {
-      const result = await this.userStatsRepository.restore(stats);
+      const result = await this.userStatsRepository.restore(stats.id);
       if (result.affected <= 0) throw new BadRequestException('Error restoring user stats!');
     } catch (error) {
       handlePostgresError(error);
