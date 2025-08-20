@@ -16,7 +16,7 @@ services:
     depends_on:
       - rwa-solitaire-api
     restart: unless-stopped
-    command: ng serve --host 0.0.0.0 --port 4200 --poll 2000
+    command: ng serve --host 0.0.0.0 --port 4200
 
   rwa-solitaire-api:
     container_name: rwa-solitaire-api
