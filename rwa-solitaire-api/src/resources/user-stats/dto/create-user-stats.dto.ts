@@ -42,5 +42,5 @@ export class CreateUserStatsDto {
     @IsNumber({  allowInfinity: false, allowNaN: false}, { message: 'fastestSolveTime must be a valid number' })
     @Min(0, { message: 'fastestSolveTime must be greater or equal than 0' })
     @Max(POSTGRES_MAX_INTEGER, { message: 'fastestSolveTime must be less or equal to ' + POSTGRES_MAX_INTEGER })
-    fastestSolveTime: number = POSTGRES_MAX_INTEGER;    
+    fastestSolveTime: number = POSTGRES_MAX_INTEGER;
 }

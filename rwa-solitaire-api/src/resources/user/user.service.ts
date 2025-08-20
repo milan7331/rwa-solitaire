@@ -25,34 +25,30 @@ export class UserService {
   ) { }
 
   async isUsernameAvailable(username: string): Promise<void> {
-    let user: User | null;
+    if (!username) throw new BadRequestException('Invalid parameters!');
 
-    try {
-      user = await this.userRepository.findOne({
-        where: { username },
-        withDeleted: true,
-        select: ['id'],
-      });
-    } catch(error) {
-      handlePostgresError(error);
+    const findDto: FindUserDto = {
+      username,
+      withDeleted: true,
+      withRelations: false,
     }
+
+    let user: User | null = await this.findOne(findDto);
 
     if (user) throw new BadRequestException('Username already in use!');
     return;
   }
-  
-  async isEmailAvailable(email: string): Promise<void> {
-    let user: User | null;
 
-    try {
-      user = await this.userRepository.findOne({
-        where: { email },
-        withDeleted: true,
-        select: ['id'],
-      });
-    } catch(error) {
-      handlePostgresError(error);
+  async isEmailAvailable(email: string): Promise<void> {
+    if (!email) throw new BadRequestException('Invalid parameters!');
+
+    const findDto: FindUserDto = {
+      email,
+      withDeleted: true,
+      withRelations: false,
     }
+
+    let user: User | null = await this.findOne(findDto);
 
    if (user) throw new BadRequestException('Email already in use!');
    return;
@@ -70,7 +66,7 @@ export class UserService {
     }
     const existingUser = await this.findOne(findDto);
     if (existingUser) throw new ConflictException('Username or email already exists!');
-    
+
     const passwordHash = await this.hashService.hashPassword(password);
     const newUser = this.userRepository.create({ username, email, passwordHash });
 
@@ -210,11 +206,11 @@ export class UserService {
     }
     const user = await this.findOne(findDto);
     if (!user) throw new NotFoundException('User to restore not found!');
-    
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    
+
     try {
       await queryRunner.manager.restore(User, user.id);
       await queryRunner.manager.restore(UserStats, user.userStats.id);
@@ -230,7 +226,7 @@ export class UserService {
       await queryRunner.release();
     }
   }
-  
+
   async permanentlyRemoveOldUsers(): Promise<void> {
     const usersToRemove = await this.#findUsersForPermanentRemoval();
     if (usersToRemove.length <= 0) return;
