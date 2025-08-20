@@ -14,9 +14,7 @@ export class UserStatsController {
     return await this.userStatsService.create(createDto);
   }
 
-  @Get('find-one')
-  @Get('find_one')
-  @Get('find')
+  @Get(['find-one', 'find_one'])
   async findOne(@Query() findDto: FindUserStatsDto) {
     return await this.userStatsService.findOne(findDto);
   }
@@ -27,8 +25,7 @@ export class UserStatsController {
   }
 
   @Delete('remove')
-  @Delete('delete')
-  async remove(@Query() removeDto: RemoveUserStatsDto) {
+  async remove(@Body() removeDto: RemoveUserStatsDto) {
     return await this.userStatsService.remove(removeDto);
   }
 

@@ -11,30 +11,25 @@ import { FindUserDto } from './dto/find-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('is-username-available')
-  @Get('is_username_available')
+  @Get(['check-username', 'check_username'])
   @Public()
-  async checkUsername(@Query() username: string) {
+  async checkUsername(@Query('username') username: string) {
     return await this.userService.isUsernameAvailable(username);
   }
 
-  @Get('is-email-available')
-  @Get('is_email_available')
+  @Get(['check-email', 'check_email'])
   @Public()
-  async checkEmail(@Query() email: string) {
+  async checkEmail(@Query('email') email: string) {
     return await this.userService.isEmailAvailable(email);
   }
 
-  @Post('register')
-  @Post('create')
+  @Post(['register', 'create'])
   @Public()
   async create(@Body() createDto: CreateUserDto) {
     return await this.userService.create(createDto);
   }
 
-  @Get('find-one')
-  @Get('find_one')
-  @Get('find')
+  @Get(['find-one', 'find_one'])
   async findOne(@Query() findDto: FindUserDto) {
     const result = await this.userService.findOne(findDto);
     if (result) result.passwordHash = '';
@@ -47,8 +42,7 @@ export class UserController {
   }
 
   @Delete('remove')
-  @Delete('delete')
-  async remove(@Query() removeDto: RemoveUserDto) {
+  async remove(@Body() removeDto: RemoveUserDto) {
     return await this.userService.remove(removeDto);
   }
 
@@ -57,8 +51,7 @@ export class UserController {
     return await this.userService.restore(restoreDto);
   }
 
-  @Patch('remove-old-users')
-  @Patch('remove_old_users')
+  @Patch(['remove-old-users', 'remove_old_users'])
   async removeOldUsers() {
     return await this.userService.permanentlyRemoveOldUsers();
   }

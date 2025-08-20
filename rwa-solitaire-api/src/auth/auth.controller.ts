@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseGuards, Res, Delete, Query } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards, Res, Delete, Param } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -11,8 +11,7 @@ export class AuthController {
 
     @Public()
     @UseGuards(LocalAuthGuard)
-    @Post('login')
-    @Post('log-in')
+    @Post(['login', 'log-in'])
     async login(
         @Req() req: Request,
         @Res({ passthrough: true }) res: Response,
@@ -20,16 +19,14 @@ export class AuthController {
         return this.authService.login(req, res);
     }
 
-    @Delete('logout')
-    @Delete('log-out')
+    @Delete(['logout', 'log-out'])
     async logout(@Res({ passthrough: true }) res: Response) {
         return this.authService.logout(res);
     }
 
-    @Post('validate-session')
-    @Post('validate_session')
+    @Post(['validate-session', 'validate_session'])
     async validateSession(
-        @Query() username: string,
+        @Param('username') username: string,
         @Res({ passthrough: true }) res: Response
     ) {
         // global jwt auth guard does the cookie validation,

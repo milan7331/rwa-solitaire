@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Put, Query, Param } from '@nestjs/common';
 
 import { LeaderboardService } from './leaderboard.service';
 import { CreateLeaderboardDto } from './dto/create-leaderboard.dto';
@@ -13,28 +13,13 @@ export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) { }
 
   // manual leaderboard refresh
-  async leaderboardRefresh(type: LeaderboardType) {
+  @Get('refresh/:type')
+  async leaderboardRefresh(@Param('type') type: LeaderboardType) {
     return await this.leaderboardService.leaderboardRefresh(type);
   }
 
-  @Get('load-weekly')
-  @Get('load_weekly')
-  async loadWeeklyLeaderboards(@Query() getDto: GetLeaderboardDto) {
-    getDto.leaderboardType = LeaderboardType.WEEKLY;
-    return await this.leaderboardService.loadLeaderboards(getDto);
-  }
-
-  @Get('load-monthly')
-  @Get('load_monthly')
-  async loadMonthlyLeaderboards(@Query() getDto: GetLeaderboardDto) {
-    getDto.leaderboardType = LeaderboardType.MONTHLY;
-    return await this.leaderboardService.loadLeaderboards(getDto);
-  }
-
-  @Get('load-yearly')
-  @Get('load_yearly')
-  async loadYearlyLeaderboards(@Query() getDto: GetLeaderboardDto) {
-    getDto.leaderboardType = LeaderboardType.YEARLY;
+  @Get(['load'])
+  async loadLeaderboards(@Query() getDto: GetLeaderboardDto) {
     return await this.leaderboardService.loadLeaderboards(getDto);
   }
 
@@ -43,15 +28,12 @@ export class LeaderboardController {
     return await this.leaderboardService.create(createDto);
   }
 
-  @Get('find-all')
-  @Get('find_all')
-  async findAll(@Query() type: LeaderboardType) {
+  @Get(['find-all/:type', 'find_all/:type'])
+  async findAll(@Param('type') type: LeaderboardType) {
     return await this.leaderboardService.findAll(type, false);
   }
 
-  @Get('find-one')
-  @Get('find_one')
-  @Get('find')
+  @Get(['find-one', 'find_one'])
   async findOne(@Query() findDto: FindLeaderboardDto) {
     return await this.leaderboardService.findOne(findDto);
   }
@@ -67,8 +49,7 @@ export class LeaderboardController {
   }
 
   @Delete('remove')
-  @Delete('delete')
-  async remove(@Query() removeDto: RemoveLeaderboardDto) {
+  async remove(@Body() removeDto: RemoveLeaderboardDto) {
     return await this.leaderboardService.remove(removeDto);
   }
 

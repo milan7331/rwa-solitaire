@@ -14,22 +14,17 @@ export class SavedGameController {
     return await this.savedGameService.create(createDto);
   }
 
-  @Get('find-all')
-  @Get('find_all')
+  @Get(['find-all', 'find_all'])
   async findAll() {
     return await this.savedGameService.findAll();
   }
 
-  @Get('find-one')
-  @Get('find_one')
-  @Get('find')
-  @Get('load')
+  @Get(['find-one', 'find_one', 'load'])
   async findOne(@Query() findDto: FindGameHistoryDto) {
     return await this.savedGameService.findOne(findDto);
   }
 
-  @Patch('upsert')
-  @Patch('save')
+  @Patch(['upsert', 'save'])
   async upsert(@Body() updateDto: UpdateSavedGameDto) {
     return await this.savedGameService.upsert(updateDto);
   }
@@ -40,11 +35,10 @@ export class SavedGameController {
   }
 
   @Delete('remove')
-  @Delete('delete')
-  async remove(@Query() removeDto: RemoveSavedGameDto) {
+  async remove(@Body() removeDto: RemoveSavedGameDto) {
     return await this.savedGameService.remove(removeDto);
   }
-  
+
   @Patch('restore')
   async restore(@Body() restoreDto: RemoveSavedGameDto) {
     return await this.savedGameService.restore(restoreDto);

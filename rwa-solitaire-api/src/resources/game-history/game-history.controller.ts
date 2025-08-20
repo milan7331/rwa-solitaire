@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus, Query, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Param } from '@nestjs/common';
 
-import { User } from '../user/entities/user.entity';
 import { GameHistoryService } from './game-history.service';
 import { CreateGameHistoryDto } from './dto/create-game-history.dto';
 import { UpdateGameHistoryDto } from './dto/update-game-history.dto';
@@ -11,23 +10,18 @@ import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 export class GameHistoryController {
   constructor(private readonly gameHistoryService: GameHistoryService) {}
 
-  @Post('start-game')
-  @Post('start_game')
-  @Post('start')
+  @Post(['start-game', 'start_game'])
   async startGame(@Body() startDto: CreateGameHistoryDto) {
     await this.gameHistoryService.create(startDto);
   }
 
-  @Patch('end-game')
-  @Patch('end_game')
-  @Patch('end')
+  @Patch(['end-game', 'end_game'])
   async endGame(@Body() updateDto: UpdateGameHistoryDto) {
     await this.gameHistoryService.endGame(updateDto);
   }
 
-  @Get('get-all-games-user')
-  @Get('get_all_games_user')
-  async getAllGames(@Query() username: string) {
+  @Get(['get-all-games-user/:username', 'get_all_games_user:/username'])
+  async getAllGames(@Param('username') username: string) {
     return await this.gameHistoryService.findAllForUser(username);
   }
 
@@ -36,16 +30,14 @@ export class GameHistoryController {
     await this.gameHistoryService.create(createDto);
   }
 
-  @Get('find-all')
-  @Get('find_all')
+  @Get(['find-all', 'find_all'])
   async findAll() {
     return await this.gameHistoryService.findAll();
   }
 
-  @Get('find-one')
-  @Get('find_one')
-  @Get('find')
+  @Get(['find-one', 'find_one'])
   async findOne(@Query() findDto: FindGameHistoryDto) {
+    // passes the whole query obj into the service!
     return await this.gameHistoryService.findOne(findDto);
   }
 
@@ -55,8 +47,7 @@ export class GameHistoryController {
   }
 
   @Delete('remove')
-  @Delete('delete')
-  async remove(@Query() removeDto: RemoveGameHistoryDto) {
+  async remove(@Body() removeDto: RemoveGameHistoryDto) {
     return await this.gameHistoryService.remove(removeDto);
   }
 
