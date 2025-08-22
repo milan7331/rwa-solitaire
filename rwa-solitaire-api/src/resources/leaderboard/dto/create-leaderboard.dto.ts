@@ -1,4 +1,4 @@
-import { Transform } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { IsArray, IsDate, IsEnum, IsNotEmpty } from "class-validator";
 
 import { LeaderboardType } from "../entities/leaderboard.enum";
@@ -16,14 +16,18 @@ export class CreateLeaderboardDto {
     leaderboardType: LeaderboardType;
 
     @IsArray({ message: 'top20_averageTime must be an array' })
+    @Type(() => LeaderboardRow)
     top20_averageTime: LeaderboardRow[] = [];
 
     @IsArray({ message: 'top20_bestTime must be an array' })
+    @Type(() => LeaderboardRow)
     top20_bestTime: LeaderboardRow[] = [];
 
     @IsArray({ message: 'top20_numberOfMoves must be an array' })
+    @Type(() => LeaderboardRow)
     top20_numberOfMoves: LeaderboardRow[] = [];
 
     @IsArray({ message: 'top20_gamesPlayed must be an array' })
+    @Type(() => LeaderboardRow)
     top20_gamesPlayed: LeaderboardRow[] = [];
 }

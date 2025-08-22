@@ -8,7 +8,7 @@ export class GetLeaderboardDto {
     @Transform(({ value }) => parseInt(value, 10))
     @IsNotEmpty({ message: 'take is required' })
     @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'take must be a valid number' })
-    @Min(20, { message: 'take must be greater or equal to 10' })
+    @Min(10, { message: 'take must be greater or equal to 10' })
     @Max(POSTGRES_MAX_INTEGER, { message: 'take must not be greater or equal to ' + POSTGRES_MAX_INTEGER })
     take: number = 10;
 

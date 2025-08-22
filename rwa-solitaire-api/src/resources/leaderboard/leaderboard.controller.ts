@@ -38,11 +38,6 @@ export class LeaderboardController {
     return await this.leaderboardService.findOne(findDto);
   }
 
-  @Put('upsert')
-  async upsert(@Body() upsertDto: UpdateLeaderboardDto) {
-    return await this.leaderboardService.upsert(upsertDto);
-  }
-
   @Patch('update')
   async update(@Body() updateDto: UpdateLeaderboardDto) {
     return await this.leaderboardService.update(updateDto);

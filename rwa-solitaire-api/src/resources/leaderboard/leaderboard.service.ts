@@ -60,11 +60,7 @@ export class LeaderboardService {
 
   async create(createDto: CreateLeaderboardDto): Promise<void> {
     const { leaderboardType, timePeriod } = createDto;
-
-    const isNotValidTime = isNaN(timePeriod.getTime());
-    const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
-
-    if (isNotValidTime || isNotValidType) throw new BadRequestException('Invalid parameters!');
+    this.#checkCreateLeaderboardParameters(leaderboardType, timePeriod);
 
     const findDto: FindLeaderboardDto = {
       timePeriod,
@@ -83,33 +79,6 @@ export class LeaderboardService {
     }
   }
 
-  async findOne(findDto: FindLeaderboardDto): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
-    const {id, timePeriod, leaderboardType, withDeleted } = findDto;
-    let result = null;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(timePeriod.getTime());
-    const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
-
-    if (isNotValidId && (isNotValidTime || isNotValidType)) throw new BadRequestException('Invalid parameters!');
-
-    const where: any = { }
-    if (!isNotValidId) where.id = id;
-    if (!isNotValidTime) where.timePeriod = timePeriod;
-    const repository = this.#getRepository(leaderboardType);
-
-    try {
-      result = await repository.findOne({
-        where,
-        withDeleted
-      });
-    } catch(error) {
-      handlePostgresError(error);
-    }
-    
-    return result;
-  }
-
   async findAll(
     leaderboardType: LeaderboardType,
     withDeleted: boolean
@@ -122,14 +91,28 @@ export class LeaderboardService {
     }
   }
 
+  async findOne(findDto: FindLeaderboardDto): Promise<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard | null> {
+    const {id, timePeriod, leaderboardType, withDeleted } = findDto;
+    this.#checkLeaderboardParameters(id, timePeriod, leaderboardType);
+
+    const where: any = { }
+    if (id !== undefined) where.id = id;
+    if (timePeriod) where.timePeriod = timePeriod;
+    const repository = this.#getRepository(leaderboardType);
+
+    try {
+      return await repository.findOne({
+        where,
+        withDeleted
+      });
+    } catch(error) {
+      handlePostgresError(error);
+    }
+  }
+
   async upsert(updateDto: UpdateLeaderboardDto): Promise<void> {
     const { id, timePeriod, leaderboardType } = updateDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(timePeriod.getTime());
-    const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
-
-    if (isNotValidId && (isNotValidTime || isNotValidType)) throw new BadRequestException('Invalid parameters!');
+    this.#checkLeaderboardParameters(id, timePeriod, leaderboardType);
 
     const repository = this.#getRepository(leaderboardType);
 
@@ -141,18 +124,13 @@ export class LeaderboardService {
   }
 
   async update(updateDto: UpdateLeaderboardDto): Promise<void> {
-    const { id, timePeriod, leaderboardType } = updateDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(timePeriod.getTime());
-    const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
-
-    if (isNotValidId && (isNotValidTime || isNotValidType)) throw new BadRequestException('Invalid parameters!');
+    const { id, timePeriod, leaderboardType, top20_averageTime, top20_bestTime, top20_gamesPlayed, top20_numberOfMoves } = updateDto;
+    this.#checkLeaderboardParameters(id, timePeriod, leaderboardType);
 
     const findDto: FindLeaderboardDto = {
       id,
       timePeriod,
-      leaderboardType: leaderboardType,
+      leaderboardType,
       withDeleted: false
     }
     const leaderboard = await this.findOne(findDto);
@@ -161,7 +139,7 @@ export class LeaderboardService {
     const repository = this.#getRepository(leaderboardType);
 
     try {
-      const result = await repository.update(leaderboard.id, updateDto);
+      const result = await repository.update(leaderboard.id, { id, timePeriod, top20_averageTime, top20_bestTime, top20_gamesPlayed, top20_numberOfMoves });
       if (result.affected <= 0) throw new BadRequestException('Leaderboard update failed!');
     } catch(error) {
       handlePostgresError(error);
@@ -170,12 +148,7 @@ export class LeaderboardService {
 
   async remove(removeDto: RemoveLeaderboardDto): Promise<void> {
     const { id, timePeriod, leaderboardType } = removeDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(timePeriod.getTime());
-    const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
-
-    if (isNotValidId && (isNotValidTime || isNotValidType)) throw new BadRequestException('Invalid parameters!');
+    this.#checkLeaderboardParameters(id, timePeriod, leaderboardType);
 
     const findDto: FindLeaderboardDto = {
       id,
@@ -197,12 +170,7 @@ export class LeaderboardService {
 
   async restore(restoreDto: RemoveLeaderboardDto): Promise<void> {
     const { id, timePeriod, leaderboardType } = restoreDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(timePeriod.getTime());
-    const isNotValidType = leaderboardType < 0 || leaderboardType > 2;
-
-    if (isNotValidId && (isNotValidTime || isNotValidType)) throw new BadRequestException('Invalid parameters!');
+    this.#checkLeaderboardParameters(id, timePeriod, leaderboardType);
 
     const findDto: FindLeaderboardDto = {
       id,
@@ -210,14 +178,15 @@ export class LeaderboardService {
       leaderboardType,
       withDeleted: true
     }
-
     const leaderboard = await this.findOne(findDto);
     if (!leaderboard) throw new NotFoundException('Leaderboard update failed -> leaderboard not found!');
+    console.log(leaderboard);
 
     const repository = this.#getRepository(leaderboardType);
+    console.log(repository);
 
     try {
-      const result = await repository.restore(leaderboard);
+      const result = await repository.restore(leaderboard.id);
       if (result.affected <= 0) throw new BadRequestException('Error restoring deleted leaderboard!');
     } catch(error) {
       handlePostgresError(error);
@@ -225,24 +194,24 @@ export class LeaderboardService {
   }
 
   // groups the gamedata by user
-  #prepareUserData(games: GameHistory[]): UserData[] {    
-    const userData = new Map<string, UserData>();
+  #prepareUserData(games: GameHistory[]): UserData[] {
+    const userDataMap = new Map<string, UserData>();
 
     for (let game of games) {
       const username = game.user.username;
 
-      if (!userData[username]) {
-        userData[username] = {
+      if (!userDataMap.has(username)) {
+        userDataMap.set(username, {
           username,
           totalGames: 0,
           leastMoves: POSTGRES_MAX_INTEGER,
           totalDuration: 0,
           bestTime: POSTGRES_MAX_INTEGER,
           gamesWon: 0,
-        };
+        });
       }
 
-      const userStats = userData.get(username);
+      const userStats = userDataMap.get(username);
       userStats.totalGames++;
       if (game.gameWon) userStats.gamesWon++;
       userStats.leastMoves = Math.min(userStats.leastMoves, game.moves);
@@ -250,7 +219,7 @@ export class LeaderboardService {
       userStats.bestTime = Math.min(userStats.bestTime, game.gameDurationInSeconds);
     }
 
-    return Array.from(userData.values());
+    return Array.from(userDataMap.values());
   }
 
   #prepareUpsertDto(
@@ -319,7 +288,7 @@ export class LeaderboardService {
   }
 
   #getRepository(leaderboardType: LeaderboardType): Repository<WeeklyLeaderboard | MonthlyLeaderboard | YearlyLeaderboard> {
-    const repo = 
+    const repo =
       leaderboardType === LeaderboardType.WEEKLY ? this.weeklyRepository :
       leaderboardType === LeaderboardType.MONTHLY ? this.monthlyRepository :
       leaderboardType === LeaderboardType.YEARLY ? this.yearlyRepository : null;
@@ -347,7 +316,7 @@ export class LeaderboardService {
     const count = await this.#getLeaderboardCount(repo);
     if (take + skip > count) skip = count - take;
 
-    if (take < 1) take = 1;      
+    if (take < 1) take = 1;
     if (skip < 0) skip = 0;
 
     try {
@@ -361,5 +330,24 @@ export class LeaderboardService {
     } catch(error) {
       handlePostgresError(error);
     }
+  }
+
+  #checkCreateLeaderboardParameters(leaderboardType: number, timePeriod: Date): boolean {
+    const isNotValidType = (leaderboardType === undefined || leaderboardType === null) ? true : (leaderboardType < 0 || leaderboardType > 2);
+    const isNotValidTime = (timePeriod) ? isNaN(timePeriod.getTime()) : true;
+
+    if (isNotValidTime || isNotValidType) throw new BadRequestException('Invalid parameters!');
+
+    return true;
+  }
+
+  #checkLeaderboardParameters(id: number, timePeriod: Date, leaderboardType: number): boolean {
+    const isNotValidId = (id === undefined || id === null);
+    const isNotValidTime = (timePeriod) ? isNaN(timePeriod.getTime()) : true;
+    const isNotValidType = (leaderboardType === undefined || leaderboardType === null) ? true : (leaderboardType < 0 || leaderboardType > 2);
+
+    if (isNotValidId && (isNotValidTime || isNotValidType)) throw new BadRequestException('Invalid parameters!');
+
+    return true;
   }
 }
