@@ -20,4 +20,8 @@ export class FindGameHistoryDto {
     @IsOptional()
     @IsBoolean({ message: 'withDeleted must be a boolean' })
     withDeleted: boolean = false;
+
+    @IsOptional()
+    @IsBoolean({ message: 'withRelations must be a boolean' })
+    withRelations: boolean = false;
 }

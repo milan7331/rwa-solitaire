@@ -12,6 +12,7 @@ import { RemoveGameHistoryDto } from './dto/remove-game-history.dto';
 import { FindUserStatsDto } from '../user-stats/dto/find-user-stats.dto';
 import { UserService } from '../user/user.service';
 import { DateCalculationService } from 'src/util/date-calculation.service';
+import { EndGameHistoryDto } from './dto/end-game-history.dto';
 
 @Injectable()
 export class GameHistoryService {
@@ -20,7 +21,7 @@ export class GameHistoryService {
     private readonly historyRepository: Repository<GameHistory>,
 
     private readonly dateService: DateCalculationService,
-    
+
     private readonly userService: UserService,
     private readonly statsService: UserStatsService,
   ) {}
@@ -31,14 +32,14 @@ export class GameHistoryService {
     const games = await this.#getAllGamesFromTimeSpan(weekStartDate, weekEndDate);
     return [games, weekStartDate];
   }
-  
+
   // used for leaderboard generation only
   async getAllGamesFromThisMonth(): Promise<[GameHistory[], Date]> {
     const [monthStartDate, monthEndDate] = this.dateService.getCleanDateSpan_CurrentMonth();
     const games = await this.#getAllGamesFromTimeSpan(monthStartDate, monthEndDate);
     return [games, monthStartDate];
   }
-  
+
   // used for leaderboard generation only
   async getAllGamesFromThisYear(): Promise<[GameHistory[], Date]> {
     const [yearStartDate, yearEndDate] = this.dateService.getCleanDateSpan_CurrentYear();
@@ -55,71 +56,18 @@ export class GameHistoryService {
         where: {
           createdAt: Between(startDate, endDate),
           gameFinished: true
-        }
+        },
+        withDeleted: false,
+        relations: ['user']
       })
     } catch(error) {
       handlePostgresError(error);
     }
   }
-  
-  async endGame(updateDto: UpdateGameHistoryDto): Promise<void> {
-    const { id, userId, startedTime } = updateDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(startedTime.getTime());
-    const isNotValidUserId = userId === undefined;
-
-    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
-
-    const findDto: FindGameHistoryDto = {
-      id,
-      userId,
-      startedTime,
-      withDeleted: false
-    }
-
-    let gameInProgress = await this.findOne(findDto);
-    if (!gameInProgress) throw new NotFoundException('No game in progress found!');
-    if (gameInProgress.gameFinished) throw new BadRequestException('Game is already finished!');
-
-    gameInProgress.moves = updateDto.moves;
-    gameInProgress.gameWon = updateDto.gameWon;
-    gameInProgress.gameFinished = true;
-    gameInProgress.finishedTime = updateDto.finishedTime;
-    gameInProgress.gameDurationInSeconds = Math.floor((updateDto.finishedTime.getTime() - updateDto.startedTime.getTime()) / 1000);
-
-    await this.update(gameInProgress);
-    await this.#updateUserStats(gameInProgress);
-  }
-  
-  async #updateUserStats(game: GameHistory): Promise<void> {
-    const { user, gameFinished } = game;
-    if (!gameFinished) throw new BadRequestException('Game not finished!');
-    
-    const findUserStatsDto: FindUserStatsDto = {
-      userId: user.id,
-      withDeleted: false
-    }
-    const userStats = await this.statsService.findOne(findUserStatsDto);
-    if (!userStats) throw new Error('Error finding user stats');
-
-    userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + game.gameDurationInSeconds) / userStats.gamesPlayed + 1;
-    userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, game.gameDurationInSeconds);
-    userStats.gamesPlayed++;
-    if (game.gameWon) userStats.gamesWon++;
-    userStats.totalTimePlayed += game.gameDurationInSeconds;
-  
-    this.statsService.update(userStats);
-  }
 
   async create(createUserDto: CreateGameHistoryDto): Promise<void> {
-    const { userId, startedTime, gameDifficulty } = createUserDto;
-
-    const isNotValidTime = isNaN(startedTime.getTime());
-    const isNotValidUserId = userId === undefined;
-    const isNotValidDifficulty = gameDifficulty > 1 || gameDifficulty < 0
-
-    if (isNotValidTime || isNotValidUserId || isNotValidDifficulty) throw new BadRequestException('Invalid parameters');
+    const { userId, gameDifficulty, startedTime } = createUserDto;
+    this.#checkCreateGameParameters(userId, gameDifficulty, startedTime)
 
     const existingGame = await this.historyRepository.findOne({
       where: {
@@ -166,24 +114,21 @@ export class GameHistoryService {
   }
 
   async findOne(findDto: FindGameHistoryDto): Promise<GameHistory | null> {
-    const { id, userId, startedTime, withDeleted } = findDto;
+    const { id, userId, startedTime, withDeleted, withRelations } = findDto;
+    this.#checkGameParameters(id, userId, startedTime);
+
     let result: GameHistory | null = null;
 
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(startedTime.getTime());
-    const isNotValidUserId = userId === undefined;
-
-    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
-
     const where: any = { };
-    if (!isNotValidId) where.id = id;
-    if (!isNotValidUserId) where.user = { id: userId };
-    if (!isNotValidTime) where.startedTime = startedTime;
+    if (id !== undefined) where.id = id;
+    if (userId !== undefined) where.user = { id: userId };
+    if (startedTime) where.startedTime = startedTime;
 
     try {
       result = await this.historyRepository.findOne({
         where,
         withDeleted,
+        relations: withRelations ? ['user'] : []
       });
     } catch(error) {
       handlePostgresError(error);
@@ -194,22 +139,20 @@ export class GameHistoryService {
 
   async update(updateDto: UpdateGameHistoryDto): Promise<void> {
     const { id, userId, startedTime } = updateDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(startedTime.getTime());
-    const isNotValidUserId = userId === undefined;
-
-    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
+    this.#checkGameParameters(id, userId, startedTime);
 
     const findDto: FindGameHistoryDto = {
       id,
       userId,
       startedTime,
-      withDeleted: false
+      withDeleted: false,
+      withRelations: false
     }
 
     const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to update found!');
+
+    delete updateDto.userId;
 
     try {
       const result = await this.historyRepository.update(game.id, updateDto);
@@ -219,22 +162,64 @@ export class GameHistoryService {
     }
   }
 
-  async remove(removeDto: RemoveGameHistoryDto): Promise<void> {
-    const { id, startedTime, userId } = removeDto;
-    
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(startedTime.getTime());
-    const isNotValidUserId = userId === undefined;
-
-    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
+  async endGame(endDto: EndGameHistoryDto): Promise<void> {
+    const { id, userId, startedTime } = endDto;
+    this.#checkGameParameters(id, userId, startedTime);
 
     const findDto: FindGameHistoryDto = {
       id,
       userId,
       startedTime,
+      withDeleted: false,
+      withRelations: true,
+    }
+    let gameInProgress = await this.findOne(findDto);
+    if (!gameInProgress) throw new NotFoundException('No game in progress found!');
+    if (gameInProgress.gameFinished) throw new BadRequestException('Game is already finished!');
+
+    gameInProgress.moves = endDto.moves;
+    gameInProgress.gameWon = endDto.gameWon;
+    gameInProgress.gameFinished = true;
+    gameInProgress.finishedTime = endDto.finishedTime;
+    gameInProgress.gameDurationInSeconds = Math.floor((endDto.finishedTime.getTime() - endDto.startedTime.getTime()) / 1000);
+
+    const { user, ...updateDto } = gameInProgress;
+
+    await this.update(updateDto);
+    await this.#updateUserStats(gameInProgress);
+  }
+
+  async #updateUserStats(game: GameHistory): Promise<void> {
+    const { user, gameFinished } = game;
+    if (!gameFinished) throw new BadRequestException('Game not finished!');
+
+    const findUserStatsDto: FindUserStatsDto = {
+      userId: user.id,
       withDeleted: false
     }
+    const userStats = await this.statsService.findOne(findUserStatsDto);
+    if (!userStats) throw new Error('Error finding user stats');
 
+    userStats.averageSolveTime = (userStats.gamesPlayed * userStats.averageSolveTime + game.gameDurationInSeconds) / userStats.gamesPlayed + 1;
+    userStats.fastestSolveTime = Math.min(userStats.fastestSolveTime, game.gameDurationInSeconds);
+    userStats.gamesPlayed++;
+    if (game.gameWon) userStats.gamesWon++;
+    userStats.totalTimePlayed += game.gameDurationInSeconds;
+
+    this.statsService.update(userStats);
+  }
+
+  async remove(removeDto: RemoveGameHistoryDto): Promise<void> {
+    const { id, startedTime, userId } = removeDto;
+    this.#checkGameParameters(id, userId, startedTime);
+
+    const findDto: FindGameHistoryDto = {
+      id,
+      userId,
+      startedTime,
+      withDeleted: false,
+      withRelations: false
+    }
     const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to remove found!');
 
@@ -247,27 +232,44 @@ export class GameHistoryService {
 
   async restore(restoreDto: RemoveGameHistoryDto): Promise<void> {
     const { id, startedTime, userId } = restoreDto;
-
-    const isNotValidId = id === undefined;
-    const isNotValidTime = isNaN(startedTime.getTime());
-    const isNotValidUserId = userId === undefined;
-
-    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
+    this.#checkGameParameters(id, userId, startedTime);
 
     const findDto: FindGameHistoryDto = {
       id,
       userId,
       startedTime,
-      withDeleted: true
+      withDeleted: true,
+      withRelations: false,
     }
     const game = await this.findOne(findDto);
     if (!game) throw new NotFoundException('No game to restore found!');
 
     try {
-      const result = await this.historyRepository.restore(game);
-      if (result.affected > 0) throw new BadRequestException('Error restoring deleted game!');
+      const result = await this.historyRepository.restore(game.id);
+      if (result.affected <= 0) throw new BadRequestException('Error restoring deleted game!');
     } catch(error) {
       handlePostgresError(error);
     }
+  }
+
+
+  #checkCreateGameParameters(userId: number, gameDifficulty: number, startedTime: Date): boolean {
+    const isNotValidUserId = (userId === undefined || userId === null);
+    const isNotValidDifficulty = (isNaN(gameDifficulty)) ? true : (gameDifficulty > 1 || gameDifficulty < 0);
+    const isNotValidTime = (startedTime) ? isNaN(startedTime.getTime()) : true;
+
+    if (isNotValidTime || isNotValidUserId || isNotValidDifficulty) throw new BadRequestException('Invalid parameters');
+
+    return true;
+  }
+
+  #checkGameParameters(id: number, userId: number, startedTime: Date): boolean {
+    const isNotValidId = (id === undefined || id === null);
+    const isNotValidUserId = (userId === undefined || userId === null);
+    const isNotValidTime = (startedTime) ? isNaN(startedTime.getTime()) : true;
+
+    if (isNotValidId && (isNotValidTime || isNotValidUserId)) throw new BadRequestException('Invalid parameters');
+
+    return true;
   }
 }
