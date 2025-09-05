@@ -9,6 +9,7 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
 import { UserService } from '../user/user.service';
+import { UserStatsReponseDto } from './dto/user-stats-response.dto';
 
 @Injectable()
 export class UserStatsService {
@@ -48,14 +49,18 @@ export class UserStatsService {
   }
 
   async findOne(findDto: FindUserStatsDto): Promise<UserStats | null> {
-    const { id, userId, withDeleted } = findDto;
-    if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
+    const { id, userId, username, withDeleted } = findDto;
+    if (id === undefined && userId === undefined && username === undefined) throw new BadRequestException('Invalid parameters!');
 
     let result = null;
 
     const where: any = { };
     if (id !== undefined) where.id = id;
     if (userId !== undefined) where.user = { id: userId };
+    if (username !== undefined) {
+      if (where.user) where.user.username = username;
+      else where.user = { username: username };
+    }
 
     try {
       result = await this.userStatsRepository.findOne({
@@ -130,4 +135,16 @@ export class UserStatsService {
       handlePostgresError(error);
     }
   }
+
+  cleanUpUserStatsResponse(stats: UserStats): UserStatsReponseDto {
+    const response: any = {};
+    if (stats.id) response.id = stats.id;
+    if (stats.gamesPlayed) response.gamesPlayed = stats.gamesPlayed;
+    if (stats.gamesWon) response.gamesWon = stats.gamesWon;
+    if (stats.totalTimePlayed) response.totalTimePlayed = stats.totalTimePlayed;
+    if (stats.averageSolveTime) response.averageSolveTime = stats.averageSolveTime;
+    if (stats.fastestSolveTime) response.fastestSolveTime = stats.fastestSolveTime;
+
+    return response as UserStatsReponseDto;
+    }
 }

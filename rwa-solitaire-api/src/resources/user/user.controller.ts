@@ -35,6 +35,7 @@ export class UserController {
   async findOne(@Query() findDto: FindUserDto): Promise<UserResponseDto | null> {
     let user = await this.userService.findOne(findDto);
     if (user) return this.userService.cleanUpUserResponse(user);
+    return;
   }
 
   @Patch('update')

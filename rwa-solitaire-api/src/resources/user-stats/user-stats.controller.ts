@@ -4,19 +4,22 @@ import { CreateUserStatsDto } from './dto/create-user-stats.dto';
 import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
 import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
+import { UserStatsReponseDto } from './dto/user-stats-response.dto';
 
 @Controller(['user-stats', 'user_stats', 'stats'])
 export class UserStatsController {
   constructor(private readonly userStatsService: UserStatsService) {}
 
   @Post('create')
-  async create(@Body() createDto: CreateUserStatsDto) {
+  async create(@Body() createDto: CreateUserStatsDto): Promise<void> {
     return await this.userStatsService.create(createDto);
   }
 
   @Get(['find-one', 'find_one'])
-  async findOne(@Query() findDto: FindUserStatsDto) {
-    return await this.userStatsService.findOne(findDto);
+  async findOne(@Query() findDto: FindUserStatsDto): Promise<UserStatsReponseDto | null> {
+    const stats = await this.userStatsService.findOne(findDto);
+    if (stats) return this.userStatsService.cleanUpUserStatsResponse(stats);
+    return;
   }
 
   @Patch('update')
