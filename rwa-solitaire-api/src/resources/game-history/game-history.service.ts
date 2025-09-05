@@ -13,6 +13,7 @@ import { FindUserStatsDto } from '../user-stats/dto/find-user-stats.dto';
 import { UserService } from '../user/user.service';
 import { DateCalculationService } from 'src/util/date-calculation.service';
 import { EndGameHistoryDto } from './dto/end-game-history.dto';
+import { GameHistoryResponseDto } from './dto/game-history-response.dto';
 
 @Injectable()
 export class GameHistoryService {
@@ -252,6 +253,19 @@ export class GameHistoryService {
     }
   }
 
+  cleanUpGameHistoryResponse(game: GameHistory): GameHistoryResponseDto {
+    const response: any = {};
+    if (game.id) response.id = game.id;
+    if (game.moves) response.moves = game.moves;
+    if (game.gameWon) response.gameWon = game.gameWon;
+    if (game.gameFinished) response.gameFinished = game.gameFinished;
+    if (game.gameDifficulty) response.gameDifficulty = game.gameDifficulty;
+    if (game.startedTime) response.startedTime = game.startedTime;
+    if (game.finishedTime) response.finishedTime = game.finishedTime;
+    if (game.gameDurationInSeconds) response.gameDurationInSeconds = game.gameDurationInSeconds;
+
+    return response as GameHistoryResponseDto;
+  }
 
   #checkCreateGameParameters(userId: number, gameDifficulty: number, startedTime: Date): boolean {
     const isNotValidUserId = (userId === undefined || userId === null);
