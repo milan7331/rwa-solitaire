@@ -13,6 +13,7 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindUserDto } from './dto/find-user.dto';
 import { RemoveUserDto } from './dto/remove-user.dto';
 import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Injectable()
 export class UserService {
@@ -259,6 +260,18 @@ export class UserService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  cleanUpUserResponse(user: User): UserResponseDto {
+    const response: any = {};
+    if (user.id) response.id = user.id;
+    if (user.createdAt) response.createdAt = user.createdAt;
+    if (user.username) response.username = user.username;
+    if (user.email) response.email = user.email;
+    if (user.firstname) response.firstname = user.firstname;
+    if (user.lastname) response.lastname = user.lastname;
+
+    return response as UserResponseDto;
   }
 
   async #findUsersForPermanentRemoval(): Promise<User[]> {
