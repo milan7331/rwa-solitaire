@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { UserData } from '../../../models/user/user-data';
+import { User } from '../../../models/user/user';
 import { GameHistory } from '../../../models/user/game-history';
 import { UserStats } from '../../../models/user/user-stats';
 
@@ -32,14 +32,14 @@ export class UserService {
     return this.http.post<void>(url, data, {});
   }
 
-  getUserData(username: string): Observable<UserData> {
+  getUser(username: string): Observable<User> {
     if (!username) return throwError(() => new Error('Failed to load user data, input parameters invalid!'));
 
-    const url = this.#userUrl + '/find';
-    
-    return this.http.get<any>(url, { withCredentials: true, params: { username }});
+    const url = this.#userUrl + '/find-one';
+
+    return this.http.get<User>(url, { withCredentials: true, params: { username }});
   }
-  
+
   getUserStats(username: string): Observable<UserStats> {
     if (!username) return throwError(() => new Error('Failed to load user stats, input parameters invalid!'));
 

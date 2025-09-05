@@ -1,13 +1,13 @@
 import { createActionGroup, emptyProps, props } from "@ngrx/store";
-import { UserData } from "../../models/user/user-data";
+import { User } from "../../models/user/user";
 import { UserStats } from "../../models/user/user-stats";
 
 export const userEditActions = createActionGroup({
     source: 'User edit page',
     events: {
-        'Get user data': emptyProps(),
-        'Get user data success': props<UserData>(),
-        'Get user data failure': emptyProps(),
+        'Get user': emptyProps(),
+        'Get user success': props<User>(),
+        'Get user failure': emptyProps(),
     }
 });
 

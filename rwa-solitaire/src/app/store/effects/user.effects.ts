@@ -34,15 +34,15 @@ export class UserEffects {
         )
     );
 
-    getUserData$ = createEffect(() => 
+    getUser$ = createEffect(() => 
         this.actions$.pipe(
-            ofType(userEditActions.getUserData),
+            ofType(userEditActions.getUser),
             throttleTime(1000),
             loginValid(this.store),
             withUsername(this.store),
             switchMap((username) => 
-                this.userService.getUserData(username).pipe(
-                    map(data => userEditActions.getUserDataSuccess(data)),
+                this.userService.getUser(username).pipe(
+                    map(data => userEditActions.getUserSuccess(data)),
                     catchError(error => {
                         console.error(error);
                         return EMPTY;

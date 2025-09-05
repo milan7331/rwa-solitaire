@@ -27,8 +27,10 @@ export class AuthService {
 
   validateSession(username: string): Observable<void> {
     const url = this.#apiUrl + '/validate-session';
-    const data = { username };
 
-    return this.http.post<void>(url, data, { withCredentials: true });
+    return this.http.post<void>(url, {}, {
+      withCredentials: true,
+      params: { username },
+    });
   }
 }

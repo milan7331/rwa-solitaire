@@ -42,7 +42,7 @@ export class AuthEffects {
         )
     );
 
-    handleLoginSuccess$ = createEffect(() => 
+    loginSuccess$ = createEffect(() => 
         this.actions$.pipe(
             ofType(loginActions.logInSuccess),
             tap((action) => this.localStorageService.setUsername(action.username)),
@@ -50,7 +50,7 @@ export class AuthEffects {
         { dispatch: false }
     );
 
-    handleLogoutSuccess$ = createEffect(() =>
+    logoutSuccess$ = createEffect(() =>
         this.actions$.pipe(
             ofType(logoutActions.logoutSuccess),
             tap(() => this.localStorageService.removeUsername())

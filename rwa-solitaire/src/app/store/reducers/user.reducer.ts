@@ -2,7 +2,7 @@ import { createReducer, on } from "@ngrx/store";
 import { UserState } from "../../models/state/user.state";
 import { createEntityAdapter, EntityAdapter } from "@ngrx/entity";
 import { GameHistory } from "../../models/user/game-history";
-import { UserData } from "../../models/user/user-data";
+import { User } from "../../models/user/user";
 import { UserStats } from "../../models/user/user-stats";
 import { SavedGame } from "../../models/user/saved-game";
 import { loginActions, logoutActions, sessionActions } from "../actions/auth.actions";
@@ -15,7 +15,7 @@ export const gameHistoryAdapter: EntityAdapter<GameHistory> = createEntityAdapte
 
 const initialUserState: UserState = {
     loginValid: false,
-    userData: getInitialUserData(),
+    userData: getInitialUser(),
     userStats: getInitialUserStats(),
     gameHistory: gameHistoryAdapter.getInitialState(),
     savedGame: getInitialSavedGame(), 
@@ -42,7 +42,7 @@ const loginHandlers = [
         return {
             ...state,
             loginValid: false,
-            userData: getInitialUserData(),
+            userData: getInitialUser(),
         };
     }),
 ];
@@ -61,7 +61,7 @@ const sessionHandlers = [
 ];
 
 const userDataHandlers = [
-    on(userEditActions.getUserDataSuccess, (state: UserState, data) => {
+    on(userEditActions.getUserSuccess, (state: UserState, data) => {
         return {
             ...state,
             userData: data,
@@ -88,7 +88,7 @@ export const userReducer = createReducer(
     ...userStatsHandlers,
 );
 
-function getInitialUserData(): UserData {
+function getInitialUser(): User {
     return {
         id: -1,
         createdAt: new Date(),

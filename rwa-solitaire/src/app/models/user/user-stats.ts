@@ -4,6 +4,6 @@ export interface UserStats {
     gamesPlayed: number;
     gamesWon: number;
     totalTimePlayed: number;
-    averageSolveTime: number;  
+    averageSolveTime: number;
     fastestSolveTime: number;
 }

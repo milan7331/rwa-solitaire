@@ -1,6 +1,6 @@
 import { EntityState } from "@ngrx/entity";
 
-import { UserData } from "../user/user-data";
+import { User } from "../user/user";
 import { UserStats } from "../user/user-stats";
 import { GameHistory } from "../user/game-history";
 import { SavedGame } from "../user/saved-game";
@@ -8,7 +8,7 @@ import { SavedGame } from "../user/saved-game";
 export interface UserState {
     loginValid: boolean;
 
-    userData: UserData;
+    userData: User;
     userStats: UserStats;
     gameHistory: EntityState<GameHistory>;
     savedGame: SavedGame;

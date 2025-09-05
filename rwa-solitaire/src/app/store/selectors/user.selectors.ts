@@ -8,7 +8,7 @@ export const selectUserLoginValid = createSelector(
     (state) => state.loginValid
 );
 
-export const selectUserData = createSelector(
+export const selectUser = createSelector(
     selectUserState,
     (state) => state.userData
 );
@@ -19,8 +19,8 @@ export const selectUserStats = createSelector(
 );
 
 export const selectUsername = createSelector(
-    selectUserData,
-    (data) => data.username
+    selectUser,
+    (user) => user.username
 );
 
 export const selectUserSavedGame = createSelector(
