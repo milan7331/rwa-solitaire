@@ -9,18 +9,18 @@ import { provideEffects } from '@ngrx/effects';
 
 import { AuthEffects } from './store/effects/auth.effects';
 import { UserEffects } from './store/effects/user.effects';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideHttpClient(withFetch()),
     provideStore(rootReducer),
     provideEffects([
       AuthEffects,
       UserEffects
     ]),
-    provideHttpClient(),
     provideStoreDevtools({
       maxAge: 25,
     }),

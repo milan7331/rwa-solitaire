@@ -44,7 +44,7 @@ export class BgAnimationComponent implements OnInit, AfterViewInit {
       startWith({ width: 1920, height: 1080 } as WindowSize)
     ).subscribe((win) => {
         this.elements = this.#getBgElements(win);
-        this.cdr.detectChanges();       
+        this.cdr.detectChanges();
       });
 
     this.router.events.pipe(
