@@ -6,10 +6,9 @@ import { provideStoreDevtools} from '@ngrx/store-devtools';
 import { routes } from './app.routes';
 import { rootReducer } from './store/reducers/app.reducer';
 import { provideEffects } from '@ngrx/effects';
-
-import { AuthEffects } from './store/effects/auth.effects';
 import { UserEffects } from './store/effects/user.effects';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { NavigationEffects } from './store/effects/navigation.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,8 +17,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideStore(rootReducer),
     provideEffects([
-      AuthEffects,
-      UserEffects
+      UserEffects,
+      NavigationEffects
     ]),
     provideStoreDevtools({
       maxAge: 25,
