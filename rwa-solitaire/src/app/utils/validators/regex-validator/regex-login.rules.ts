@@ -1,6 +1,6 @@
 import { RegexValidationRule } from "../../../models/validation/regex-rule";
 
-export const LOGIN_RULES_USERNAME: RegexValidationRule[] = [
+export const RULES_LOGIN_USERNAME: RegexValidationRule[] = [
     {
         regex: /^(?!\s*$).+$/,
         errorKey: 'usernameRequired',
@@ -23,7 +23,7 @@ export const LOGIN_RULES_USERNAME: RegexValidationRule[] = [
     },
 ];
 
-export const LOGIN_RULES_PASSWORD: RegexValidationRule[] = [
+export const RULES_LOGIN_PASSWORD: RegexValidationRule[] = [
     {
         regex: /^(?!\s*$).+$/,
         errorKey: 'passwordRequired',

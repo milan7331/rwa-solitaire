@@ -5,7 +5,7 @@ import { GameHistory } from "../../models/user/game-history";
 import { User } from "../../models/user/user";
 import { UserStats } from "../../models/user/user-stats";
 import { SavedGame } from "../../models/user/saved-game";
-import { userDataActions, userStatsActions, loginActions, logoutActions, sessionActions, registerActions } from "../actions/user.actions";
+import { userDataActions, userStatsActions, loginActions, logoutActions, sessionActions, registerActions, editUserActions } from "../actions/user.actions";
 
 export const gameHistoryAdapter: EntityAdapter<GameHistory> = createEntityAdapter<GameHistory>({
     selectId: (game) => game.id,
@@ -15,6 +15,7 @@ export const gameHistoryAdapter: EntityAdapter<GameHistory> = createEntityAdapte
 const initialUserState: UserState = {
     loginValid: false,
     registerValid: false,
+    editValid: false,
 
     user: getInitialUser(),
     userStats: getInitialUserStats(),
@@ -25,11 +26,13 @@ const initialUserState: UserState = {
     loginLoading: false,
     userDataLoading: false,
     userStatsLoading: false,
+    editUserLoading: false,
 
     registerErrorMessage: '',
     loginErrorMessage: '',
     userDataErrorMessage: '',
-    userStatsErrorMessage: ''
+    userStatsErrorMessage: '',
+    editUserErrorMessage: '',
 };
 
 const registerHandlers = [
@@ -137,6 +140,12 @@ const sessionHandlers = [
 ];
 
 const userDataHandlers = [
+    on(userDataActions.getUser, (state: UserState) => {
+        return {
+            ...state,
+            userDataLoading: true
+        }
+    }),
     on(userDataActions.getUserSuccess, (state: UserState, user) => {
         return {
             ...state,
@@ -151,13 +160,24 @@ const userDataHandlers = [
             userDataLoading: false,
             userDataErrorMessage: action.message ?? 'Error loading user data!'
         }
+    }),
+    on(userDataActions.getUserClearError, (state: UserState) => {
+        return {
+            ...state,
+            userDataErrorMessage: ''
+        }
     })
 ];
 
 const userStatsHandlers = [
+    on(userStatsActions.getUserStats, (state: UserState) => {
+        return {
+            ...state,
+            userStatsLoading: true
+        }
+    }),
     on(userStatsActions.getUserStatsSuccess, (state: UserState, stats) => {
         if (!checkUserStatsValid(stats)) return state;
-
         return {
             ...state,
             userStats: stats,
@@ -180,6 +200,43 @@ const userStatsHandlers = [
     })
 ];
 
+const userEditHandlers = [
+    on(editUserActions.editUser, (state: UserState) => {
+        return {
+            ...state,
+            editUserLoading: true,
+        }
+    }),
+    on(editUserActions.editUserSuccess, (state: UserState) => {
+        return {
+            ...state,
+            editUserLoading: false,
+            editValid: true,
+            editUserErrorMessage: ''
+        }
+    }),
+    on(editUserActions.editUserFailure, (state: UserState, action) => {
+        return {
+            ...state,
+            editUserLoading: false,
+            editValid: false,
+            editUserErrorMessage: action.message ?? 'Error editing user data!'
+        }
+    }),
+    on(editUserActions.clearEditValid, (state: UserState) => {
+        return {
+            ...state,
+            editValid: false,
+        }
+    }),
+    on(editUserActions.editUserClearError, (state: UserState) => {
+        return {
+            ...state,
+            editUserErrorMessage: ''
+        }
+    })
+];
+
 export const userReducer = createReducer(
     initialUserState,
     ...registerHandlers,
@@ -187,6 +244,7 @@ export const userReducer = createReducer(
     ...sessionHandlers,
     ...userDataHandlers,
     ...userStatsHandlers,
+    ...userEditHandlers,
 );
 
 function getInitialUser(): User {

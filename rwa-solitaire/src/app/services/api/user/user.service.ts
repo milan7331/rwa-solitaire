@@ -28,14 +28,8 @@ export class UserService {
     const data: any = { email, username, password };
     if (firstname && firstname.length > 0) data.firstname = firstname;
     if (lastname && lastname.length > 0) data.lastname = lastname;
-    
-    return this.http.post<void>(url, data, { withCredentials: true }).pipe(
-      timeout(30000),
-      catchError(error => {
-        if (error.name === 'TimeoutError') return throwError(() => new Error('Registration request timed out. The server may be down or unresponsive.'));
-        return throwError(() => error);
-      }),
-    );
+
+    return this.http.post<void>(url, data, { withCredentials: true });
   }
 
   getUser(username: string): Observable<User> {
@@ -51,7 +45,7 @@ export class UserService {
 
     const url = this.#statsUrl + '/find-one';
 
-    return this.http.get<any>(url, { withCredentials: true, params: { username }});
+    return this.http.get<UserStats>(url, { withCredentials: true, params: { username }});
   }
 
   getUserGameHistory(username: string): Observable<GameHistory[]> {
@@ -89,5 +83,25 @@ export class UserService {
         return throwError(() => error);
       })
     );
+  }
+
+  editUser(
+    username: string,
+    email?: string,
+    password?: string,
+    newPassword?: string,
+    firstname?: string,
+    lastname?: string
+  ): Observable<void> {
+    const url = this.#userUrl + '/update';
+
+    const data: any = { username };
+    if (email) data.email = email;
+    if (password) data.password = password;
+    if (newPassword) data.newPassword = newPassword;
+    if (firstname) data.firstname = firstname;
+    if (lastname) data.lastname = lastname;
+
+    return this.http.patch<void>(url, data, { withCredentials: true });
   }
 }

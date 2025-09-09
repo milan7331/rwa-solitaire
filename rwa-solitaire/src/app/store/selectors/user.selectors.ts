@@ -72,3 +72,18 @@ export const selectUserStatsErrorMessage = createSelector(
     selectUserState,
     (state) => state.userStatsErrorMessage
 );
+
+export const selectEditValid = createSelector(
+    selectUserState,
+    (state) => state.editValid
+);
+
+export const selectEditUserLoading = createSelector(
+    selectUserState,
+    (state) => state.editUserLoading
+);
+
+export const selectEditUserMessage = createSelector(
+    selectUserState,
+    (state) => state.editUserErrorMessage,
+);

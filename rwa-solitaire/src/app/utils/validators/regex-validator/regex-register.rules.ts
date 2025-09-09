@@ -21,7 +21,6 @@ export const RULES_REGISTER_EMAIL: RegexValidationRule[] = [
         errorKey: 'invalidEmailFormat',
         message: 'Please enter a valid email address'
     }
-
 ];
 
 export const RULES_REGISTER_USERNAME: RegexValidationRule[] = [
@@ -88,13 +87,12 @@ export const RULES_REGISTER_PASSWORD: RegexValidationRule[] = [
 
 export const RULES_REGISTER_FIRSTNAME: RegexValidationRule[] = [
     {
-        // Only validate if field is not empty
+        // Only validate format if field is not empty
         regex: /^(?:.{0}|.{2,64})$/,
         errorKey: 'firstnameLength',
         message: 'First name must be between 2 and 64 characters if provided',
     },
     {
-        // Only validate format if field is not empty
         regex: /^(?:.{0}|[\p{L}\-'’\s]+)$/u,
         errorKey: 'invalidFirstNameFormat',
         message: 'First name can only contain letters, hyphens (-), apostrophes (\’), and spaces',

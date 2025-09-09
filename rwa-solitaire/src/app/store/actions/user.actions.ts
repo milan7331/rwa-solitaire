@@ -53,7 +53,7 @@ export const userDataActions = createActionGroup({
 
         'Get user clear error': emptyProps(),
     }
-})
+});
 
 export const userStatsActions = createActionGroup({
     source: 'Load user stats',
@@ -64,7 +64,19 @@ export const userStatsActions = createActionGroup({
 
         'Get user stats clear error': emptyProps(),
     }
-})
+});
+
+export const editUserActions = createActionGroup({
+    source: 'User edit page',
+    events: {
+        'Edit user': props<{ email: string, password: string, newPassword: string, firstname: string, lastname: string }>(),
+        'Edit user success': emptyProps(),
+        'Edit user failure': props<{ message: string }>(),
+
+        'Edit user clear error': emptyProps(),
+        'Clear editValid': emptyProps()
+    }
+});
 
 
 

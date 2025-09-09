@@ -8,6 +8,7 @@ import { SavedGame } from "../user/saved-game";
 export interface UserState {
     loginValid: boolean;
     registerValid: boolean;
+    editValid: boolean;
 
     user: User;
     userStats: UserStats;
@@ -18,9 +19,11 @@ export interface UserState {
     loginLoading: boolean;
     userDataLoading: boolean;
     userStatsLoading: boolean;
+    editUserLoading: boolean;
 
     registerErrorMessage: string;
     loginErrorMessage: string;
     userDataErrorMessage: string;
     userStatsErrorMessage: string;
+    editUserErrorMessage: string;
 }

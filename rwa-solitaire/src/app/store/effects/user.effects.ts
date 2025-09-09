@@ -2,7 +2,7 @@ import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { UserService } from "../../services/api/user/user.service";
 import { Store } from "@ngrx/store";
 import { catchError, map, switchMap, throttleTime, of, exhaustMap, tap, filter, withLatestFrom } from "rxjs";
-import { loginActions, logoutActions, userDataActions, userStatsActions, registerActions, sessionActions } from "../actions/user.actions";
+import { loginActions, logoutActions, userDataActions, userStatsActions, registerActions, sessionActions, editUserActions } from "../actions/user.actions";
 import { inject, Injectable } from "@angular/core";
 import { AuthService } from "../../services/api/auth/auth.service";
 import { LocalStorageService } from "../../services/app/local-storage/local-storage.service";
@@ -101,7 +101,7 @@ export class UserEffects {
 
     getUser$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(sessionActions.validateSessionSuccess, loginActions.logInSuccess),
+            ofType(sessionActions.validateSessionSuccess, loginActions.logInSuccess, editUserActions.editUserSuccess),
             throttleTime(1000),
             withLatestFrom(
                 this.store.select(selectLoginValid),
@@ -122,7 +122,7 @@ export class UserEffects {
         )
     );
 
-    getUserStats = createEffect(() =>
+    getUserStats$ = createEffect(() =>
         this.actions$.pipe(
             ofType(sessionActions.validateSessionSuccess, loginActions.logInSuccess),
             throttleTime(1000),
@@ -137,11 +137,36 @@ export class UserEffects {
                 this.userService.getUserStats(username).pipe(
                     map(data => userStatsActions.getUserStatsSuccess(data)),
                     catchError(error => {
-                        const message = error.error?.message || error.message || 'Error loading user stats';
-                        return of(userStatsActions.getUserStatsFailure({ message}));
+                        const message = error.error?.message || error.message || 'Error loading user stats!';
+                        return of(userStatsActions.getUserStatsFailure({ message }));
                     })
                 )
             )
         )
     );
+
+    editUser$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(editUserActions.editUser),
+            throttleTime(1000),
+            withLatestFrom(
+                this.store.select(selectLoginValid),
+                this.store.select(selectUsername),
+            ),
+            filter(([_, loginValid, username]) =>
+                loginValid && username !== null && username.length > 0
+            ),
+            switchMap(([action, _, username]) =>
+                this.userService.editUser(username, action.email, action.password, action.newPassword, action.firstname, action.lastname).pipe(
+                    map(() => editUserActions.editUserSuccess()),
+                    catchError(error => {
+                        const message = error.error?.message || error.message || 'Error editing user data!';
+                        return of(editUserActions.editUserFailure({ message }));
+                    })
+                )
+            )
+        )
+    );
+
+
 }

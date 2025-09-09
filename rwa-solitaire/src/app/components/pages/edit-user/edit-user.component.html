@@ -1,0 +1,61 @@
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>Edit user data</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-divider></mat-divider>
+        <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+            <mat-form-field>
+                <mat-label>New mail address</mat-label>
+                <input matInput formControlName="email" maxlength="128">
+                @if (isCheckingEmail$ | async) {
+                        <mat-spinner matSuffix diameter="24" class="validation-spinner"></mat-spinner>
+                }
+                @if (email?.valid && (email?.dirty || email?.touched)) {
+                    <mat-icon matSuffix>check_circle</mat-icon>
+                }
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(email?.errors)}} }
+                </mat-error>
+            </mat-form-field>
+            <mat-divider></mat-divider>
+            <mat-form-field>
+                <mat-label>New password</mat-label>
+                <input matInput formControlName="newPassword" maxlength="64">
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(newPassword?.errors)}} }
+                </mat-error>
+            </mat-form-field>
+            <mat-divider></mat-divider>
+            <mat-form-field>
+                <mat-label>First name (optional)</mat-label>
+                <input matInput formControlName="firstname" maxlength="64">
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(firstname?.errors)}} }
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Last name (optional)</mat-label>
+                <input matInput formControlName="lastname" maxlength="64">
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(lastname?.errors)}} }
+                </mat-error>
+            </mat-form-field>
+            <mat-divider></mat-divider>
+            <mat-form-field>
+                <mat-label>Current password</mat-label>
+                <input matInput formControlName="password" [type]="showPassword ? 'text' : 'password'" maxlength="64">
+                <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+                    <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                <mat-error>
+                    @if (showErrors) { {{getErrorMessage(password?.errors)}} }
+                </mat-error>
+            </mat-form-field>
+            <button mat-fab extended type="submit" [disabledInteractive]="(showLoading$ | async)">
+                @if (showLoading$ | async) { <mat-spinner diameter="30"></mat-spinner> } @else { Save changes }
+            </button>
+            <mat-divider></mat-divider>
+        </form>
+    </mat-card-content>
+</mat-card>
