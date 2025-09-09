@@ -12,7 +12,7 @@ import { AudioService } from '../../../services/app/audio/audio.service';
 import { ThemeService } from '../../../services/app/theme/theme.service';
 import { AudioControlComponent } from '../audio-control/audio-control.component';
 import { selectAudioVolumeIcon } from '../../../store/selectors/audio.selectors';
-import { selectUserLoginValid } from '../../../store/selectors/user.selectors';
+import { selectLoginValid } from '../../../store/selectors/user.selectors';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
@@ -56,7 +56,7 @@ export class TopBarComponent implements OnInit {
   
   ngOnInit(): void {
     this.volumeIcon$ = this.store.select(selectAudioVolumeIcon);
-    this.loginValid$ = this.store.select(selectUserLoginValid);
+    this.loginValid$ = this.store.select(selectLoginValid);
   }
 
   loadHomePage(): void {

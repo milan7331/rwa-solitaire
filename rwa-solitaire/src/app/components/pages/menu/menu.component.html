@@ -1,15 +1,18 @@
-<app-user-stats></app-user-stats>
 <div class="spacer"></div>
 <mat-card>
     <mat-card-content>
-        <button mat-fab extended (click)="continueGame()">Continue</button>
-        <div class="new-game-buttons">
-            <button mat-fab extended (click)="loadSolitairePage()">Start new game</button>
-            <button mat-fab extended (click)="changeDifficulty()">Difficulty: {{ SolitaireDifficulty[this.difficulty] }}</button>
+        <app-user-stats></app-user-stats>
+        <div class="buttons">
+            <button mat-raised-button (click)="continueGame()">Continue</button>
+            <div class="new-game-buttons">
+                <button mat-mini-fab (click)="setDifficulty(SolitaireDifficulty.Easy)" [disabled]="(this.difficulty === SolitaireDifficulty.Easy)"><mat-icon>remove</mat-icon></button>
+                <button mat-raised-button (click)="loadSolitairePage()">Start new game ({{ SolitaireDifficulty[this.difficulty] }})</button>
+                <button mat-mini-fab (click)="setDifficulty(SolitaireDifficulty.Hard)" [disabled]="(this.difficulty === SolitaireDifficulty.Hard)"><mat-icon>add</mat-icon></button>
+            </div>
+            <button mat-raised-button (click)="loadLeaderboardsPage()">Leaderboards</button>
+            <button mat-raised-button (click)="loadEditProfilePage()">Edit profile</button>
+            <button mat-raised-button (click)="logout()">Log out</button>
         </div>
-        <button mat-fab extended (click)="loadLeaderboardsPage()">Leaderboards</button>
-        <button mat-fab extended (click)="loadEditProfilePage()">Edit profile</button>
-        <button mat-fab extended (click)="logout()">Log out</button>
     </mat-card-content>
 </mat-card>
 <div class="spacer"></div>

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { TopBarComponent } from "./components/standalone/top-bar/top-bar.component";
 import { BgAnimationComponent } from './components/standalone/bg-animation/bg-animation.component';
-import { sessionActions } from './store/actions/auth.actions';
+import { sessionActions } from './store/actions/user.actions';
 
 @Component({
   selector: 'app-root',

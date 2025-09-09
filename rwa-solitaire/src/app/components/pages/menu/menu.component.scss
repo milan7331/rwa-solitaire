@@ -15,30 +15,41 @@
     }
 
     mat-card {
-        min-width: 40rem;
-        width: 40%;
-
+        min-width: 30rem;
+        width: fit-content;
 
         mat-card-content {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: flex-start;
+            align-items: stretch;
+            row-gap: 2vh;
+            column-gap: 2vh;
+
+            .buttons {
+                min-width: 20rem;
+                flex: 3 1 auto;
+
                 display: flex;
                 flex-flow: column nowrap;
                 justify-content: flex-start;
                 align-items: stretch;
                 row-gap: 2vh;
+            }
 
             .new-game-buttons {
                 display: flex;
                 flex-flow: row nowrap;
                 justify-content: flex-start;
-                align-items: center;    
+                align-items: center;
                 column-gap: 2vh;
 
                 * {
-                    flex: 1 1 auto;
+                    flex: 0 1 auto;
                 }
 
-                :first-child {
-                    flex-grow: 4;
+                :nth-child(2) {
+                    flex-grow: 1;
                 }
             }
         }

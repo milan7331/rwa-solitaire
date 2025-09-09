@@ -10,7 +10,7 @@
                 <input matInput formControlName="username" maxlength="32">
                 <mat-error>
                     @if (showErrors) { {{getErrorMessage(username?.errors)}} }
-                </mat-error>               
+                </mat-error>
             </mat-form-field>
             <mat-form-field>
                 <mat-label>Password</mat-label>
@@ -22,8 +22,8 @@
                     @if (showErrors) { {{getErrorMessage(password?.errors)}} }
                 </mat-error>
             </mat-form-field>
-            <button mat-fab extended type="submit" [disabledInteractive]="showLoading">
-                @if (showLoading) { <mat-spinner diameter="30"></mat-spinner> } @else { Log In }
+            <button mat-fab extended type="submit" [disabledInteractive]="(showLoading$ | async)">
+                @if (showLoading$ | async) { <mat-spinner diameter="30"></mat-spinner> } @else { Log In }
             </button>
         </form>
         <mat-divider></mat-divider>

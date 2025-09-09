@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { UserStatsComponent } from "../../standalone/user-stats/user-stats.component";
 import { SolitaireDifficulty } from '../../../models/solitaire/solitaire-difficulty';
 import { AudioService } from '../../../services/app/audio/audio.service';
-import { logoutActions } from '../../../store/actions/auth.actions';
+import { logoutActions } from '../../../store/actions/user.actions';
 
 @Component({
   selector: 'app-menu',
@@ -20,6 +20,7 @@ import { logoutActions } from '../../../store/actions/auth.actions';
     MatListModule,
     MatDividerModule,
     MatIconModule,
+    MatDividerModule,
     UserStatsComponent
 ],
   templateUrl: './menu.component.html',
@@ -29,13 +30,13 @@ import { logoutActions } from '../../../store/actions/auth.actions';
 export class MenuComponent {
   SolitaireDifficulty = SolitaireDifficulty;
   difficulty: SolitaireDifficulty;
-  
+
   constructor(
     private readonly router: Router,
     private readonly store: Store,
     private readonly audio: AudioService,
   ) {
-    this.difficulty = SolitaireDifficulty.Hard;
+    this.difficulty = SolitaireDifficulty.Easy;
   }
 
   continueGame(): void {
@@ -54,19 +55,18 @@ export class MenuComponent {
   }
 
   loadEditProfilePage(): void {
-    // IZMENITI!!
     this.audio.play_buttonPress();
+    this.router.navigate(['edit-user']);
   }
 
   logout(): void {
-    this.router.navigate(['home']);
     this.audio.play_buttonPress();
+    this.router.navigate(['home']);
     this.store.dispatch(logoutActions.logout());
   }
 
-  changeDifficulty(): void {
+  setDifficulty(diff: SolitaireDifficulty) {
     this.audio.play_buttonPress();
-    this.difficulty = (this.difficulty === 0) ? 1 : 0;
+    this.difficulty = diff;
   }
-
 }
