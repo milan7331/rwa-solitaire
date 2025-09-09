@@ -10,6 +10,7 @@ import { FindUserStatsDto } from './dto/find-user-stats.dto';
 import { RemoveUserStatsDto } from './dto/remove-user-stats.dto';
 import { UserService } from '../user/user.service';
 import { UserStatsReponseDto } from './dto/user-stats-response.dto';
+import { POSTGRES_MAX_INTEGER } from 'src/util/postgres-constants';
 
 @Injectable()
 export class UserStatsService {
@@ -138,13 +139,16 @@ export class UserStatsService {
 
   cleanUpUserStatsResponse(stats: UserStats): UserStatsReponseDto {
     const response: any = {};
-    if (stats.id) response.id = stats.id;
-    if (stats.gamesPlayed) response.gamesPlayed = stats.gamesPlayed;
-    if (stats.gamesWon) response.gamesWon = stats.gamesWon;
-    if (stats.totalTimePlayed) response.totalTimePlayed = stats.totalTimePlayed;
-    if (stats.averageSolveTime) response.averageSolveTime = stats.averageSolveTime;
-    if (stats.fastestSolveTime) response.fastestSolveTime = stats.fastestSolveTime;
+    if (stats.id !== undefined && stats.id !== null) response.id = stats.id;
+    if (stats.gamesPlayed !== undefined && stats.gamesPlayed !== null) response.gamesPlayed = stats.gamesPlayed;
+    if (stats.gamesWon !== undefined && stats.gamesWon !== null) response.gamesWon = stats.gamesWon;
+    if (stats.totalTimePlayed !== undefined && stats.totalTimePlayed !== null) response.totalTimePlayed = stats.totalTimePlayed;
+    if (stats.averageSolveTime !== undefined && stats.averageSolveTime !== null) response.averageSolveTime = stats.averageSolveTime;
+    if (stats.fastestSolveTime !== undefined && stats.fastestSolveTime !== null) response.fastestSolveTime = stats.fastestSolveTime;
+
+    if (response.averageSolveTime === POSTGRES_MAX_INTEGER) response.averageSolveTime = 0;
+    if (response.fastestSolveTime === POSTGRES_MAX_INTEGER) response.fastestSolveTime = 0;
 
     return response as UserStatsReponseDto;
-    }
+  }
 }

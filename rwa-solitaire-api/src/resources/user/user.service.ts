@@ -129,10 +129,11 @@ export class UserService {
 
   async update(updateDto: UpdateUserDto): Promise<void> {
     const {id, email, username, password, newPassword, firstname, lastname } = updateDto;
-    if (id === undefined) throw new BadRequestException('Invalid parameters!');
+    if (!id  && !username) throw new BadRequestException('Invalid parameters!');
 
     const findDto: FindUserDto = {
-      id,
+      ...(id && { id }),
+      ...(username && { username }),
       password,
       withDeleted: false,
       withRelations: false
@@ -143,7 +144,7 @@ export class UserService {
 
     const update: DeepPartial<User>  = { }
     if (email) update.email = email;
-    if (username) update.username = username;
+    // if (username) update.username = username; username updates are disabled for the purpose of leaderboards
     if (newPassword) update.passwordHash = await this.hashService.hashPassword(newPassword);
     if (firstname) update.firstname = firstname;
     if (lastname) update.lastname = lastname;
