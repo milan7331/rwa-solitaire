@@ -36,7 +36,7 @@ export class UserService {
 
     let user: User | null = await this.findOne(findDto);
 
-    if (user) throw new BadRequestException('Username already in use!');
+    if (user) throw new ConflictException('Username already in use!');
     return;
   }
 
@@ -51,7 +51,7 @@ export class UserService {
 
     let user: User | null = await this.findOne(findDto);
 
-   if (user) throw new BadRequestException('Email already in use!');
+   if (user) throw new ConflictException('Email already in use!');
    return;
   }
 
