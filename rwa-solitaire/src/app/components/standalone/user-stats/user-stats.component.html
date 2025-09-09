@@ -1,4 +1,4 @@
-<button mat-raised-button [disabledInteractive]="true" class="visual-button">
+<button mat-fab extended [disabledInteractive]="true" class="visual-button">
     <div class="title">Welcome back  {{ username$ | async }}!</div>
     <div>Games played: {{ (stats$ | async)?.gamesPlayed }}</div>
     <div>Games won: {{ (stats$ | async)?.gamesWon }}</div>

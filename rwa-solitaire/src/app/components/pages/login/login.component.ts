@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { createPatternValidator } from '../../../utils/validators/regex-validator/regex.factory';
-import { LOGIN_RULES_PASSWORD, LOGIN_RULES_USERNAME } from '../../../utils/validators/regex-validator/regex-login.rules';
+import { RULES_LOGIN_PASSWORD, RULES_LOGIN_USERNAME } from '../../../utils/validators/regex-validator/regex-login.rules';
 import { RegexValidationRule } from '../../../models/validation/regex-rule';
 import { MatDividerModule } from '@angular/material/divider';
 import { AudioService } from '../../../services/app/audio/audio.service';
@@ -64,8 +64,8 @@ export class LoginComponent implements OnInit {
     this.errorMessage$ = of('');
 
     this.loginForm = this.formBuilder.group({
-      username: ['', [createPatternValidator(LOGIN_RULES_USERNAME)], []],
-      password: ['', [createPatternValidator(LOGIN_RULES_PASSWORD)], []],
+      username: ['', [createPatternValidator(RULES_LOGIN_USERNAME)], []],
+      password: ['', [createPatternValidator(RULES_LOGIN_PASSWORD)], []],
     });
   }
 

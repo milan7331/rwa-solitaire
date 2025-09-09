@@ -12,8 +12,9 @@ import { AudioService } from '../../../services/app/audio/audio.service';
 import { ThemeService } from '../../../services/app/theme/theme.service';
 import { AudioControlComponent } from '../audio-control/audio-control.component';
 import { selectAudioVolumeIcon } from '../../../store/selectors/audio.selectors';
-import { selectLoginValid } from '../../../store/selectors/user.selectors';
+import { selectLoginValid, selectUsername } from '../../../store/selectors/user.selectors';
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { logoutActions } from '../../../store/actions/user.actions';
 
 @Component({
   selector: 'app-top-bar',
@@ -39,6 +40,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 export class TopBarComponent implements OnInit {
   volumeIcon$: Observable<string>;
   loginValid$: Observable<boolean>;
+  username$: Observable<string>;
 
   audioControlIsOpen: boolean;
 
@@ -50,13 +52,16 @@ export class TopBarComponent implements OnInit {
   ) {
     this.volumeIcon$ = of('volume_up');
     this.loginValid$ = of(false);
+    this.username$ = of('');
 
     this.audioControlIsOpen = false;
   }
-  
+
   ngOnInit(): void {
     this.volumeIcon$ = this.store.select(selectAudioVolumeIcon);
     this.loginValid$ = this.store.select(selectLoginValid);
+    this.username$ = this.store.select(selectUsername);
+
   }
 
   loadHomePage(): void {
@@ -64,9 +69,14 @@ export class TopBarComponent implements OnInit {
     this.router.navigate(['']);
   }
 
+  loadMenuPage(): void {
+    this.audio.play_buttonPress();
+    this.router.navigate(['menu'])
+  }
+
   logout(): void {
     this.audio.play_buttonPress();
-    // treba da trigger akciju -> da se vrati na homepage
+    this.store.dispatch(logoutActions.logout());
   }
 
   loadLoginPage(): void {

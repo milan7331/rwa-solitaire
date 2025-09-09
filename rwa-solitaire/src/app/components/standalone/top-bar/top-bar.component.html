@@ -14,13 +14,16 @@
     <button mat-button class="title-btn" (click)="loadHomePage()">RWA Solitaire</button>
     <span class="top-bar-spacer"></span>
     @if (loginValid$ | async) {
-        <button mat-raised-button class="ml-05" (click)="logout()"><mat-icon>logout</mat-icon>Log out</button>
+        <button mat-stroked-button class="ml-05 username-btn" (click)="loadMenuPage()">{{ username$ | async }}</button>
+        <button mat-icon-button class="ml-05 icon-btn" (click)="logout()" matTooltip="Log out"><mat-icon>logout</mat-icon></button>
+        <button mat-icon-button class="ml-05 icon-btn" (click)="loadLeaderboardsPage()" matTooltip="Leaderboards"><mat-icon>leaderboard</mat-icon></button>
+        <button mat-icon-button class="ml-05 icon-btn" (click)="loadAboutPage()" matTooltip="About"><mat-icon>info</mat-icon></button>
     } @else {
         <button mat-raised-button class="ml-05" (click)="loadLoginPage()"><mat-icon>login</mat-icon>Log in</button>
         <button mat-button class="ml-05" (click)="loadRegisterPage()"><mat-icon>person_add</mat-icon>Register</button>
-    } 
-    <button mat-button class="ml-05" (click)="loadLeaderboardsPage()"><mat-icon>leaderboard</mat-icon>Leaderboards</button>
-    <button mat-button class="ml-05" (click)="loadAboutPage()"><mat-icon>info</mat-icon>About</button>
+        <button mat-button class="ml-05" (click)="loadLeaderboardsPage()"><mat-icon>leaderboard</mat-icon>Leaderboards</button>
+        <button mat-button class="ml-05" (click)="loadAboutPage()"><mat-icon>info</mat-icon>About</button>
+    }
     <button mat-icon-button class="ml-05 icon-btn" (click)="toggleDarkMode()"><mat-icon>dark_mode</mat-icon></button>
     <button mat-icon-button class="ml-05 icon-btn" (click)="toggleAudioControl()" cdkOverlayOrigin #trigger="cdkOverlayOrigin"><mat-icon>{{ volumeIcon$ | async }}</mat-icon></button>
 </mat-toolbar>
