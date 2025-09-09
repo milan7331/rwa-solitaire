@@ -1,5 +1,5 @@
-export interface RegexValidationRule {
+import { ValidationRule } from "./validation-rule";
+
+export interface RegexValidationRule extends ValidationRule {
     regex: RegExp;
-    errorKey: string;
-    message: string;
 }

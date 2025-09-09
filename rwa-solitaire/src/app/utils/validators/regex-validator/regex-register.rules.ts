@@ -88,45 +88,27 @@ export const RULES_REGISTER_PASSWORD: RegexValidationRule[] = [
 
 export const RULES_REGISTER_FIRSTNAME: RegexValidationRule[] = [
     {
-        regex: /^(?!\s*$).+$/,
-        errorKey: 'firstnameRequired',
-        message: 'First name is required',
+        // Only validate if field is not empty
+        regex: /^(?:.{0}|.{2,64})$/,
+        errorKey: 'firstnameLength',
+        message: 'First name must be between 2 and 64 characters if provided',
     },
     {
-        regex: /^.{2,}$/,
-        errorKey: 'firstnameMinLength',
-        message: 'First name must be at least 2 characters long',
-    },
-    {
-        regex: /^.{0,64}$/,
-        errorKey: 'firstnameMaxLength',
-        message: 'First name cannot exceed 64 characters',
-    },
-    {
-        regex: /^[\p{L}\-'’\s]+$/u,
+        // Only validate format if field is not empty
+        regex: /^(?:.{0}|[\p{L}\-'’\s]+)$/u,
         errorKey: 'invalidFirstNameFormat',
-        message: 'Furst name can only contain letters, hyphens (-), apostrophes (\’), and spaces',
+        message: 'First name can only contain letters, hyphens (-), apostrophes (\’), and spaces',
     }
 ];
 
 export const RULES_REGISTER_LASTNAME: RegexValidationRule[] = [
     {
-        regex: /^(?!\s*$).+$/,
-        errorKey: 'lastnameRequired',
-        message: 'First name is required',
+        regex: /^(?:.{0}|.{2,64})$/,
+        errorKey: 'lastnameLength',
+        message: 'Last name must be between 2 and 64 characters if provided',
     },
     {
-        regex: /^.{2,}$/,
-        errorKey: 'lastnameMinLength',
-        message: 'Last name must be at least 2 characters long',
-    },
-    {
-        regex: /^.{0,64}$/,
-        errorKey: 'lastnameMaxLength',
-        message: 'Last name cannot exceed 64 characters',
-    },
-    {
-        regex: /^[\p{L}\-'’\s]+$/u,
+        regex: /^(?:.{0}|[\p{L}\-'’\s]+)$/u,
         errorKey: 'invalidLastNameFormat',
         message: 'Last name can only contain letters, hyphens (-), apostrophes (\’), and spaces',
     }
