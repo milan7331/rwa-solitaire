@@ -96,7 +96,7 @@ export class RegisterComponent implements OnInit {
       filter(registerValid => registerValid)
     ).subscribe(() => {
       this.snackbar.open('Account registered successfully!', '', {
-        duration: 1000,
+        duration: 3000,
         horizontalPosition: 'center',
         verticalPosition: 'bottom'
       });
