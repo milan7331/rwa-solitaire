@@ -23,7 +23,7 @@ export const selectBoard = createSelector(
     selectBoardsState,
     (boards) => {
         const { ids, entities } = boards;
-        
+
         const lastId = (ids.length >= 0) ? ids.at(-1) : undefined;
         return (lastId !== undefined) ? entities[lastId] : undefined;
     }

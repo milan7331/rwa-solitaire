@@ -1,21 +1,27 @@
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { UserService } from "../../services/api/user/user.service";
 import { Store } from "@ngrx/store";
-import { catchError, map, switchMap, throttleTime, of, EMPTY, exhaustMap } from "rxjs";
-import { loginValid } from "../../utils/operators/login-valid";
-import { withUsername } from "../../utils/operators/with-username";
-import { userEditActions, userMenuActions, userRegisterActions } from "../actions/user.actions";
+import { catchError, map, switchMap, throttleTime, of, exhaustMap, tap, filter, withLatestFrom } from "rxjs";
+import { loginActions, logoutActions, userDataActions, userStatsActions, registerActions, sessionActions } from "../actions/user.actions";
 import { inject, Injectable } from "@angular/core";
+import { AuthService } from "../../services/api/auth/auth.service";
+import { LocalStorageService } from "../../services/app/local-storage/local-storage.service";
+import { HttpErrorResponse } from "@angular/common/http";
+import { selectLoginValid, selectUsername } from "../selectors/user.selectors";
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class UserEffects {
     private readonly actions$: Actions = inject(Actions);
     private readonly userService: UserService = inject(UserService);
+    private readonly authService: AuthService = inject(AuthService);
+    private readonly localStorageService: LocalStorageService = inject(LocalStorageService);
     private readonly store: Store = inject(Store);
 
-    registerUser$ = createEffect(() =>
+    register$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(userRegisterActions.register),
+            ofType(registerActions.register),
             exhaustMap((action) =>
                 this.userService.register(
                     action.email,
@@ -24,47 +30,116 @@ export class UserEffects {
                     action.firstname,
                     action.lastname
                 ).pipe(
-                    map(() => userRegisterActions.registerSuccess()),
-                    catchError(error => {
-                        console.error(error);
-                        return EMPTY;
-                    }),
+                    map(() => registerActions.registerSuccess()),
+                    catchError((e: HttpErrorResponse) => {
+                        const message = e.error?.message || e.message || 'An unknown registration error has occured!';
+                        return of(registerActions.registerFailure({ message }));
+                    })
                 )
             )
         )
     );
 
-    getUser$ = createEffect(() => 
+    login$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(userEditActions.getUser),
-            throttleTime(1000),
-            loginValid(this.store),
-            withUsername(this.store),
-            switchMap((username) => 
-                this.userService.getUser(username).pipe(
-                    map(data => userEditActions.getUserSuccess(data)),
-                    catchError(error => {
-                        console.error(error);
-                        return EMPTY;
-                    }),
+            ofType(loginActions.logIn),
+            exhaustMap((action) =>
+                this.authService.login(action.username, action.password).pipe(
+                    map(() => loginActions.logInSuccess({ username: action.username })),
+                    catchError(e => {
+                        const message = e.error?.message || e.message || 'An unknown login error has occured!';
+                        return of(loginActions.logInFailure({ message }));
+                    })
                 )
             )
         )
     );
 
-    getUserStats$ = createEffect(() =>
+    loginSuccess$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(userMenuActions.getUserStats),
-            throttleTime(1000),
-            loginValid(this.store),
-            withUsername(this.store),
+            ofType(loginActions.logInSuccess),
+            tap((action) => this.localStorageService.setUsername(action.username)),
+        ),
+        { dispatch: false }
+    );
+
+    logout$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(logoutActions.logout),
+            exhaustMap(() =>
+                this.authService.logout().pipe(
+                    map(() => logoutActions.logoutSuccess()),
+                    catchError(() => of(logoutActions.logoutSuccess())),
+                )
+            )
+        )
+    );
+
+    logoutSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(logoutActions.logoutSuccess),
+            tap(() => this.localStorageService.removeUsername())
+        ),
+        { dispatch: false }
+    );
+
+    validateSession$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(sessionActions.validateSession),
+            map(() => this.localStorageService.getUsername()),
+            filter((username): username is string => username !== null && username !== undefined && username !== ''),
             switchMap((username) =>
-                this.userService.getUserStats(username).pipe(
-                    map(stats => userMenuActions.getUserStatsSuccess(stats)),
+                this.authService.validateSession(username).pipe(
+                    map(() => sessionActions.validateSessionSuccess({ username })),
+                    catchError(() => {
+                        return of(sessionActions.validateSessionFailure());
+                    })
+                )
+            )
+        )
+    );
+
+    getUser$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(sessionActions.validateSessionSuccess, loginActions.logInSuccess),
+            throttleTime(1000),
+            withLatestFrom(
+                this.store.select(selectLoginValid),
+                this.store.select(selectUsername),
+            ),
+            filter(([ , loginValid, username]) =>
+                loginValid && username !== null && username.length > 0
+            ),
+            switchMap(([ , , username]) =>
+                this.userService.getUser(username).pipe(
+                    map(data => userDataActions.getUserSuccess(data)),
                     catchError(error => {
-                        console.error(error);
-                        return EMPTY;
-                    }),
+                        const message = error.error?.message || error.message || 'Error loading user data';
+                        return of(userDataActions.getUserFailure({ message}));
+                    })
+                )
+            )
+        )
+    );
+
+    getUserStats = createEffect(() =>
+        this.actions$.pipe(
+            ofType(sessionActions.validateSessionSuccess, loginActions.logInSuccess),
+            throttleTime(1000),
+            withLatestFrom(
+                this.store.select(selectLoginValid),
+                this.store.select(selectUsername),
+            ),
+            filter(([ , loginValid, username]) =>
+                loginValid && username !== null && username.length > 0
+            ),
+            switchMap(([ , , username]) =>
+                this.userService.getUserStats(username).pipe(
+                    map(data => userStatsActions.getUserStatsSuccess(data)),
+                    catchError(error => {
+                        const message = error.error?.message || error.message || 'Error loading user stats';
+                        return of(userStatsActions.getUserStatsFailure({ message}));
+                    })
                 )
             )
         )

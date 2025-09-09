@@ -7,9 +7,20 @@ import { SavedGame } from "../user/saved-game";
 
 export interface UserState {
     loginValid: boolean;
+    registerValid: boolean;
 
-    userData: User;
+    user: User;
     userStats: UserStats;
     gameHistory: EntityState<GameHistory>;
     savedGame: SavedGame;
+
+    registerLoading: boolean;
+    loginLoading: boolean;
+    userDataLoading: boolean;
+    userStatsLoading: boolean;
+
+    registerErrorMessage: string;
+    loginErrorMessage: string;
+    userDataErrorMessage: string;
+    userStatsErrorMessage: string;
 }
