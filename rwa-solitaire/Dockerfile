@@ -14,4 +14,4 @@ EXPOSE 4200
 
 COPY . .
 
-CMD ["bash", "-c", "ng serve --host 0.0.0.0 --port 4200"]
+CMD ["bash", "-c", "ng serve --host 0.0.0.0 --port 4200 --poll 5000"]
