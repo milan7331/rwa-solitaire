@@ -6,20 +6,27 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
+  app.use(cookieParser());
+  app.use(helmet());
+    app.enableCors({
     origin: [
-      'http://localhost:4200',
-      'https://localhost:4200',
       // docker
       'http://rwa-solitaire:4200',
       'https://rwa-solitaire:4200',
       'http://rwa-solitaire-db:5432',
       'https://rwa-solitaire-db:5432',
+
+      // regular
+      'http://localhost:4200',
+      'https://localhost:4200',
     ],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+
   });
-  app.use(cookieParser());
-  app.use(helmet());
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     // forbidNonWhitelisted: true,
