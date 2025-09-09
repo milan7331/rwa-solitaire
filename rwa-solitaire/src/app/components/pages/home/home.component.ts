@@ -28,7 +28,7 @@ import { AudioService } from '../../../services/app/audio/audio.service';
 })
 export class HomeComponent {
   difficulty = SolitaireDifficulty;
-  
+
   constructor(
     private readonly router: Router,
     private readonly audio: AudioService,

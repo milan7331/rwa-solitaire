@@ -31,6 +31,6 @@ const  muteHandlers = [
 
 export const audioReducer = createReducer(
     initialAudioState,
-    ...volumeChangeHandlers,    
+    ...volumeChangeHandlers,
     ...muteHandlers,
 );
