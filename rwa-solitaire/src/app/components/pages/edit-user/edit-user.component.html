@@ -18,15 +18,16 @@
                     @if (showErrors) { {{getErrorMessage(email?.errors)}} }
                 </mat-error>
             </mat-form-field>
-            <mat-divider></mat-divider>
             <mat-form-field>
                 <mat-label>New password</mat-label>
-                <input matInput formControlName="newPassword" maxlength="64">
+                <input matInput formControlName="newPassword" [type]="showNewPassword ? 'text' : 'password'" maxlength="64">
+                <button mat-icon-button matSuffix (click)="toggleNewPasswordVisibility()" type="button">
+                    <mat-icon>{{ showNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
                 <mat-error>
                     @if (showErrors) { {{getErrorMessage(newPassword?.errors)}} }
                 </mat-error>
             </mat-form-field>
-            <mat-divider></mat-divider>
             <mat-form-field>
                 <mat-label>First name (optional)</mat-label>
                 <input matInput formControlName="firstname" maxlength="64">
@@ -57,5 +58,6 @@
             </button>
             <mat-divider></mat-divider>
         </form>
+        <button mat-fab extended class="delete-button" (click)="deleteAccount()">Delete account</button>
     </mat-card-content>
 </mat-card>

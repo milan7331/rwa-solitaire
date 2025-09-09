@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 :host {
     flex: 1 1 auto;
     position: relative;
@@ -15,6 +17,14 @@
 
         .validation-spinner {
             margin-right: 0.4rem;
+        }
+
+        .delete-button {
+            width: 100%;
+            @include mat.fab-overrides((
+                container-color: var(--mat-sys-error-container),
+                foreground-color: var(--mat-sys-on-error-container)
+            ));
         }
 
         mat-divider {

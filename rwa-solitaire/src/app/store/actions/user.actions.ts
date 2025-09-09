@@ -78,14 +78,36 @@ export const editUserActions = createActionGroup({
     }
 });
 
+export const deleteAccountActions = createActionGroup({
+    source: 'Delete account dialog',
+    events: {
+        'Delete account': emptyProps(),
+        'Delete account success': emptyProps(),
+        'Delete account failure': emptyProps()
+    }
+})
 
+export const savedGameActions = createActionGroup({
+    source: 'Saved game actions',
+    events: {
+        'Save game': emptyProps(),
+        'Save game success': emptyProps(),
+        'Save game failure': emptyProps(),
 
-// // videti za saved game kasnije
-// export const userSavedGameActions = createActionGroup({
-//     source: 'Menu page | continue saved game ',
-//     events: {
-//         'Load saved game': emptyProps(),
-//         'Load saved game success': props<any>(), // dodati solitaire board ili nešto slično
-//         'Load saved game failure': emptyProps(),
-//     }
-// })
+        'Load game': emptyProps(),
+        'Load game success': emptyProps(),
+        'Load game failure': emptyProps(),
+
+        'Check saved game available': emptyProps(),
+        'Check saved game available success': emptyProps(),
+        'Check saved game available failure': emptyProps(),
+
+        'Load saved game': emptyProps(),
+        'Load saved game success': props<any>(),
+        'Load saved game failure': emptyProps(),
+
+        'Delete saved game': emptyProps(),
+        'Delete saved game success': emptyProps(),
+        'Delete saved game failure': emptyProps(),
+    }
+})

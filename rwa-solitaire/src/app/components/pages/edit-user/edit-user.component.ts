@@ -18,9 +18,11 @@ import { AsyncValidationRule } from '../../../models/validation/async-validation
 import { selectEditUserLoading, selectEditUserMessage, selectEditValid, selectUser } from '../../../store/selectors/user.selectors';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { editUserActions } from '../../../store/actions/user.actions';
-import { User } from '../../../models/user/user';
 import { MatDividerModule } from '@angular/material/divider';
+import { User } from '../../../models/user/user';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RULES_EDIT_EMAIL, RULES_EDIT_FIRSTNAME, RULES_EDIT_LASTNAME, RULES_EDIT_NEW_PASSWORD, RULES_EDIT_PASSWORD } from '../../../utils/validators/regex-validator/regex-edit.rules';
+import { DeleteAccountComponent } from '../../standalone/delete-account/delete-account.component';
 
 @Component({
   selector: 'app-edit-user',
@@ -34,7 +36,8 @@ import { RULES_EDIT_EMAIL, RULES_EDIT_FIRSTNAME, RULES_EDIT_LASTNAME, RULES_EDIT
     MatButtonModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDialogModule,
   ],
   templateUrl: './edit-user.component.html',
   styleUrl: './edit-user.component.scss',
@@ -66,6 +69,7 @@ export class EditUserComponent implements OnInit {
     private readonly audio: AudioService,
     private readonly formBuilder: FormBuilder,
     private readonly snackbar: MatSnackBar,
+    private readonly dialog: MatDialog,
     private readonly destroyRef: DestroyRef,
     private readonly emailAsyncValidator: EmailAsyncValidator
   ) {
@@ -160,6 +164,12 @@ export class EditUserComponent implements OnInit {
   toggleNewPasswordVisibility = () => {
     this.audio.play_buttonPress();
     this.showNewPassword = !this.showNewPassword;
+  }
+
+  deleteAccount(): void {
+    this.dialog.open(DeleteAccountComponent, {
+      closeOnNavigation: true,
+    });
   }
 
   getErrorMessage(errors: ValidationErrors | null | undefined): string {

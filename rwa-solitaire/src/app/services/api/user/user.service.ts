@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, map, Observable, of, throwError, timeout } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { User } from '../../../models/user/user';
 import { GameHistory } from '../../../models/user/game-history';
 import { UserStats } from '../../../models/user/user-stats';
@@ -103,5 +103,16 @@ export class UserService {
     if (lastname) data.lastname = lastname;
 
     return this.http.patch<void>(url, data, { withCredentials: true });
+  }
+
+  deleteUser(username?: string, email?: string, password?: string): Observable<void> {
+    const url = this.#userUrl + '/remove';
+
+    const data: any = {};
+    if (username) data.username = username;
+    if (email) data.email = email;
+    if (password) data.password = password;
+
+    return this.http.delete<void>(url, { withCredentials: true, body: data });
   }
 }

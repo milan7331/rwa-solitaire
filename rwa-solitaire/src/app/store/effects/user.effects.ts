@@ -2,12 +2,12 @@ import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { UserService } from "../../services/api/user/user.service";
 import { Store } from "@ngrx/store";
 import { catchError, map, switchMap, throttleTime, of, exhaustMap, tap, filter, withLatestFrom } from "rxjs";
-import { loginActions, logoutActions, userDataActions, userStatsActions, registerActions, sessionActions, editUserActions } from "../actions/user.actions";
+import { loginActions, logoutActions, userDataActions, userStatsActions, registerActions, sessionActions, editUserActions, deleteAccountActions } from "../actions/user.actions";
 import { inject, Injectable } from "@angular/core";
 import { AuthService } from "../../services/api/auth/auth.service";
 import { LocalStorageService } from "../../services/app/local-storage/local-storage.service";
 import { HttpErrorResponse } from "@angular/common/http";
-import { selectLoginValid, selectUsername } from "../selectors/user.selectors";
+import { selectLoginValid, selectUser, selectUsername } from "../selectors/user.selectors";
 
 @Injectable({
     providedIn: 'root'
@@ -169,4 +169,30 @@ export class UserEffects {
     );
 
 
+    // TODO: add failure message for user
+    // TODO: add password confirmation on component 
+    deleteAccount$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(deleteAccountActions.deleteAccount),
+            withLatestFrom(
+                this.store.select(selectUsername)
+            ),
+            filter(([_, username]) => username !== undefined && username !== null && username.length > 0),
+            switchMap(([_, username]) =>
+                this.userService.deleteUser(username).pipe(
+                    map(() => deleteAccountActions.deleteAccountSuccess()),
+                    catchError(() => {
+                        return of(deleteAccountActions.deleteAccountFailure());
+                    })
+                )
+            )
+        )
+    );
+
+    deleteAccountSuccess$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(deleteAccountActions.deleteAccountSuccess),
+            map(() => logoutActions.logout())
+        )
+    );
 }

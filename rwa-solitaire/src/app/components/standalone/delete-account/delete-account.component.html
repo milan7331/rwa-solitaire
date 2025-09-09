@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>Delete account?</h2>
+<mat-dialog-content>
+  Are you sure? This action is irreversible.
+</mat-dialog-content>
+<mat-dialog-actions align="center">
+  <button mat-button mat-dialog-close (click)="deleteAccount()">Yes</button>
+  <button mat-button mat-dialog-close (click)="exit()" cdkFocusInitial>No</button>
+</mat-dialog-actions>
