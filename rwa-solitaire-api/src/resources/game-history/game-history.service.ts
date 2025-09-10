@@ -66,8 +66,8 @@ export class GameHistoryService {
     }
   }
 
-  async create(createUserDto: CreateGameHistoryDto): Promise<void> {
-    const { userId, gameDifficulty, startedTime } = createUserDto;
+  async create(createGameDto: CreateGameHistoryDto): Promise<void> {
+    const { userId, gameDifficulty, startedTime } = createGameDto;
     this.#checkCreateGameParameters(userId, gameDifficulty, startedTime)
 
     const existingGame = await this.historyRepository.findOne({
