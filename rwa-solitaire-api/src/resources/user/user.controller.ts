@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, NotFoundException } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { Public } from 'src/auth/auth.decorators';
@@ -32,10 +32,10 @@ export class UserController {
 
 
   @Get(['find-one', 'find_one'])
-  async findOne(@Query() findDto: FindUserDto): Promise<UserResponseDto | null> {
+  async findOne(@Query() findDto: FindUserDto): Promise<UserResponseDto> {
     let user = await this.userService.findOne(findDto);
-    if (user) return this.userService.cleanUpUserResponse(user);
-    return;
+    if (user === null) throw new NotFoundException('User not found!');
+    return this.userService.cleanUpUserResponse(user);
   }
 
   @Patch('update')

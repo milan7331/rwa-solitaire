@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, NotFoundException } from '@nestjs/common';
 import { UserStatsService } from './user-stats.service';
 import { CreateUserStatsDto } from './dto/create-user-stats.dto';
 import { UpdateUserStatsDto } from './dto/update-user-stats.dto';
@@ -16,10 +16,11 @@ export class UserStatsController {
   }
 
   @Get(['find-one', 'find_one'])
-  async findOne(@Query() findDto: FindUserStatsDto): Promise<UserStatsReponseDto | null> {
+  async findOne(@Query() findDto: FindUserStatsDto): Promise<UserStatsReponseDto> {
     const stats = await this.userStatsService.findOne(findDto);
-    if (stats) return this.userStatsService.cleanUpUserStatsResponse(stats);
-    return;
+    
+    if (stats === null) throw new NotFoundException('User stats not found!');
+    return this.userStatsService.cleanUpUserStatsResponse(stats);
   }
 
   @Patch('update')

@@ -8,15 +8,15 @@ import { handlePostgresError } from 'src/util/postgres-error-handler';
 import { FindSavedGameDto } from './dto/find-saved-game.dto';
 import { RemoveSavedGameDto } from './dto/remove-saved-game.dto';
 import { UserService } from '../user/user.service';
+import { SavedGameResponseDto } from './dto/saved-game-response.dto';
 
 @Injectable()
 export class SavedGameService {
   constructor(
     @InjectRepository(SavedGame)
     private readonly savedGameRepository: Repository<SavedGame>,
-
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   async create(createDto: CreateSavedGameDto): Promise<void> {
     const { gameState, userId } = createDto;
@@ -70,8 +70,10 @@ export class SavedGameService {
   }
 
   async update(updateDto: UpdateSavedGameDto): Promise<void> {
-    const { id, userId } = updateDto;
+    const { id, userId, gameState } = updateDto;
     if (id === undefined && userId === undefined) throw new BadRequestException('Invalid parameters!');
+    if (gameState === undefined || gameState === null)
+      throw new BadRequestException('Nothing to update! Invalid parameters!');
 
     const findDto: FindSavedGameDto = {
       id,
@@ -128,5 +130,9 @@ export class SavedGameService {
     } catch(error) {
       handlePostgresError(error);
     }
+  }
+
+  cleanupSavedGameResponse(game: SavedGame): SavedGameResponseDto {
+    return { savedGame: game.gameState };
   }
 }

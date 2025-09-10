@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Param, NotFoundException } from '@nestjs/common';
 
 import { GameHistoryService } from './game-history.service';
 import { CreateGameHistoryDto } from './dto/create-game-history.dto';
@@ -32,7 +32,9 @@ export class GameHistoryController {
   @Get(['find-one', 'find_one'])
   async findOne(@Query() findDto: FindGameHistoryDto): Promise<GameHistory> {
     // passes the whole query obj into the service!
-    return await this.gameHistoryService.findOne(findDto);
+    const game = await this.gameHistoryService.findOne(findDto);
+    if (game === null) throw new NotFoundException('Game not found!');
+    return game;
   }
 
   @Patch('update')

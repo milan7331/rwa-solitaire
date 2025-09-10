@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, NotFoundException } from '@nestjs/common';
 import { SavedGameService } from './saved-game.service';
 import { CreateSavedGameDto } from './dto/create-saved-game.dto';
 import { UpdateSavedGameDto } from './dto/update-saved-game.dto';
@@ -22,10 +22,10 @@ export class SavedGameController {
   }
 
   @Get(['find-one', 'find_one', 'load'])
-  async findOne(@Query() findDto: FindSavedGameDto): Promise<SavedGameResponseDto | null> {
+  async findOne(@Query() findDto: FindSavedGameDto): Promise<SavedGameResponseDto> {
     const game = await this.savedGameService.findOne(findDto);
-    if (game) return this.savedGameService.cleanupSavedGameResponse(game);
-    return null;
+    if (game === null) throw new NotFoundException('Saved game not found!');
+    return this.savedGameService.cleanupSavedGameResponse(game);
   }
 
   @Patch('update')
